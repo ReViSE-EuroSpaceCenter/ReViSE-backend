@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/lobbies")
-@CrossOrigin
 public class LobbyController {
 
     private final LobbyService lobbyService;
