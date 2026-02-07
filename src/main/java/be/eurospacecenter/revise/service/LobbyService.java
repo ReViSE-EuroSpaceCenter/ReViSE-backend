@@ -1,13 +1,10 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.LobbyEvent;
-import be.eurospacecenter.revise.dto.LobbyEventType;
-import be.eurospacecenter.revise.dto.TeamJoinedPayload;
 import be.eurospacecenter.revise.model.Host;
 import be.eurospacecenter.revise.model.Lobby;
 import be.eurospacecenter.revise.model.Team;
 import be.eurospacecenter.revise.model.TeamId;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import be.eurospacecenter.revise.notification.LobbyNotifier;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -20,51 +17,41 @@ import static be.eurospacecenter.revise.helper.LobbyCode.generateCode;
 @Service
 public class LobbyService {
 
-    private final Map<String, Lobby> lobbies = new ConcurrentHashMap<>();
+    protected final Map<String, Lobby> lobbies = new ConcurrentHashMap<>();
     private final SecureRandom random = new SecureRandom();
-    private final SimpMessagingTemplate messagingTemplate;
+    private final LobbyNotifier notifier;
 
-    public LobbyService(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
+    public LobbyService(LobbyNotifier notifier) {
+        this.notifier = notifier;
     }
 
     public String createLobby() {
-        String code = generateCode(random);
+        String lobbyCode = generateCode(random);
         Host host = new Host(UUID.randomUUID());
-        Lobby lobby = new Lobby(code, host);
+        Lobby lobby = new Lobby(lobbyCode, host);
 
-        lobbies.put(code, lobby);
+        lobbies.put(lobbyCode, lobby);
         return lobby.getCode();
     }
 
-    public void joinLobby(String code, String teamLabel) {
-        Lobby lobby = getLobby(code);
-
-        lobby.teamLabelIsAvailable(teamLabel);
+    public void joinLobby(String lobbyCode, String teamLabel) {
+        Lobby lobby = getLobby(lobbyCode);
 
         Team team = new Team(TeamId.valueOf(teamLabel), UUID.randomUUID());
-        lobby.addPlayer(team);
+        lobby.addTeam(team);
 
-        notifyPlayerJoined(lobby, team);
+        notifier.notifyPlayerJoined(lobbyCode, teamLabel);
     }
 
-    public void startGame(String code, UUID hostId) {
-        Lobby lobby = getLobby(code);
+    public void startGame(String lobbyCode, UUID hostId) {
+        Lobby lobby = getLobby(lobbyCode);
 
-        if (!lobby.isHost(hostId)) {
-            throw new IllegalArgumentException("Seul l'hôte peut démarrer la partie");
-        }
+        lobby.startGame(hostId);
 
-        // Lancer la partie et avertie les joueurs
+        notifier.notifyGameStarted(lobbyCode);
     }
 
-    private Lobby getLobby(String code) {
-        return Optional.ofNullable(lobbies.get(code)).orElseThrow(() -> new IllegalArgumentException("Lobby introuvable"));
-    }
-
-    private void notifyPlayerJoined(Lobby lobby, Team team) {
-        LobbyEvent event = new LobbyEvent(LobbyEventType.TEAM_JOINED, new TeamJoinedPayload(team.label()));
-
-        messagingTemplate.convertAndSend("/topic/lobby/" + lobby.getCode(), event);
+    private Lobby getLobby(String lobbyCode) {
+        return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new IllegalArgumentException("Lobby introuvable"));
     }
 }

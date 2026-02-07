@@ -18,8 +18,8 @@ public class LobbyController {
         return lobbyService.createLobby();
     }
 
-    @PostMapping("/{code}/join")
-    public void joinLobby(@PathVariable String code, @RequestParam String teamLabel) {
-        lobbyService.joinLobby(code, teamLabel);
+    @PostMapping("/{lobbyCode}/join")
+    public void joinLobby(@PathVariable String lobbyCode, @RequestParam String teamLabel) {
+        lobbyService.joinLobby(lobbyCode, teamLabel);
     }
 }

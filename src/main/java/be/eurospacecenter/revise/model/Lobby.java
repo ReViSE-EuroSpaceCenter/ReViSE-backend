@@ -22,19 +22,28 @@ public class Lobby {
         return Collections.unmodifiableCollection(players.values());
     }
 
-    public void addPlayer(Team team) {
+    public void addTeam(Team team) {
+        if (teamLabelTaken(team.label())) {
+            throw new IllegalArgumentException("Cette équipe est déjà prise");
+        }
+
         players.put(team.getId(), team);
     }
 
-    public void teamLabelIsAvailable(String teamId) {
-        boolean alreadyTaken = players.values().stream().anyMatch(team -> team.label().equals(teamId));
-
-        if (alreadyTaken) {
-            throw new IllegalArgumentException("Cette équipe est déjà pris");
+    public void startGame(UUID hostId) {
+        if (!host.id().equals(hostId)) {
+            throw new IllegalArgumentException("Seul l'hôte peut démarrer la partie");
         }
+
+        // Logique pour démarrer la partie
+        // Par exemple, déléguer à un objet GameManager ou similaire
     }
 
-    public boolean isHost(UUID id) {
-        return host.id().equals(id);
+    public UUID getHostId() {
+        return host.id();
+    }
+
+    private boolean teamLabelTaken(String teamId) {
+        return players.values().stream().anyMatch(team -> team.label().equals(teamId));
     }
 }
