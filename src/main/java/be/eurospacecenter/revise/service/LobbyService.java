@@ -40,7 +40,7 @@ public class LobbyService {
         Team team = new Team(TeamId.valueOf(teamLabel), UUID.randomUUID());
         lobby.addTeam(team);
 
-        notifier.notifyPlayerJoined(lobbyCode, teamLabel);
+        notifier.notifyTeamJoined(lobbyCode, teamLabel);
     }
 
     public void startGame(String lobbyCode, UUID hostId) {

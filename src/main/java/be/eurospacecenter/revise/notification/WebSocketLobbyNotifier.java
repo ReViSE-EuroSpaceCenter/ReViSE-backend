@@ -16,7 +16,7 @@ public class WebSocketLobbyNotifier implements LobbyNotifier {
     }
 
     @Override
-    public void notifyPlayerJoined(String lobbyCode, String teamLabel) {
+    public void notifyTeamJoined(String lobbyCode, String teamLabel) {
         LobbyEvent event = new LobbyEvent(LobbyEventType.TEAM_JOINED, new TeamJoinedPayload(teamLabel));
 
         messagingTemplate.convertAndSend("/topic/lobby/" + lobbyCode, event);
