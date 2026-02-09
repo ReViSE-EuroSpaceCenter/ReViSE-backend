@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class WebSocketLobbyNotifier implements LobbyNotifier {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketLobbyNotifier.class);
+    private static final String LOBBY_TOPIC_PREFIX = "/topic/lobby/";
     private final SimpMessagingTemplate messagingTemplate;
 
     public WebSocketLobbyNotifier(SimpMessagingTemplate messagingTemplate) {
@@ -23,7 +24,7 @@ public class WebSocketLobbyNotifier implements LobbyNotifier {
         logger.info("Sending TEAM_JOINED event for lobby: {} with team: {}", lobbyCode, teamLabel);
         LobbyEvent event = new LobbyEvent(LobbyEventType.TEAM_JOINED, new TeamJoinedPayload(teamLabel));
 
-        messagingTemplate.convertAndSend("/topic/lobby/" + lobbyCode, event);
+        messagingTemplate.convertAndSend(LOBBY_TOPIC_PREFIX + lobbyCode, event);
         logger.info("TEAM_JOINED event sent successfully");
     }
 
@@ -32,7 +33,7 @@ public class WebSocketLobbyNotifier implements LobbyNotifier {
         logger.info("Sending GAME_STARTED event for lobby: {}", lobbyCode);
         LobbyEvent event = new LobbyEvent(LobbyEventType.GAME_STARTED, null);
 
-        messagingTemplate.convertAndSend("/topic/lobby/" + lobbyCode, event);
+        messagingTemplate.convertAndSend(LOBBY_TOPIC_PREFIX + lobbyCode, event);
         logger.info("GAME_STARTED event sent successfully");
     }
 }
