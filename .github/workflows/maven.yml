@@ -19,7 +19,6 @@ on:
       - synchronize
 
 
-
 jobs:
   build:
 
