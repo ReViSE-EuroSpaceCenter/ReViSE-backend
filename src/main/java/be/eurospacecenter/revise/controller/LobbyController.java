@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.controller;
 
+import be.eurospacecenter.revise.dto.LobbyResponse;
 import be.eurospacecenter.revise.service.LobbyService;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
@@ -17,8 +18,9 @@ public class LobbyController {
     }
 
     @PostMapping
-    public String createLobby() {
-        return lobbyService.createLobby();
+    public LobbyResponse createLobby() {
+        String lobbyCode = lobbyService.createLobby();
+        return new LobbyResponse(lobbyCode);
     }
 
     @PostMapping("/{lobbyCode}/join")
