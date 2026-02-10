@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.LobbyResponse;
-import be.eurospacecenter.revise.exceptions.InvalidHostIdException;
+import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
 import be.eurospacecenter.revise.service.LobbyService;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
@@ -32,7 +32,7 @@ public class LobbyController {
             String lobbyCode,
 
             @RequestParam
-            @Pattern(regexp = "^[a-zA-Z0-9\\s-_]+$", message = "Le label de l'équipe contient des caractères non autorisés")
+            @Pattern(regexp = "^[A-Z]{4}$", message = "Le label de l'équipe contient des caractères non autorisés")
             String teamLabel
     ) {
         try {
@@ -53,7 +53,7 @@ public class LobbyController {
     ) {
         try {
             lobbyService.startGame(lobbyCode, hostId);
-        } catch (InvalidHostIdException e) {
+        } catch (InvalidStartLobbyException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erreur pour démarrer le lobby : " + e.getMessage());
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Erreur pour démarrer le lobby : " + e.getMessage());
