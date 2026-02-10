@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.model;
 
+import be.eurospacecenter.revise.exceptions.InvalidHostIdException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,7 +33,7 @@ public class Lobby {
 
     public void startGame(UUID hostId) {
         if (!host.id().equals(hostId)) {
-            throw new IllegalArgumentException("Seul l'hôte peut démarrer la partie");
+            throw new InvalidHostIdException("Seul l'hôte peut démarrer la partie");
         }
 
         // Logique pour démarrer la partie
