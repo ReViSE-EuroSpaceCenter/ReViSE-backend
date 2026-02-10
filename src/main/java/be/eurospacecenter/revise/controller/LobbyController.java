@@ -20,7 +20,7 @@ public class LobbyController {
     public LobbyResponse createLobby() {
         String lobbyCode = lobbyService.createLobby();
         return new LobbyResponse(lobbyCode);
-    }w
+    }
 
     @PostMapping("/{lobbyCode}/join")
     public void joinLobby(@PathVariable String lobbyCode, @RequestParam String teamLabel) {
