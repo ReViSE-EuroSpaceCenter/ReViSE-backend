@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.service.LobbyService;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,7 +22,15 @@ public class LobbyController {
     }
 
     @PostMapping("/{lobbyCode}/join")
-    public void joinLobby(@PathVariable String lobbyCode, @RequestParam String teamLabel) {
+    public void joinLobby(
+            @PathVariable
+            @Pattern(regexp = "^[A-Z0-9]{6}$", message = "Le code du lobby doit contenir uniquement des lettres majuscules et chiffres (6 caractères)")
+            String lobbyCode,
+
+            @RequestParam
+            @Pattern(regexp = "^[a-zA-Z0-9\\s-_]+$", message = "Le label de l'équipe contient des caractères non autorisés")
+            String teamLabel
+    ) {
         try {
             lobbyService.joinLobby(lobbyCode, teamLabel);
         } catch (IllegalArgumentException e) {
