@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.controller;
 
+import be.eurospacecenter.revise.dto.LobbyResponse;
 import be.eurospacecenter.revise.service.LobbyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +17,10 @@ public class LobbyController {
     }
 
     @PostMapping
-    public String createLobby() {
-        return lobbyService.createLobby();
-    }
+    public LobbyResponse createLobby() {
+        String lobbyCode = lobbyService.createLobby();
+        return new LobbyResponse(lobbyCode);
+    }w
 
     @PostMapping("/{lobbyCode}/join")
     public void joinLobby(@PathVariable String lobbyCode, @RequestParam String teamLabel) {
