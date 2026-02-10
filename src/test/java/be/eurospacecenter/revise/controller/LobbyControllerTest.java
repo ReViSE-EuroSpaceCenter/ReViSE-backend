@@ -31,7 +31,7 @@ class LobbyControllerTest {
 
     @Test
     void joinLobbyShouldFailForInvalidLobbyCode() {
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", "ING").build("INVALID_CODE")).exchange().expectStatus().isNotFound();
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", "ING").build("INVALID_CODE")).exchange().expectStatus().isBadRequest();
     }
 
     @Test
@@ -63,7 +63,7 @@ class LobbyControllerTest {
         String body = new String(result.getResponseBody());
         String lobbyCode = JsonPath.read(body, "$.lobbyCode");
 
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", "").build(lobbyCode)).exchange().expectStatus().isNotFound();
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", "").build(lobbyCode)).exchange().expectStatus().isBadRequest();
     }
 
     @Test
@@ -73,7 +73,7 @@ class LobbyControllerTest {
         String body = new String(result.getResponseBody());
         String lobbyCode = JsonPath.read(body, "$.lobbyCode");
 
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", (String) null).build(lobbyCode)).exchange().expectStatus().isNotFound();
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", (String) null).build(lobbyCode)).exchange().expectStatus().isBadRequest();
     }
 
     @Test

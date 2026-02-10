@@ -26,7 +26,7 @@ public class LobbyController {
     @PostMapping("/{lobbyCode}/join")
     public void joinLobby(
             @PathVariable
-            @Pattern(regexp = "^[A-Z0-9]{6}$", message = "Le code du lobby doit contenir uniquement des lettres majuscules et chiffres (6 caractères)")
+            @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")
             String lobbyCode,
 
             @RequestParam
