@@ -7,7 +7,7 @@ public class Lobby {
 
     private final String code;
     private final Host host;
-    private final Map<UUID, Team> players = new ConcurrentHashMap<>();
+    private final Map<UUID, Team> teams = new ConcurrentHashMap<>();
 
     public Lobby(String code, Host host) {
         this.code = code;
@@ -18,8 +18,8 @@ public class Lobby {
         return code;
     }
 
-    public Collection<Team> getPlayers() {
-        return Collections.unmodifiableCollection(players.values());
+    public List<Team> getTeams() {
+        return Collections.unmodifiableCollection(teams.values()).stream().toList();
     }
 
     public void addTeam(Team team) {
@@ -27,7 +27,7 @@ public class Lobby {
             throw new IllegalArgumentException("Cette équipe est déjà prise");
         }
 
-        players.put(team.getId(), team);
+        teams.put(team.getId(), team);
     }
 
     public void startGame(UUID hostId) {
@@ -44,6 +44,6 @@ public class Lobby {
     }
 
     private boolean teamLabelTaken(String teamId) {
-        return players.values().stream().anyMatch(team -> team.label().equals(teamId));
+        return teams.values().stream().anyMatch(team -> team.label().equals(teamId));
     }
 }

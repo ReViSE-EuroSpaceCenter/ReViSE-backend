@@ -42,6 +42,23 @@ class LobbyServiceTest {
     }
 
     @Test
+    void shouldCreateLobbyWithUniqueCode() {
+        String code1 = lobbyService.createLobby();
+        String code2 = lobbyService.createLobby();
+
+        assertThat(code1).isNotEqualTo(code2);
+    }
+
+    @Test
+    void shouldAllowJoiningLobby() {
+        String code = lobbyService.createLobby();
+        lobbyService.joinLobby(code, "ING");
+
+        assertThat(lobbyService.lobbies.get(code).getTeams()).hasSize(1);
+        assertThat(lobbyService.lobbies.get(code).getTeams().getFirst().label()).isEqualTo("ING");
+    }
+
+    @Test
     void shouldNotAllowDuplicateTeamLabels() {
         String code = lobbyService.createLobby();
         lobbyService.joinLobby(code, "ING");
@@ -73,6 +90,16 @@ class LobbyServiceTest {
             lobbyService.startGame(code, UUID.randomUUID());
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage()).isEqualTo("Seul l'hôte peut démarrer la partie");
+        }
+    }
+
+    @Test
+    void shouldNotAllowJoiningNonExistentLobby() {
+        lobbyService.createLobby();
+        try {
+            lobbyService.joinLobby("INVALID", "ING");
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage()).isEqualTo("Lobby introuvable");
         }
     }
 }

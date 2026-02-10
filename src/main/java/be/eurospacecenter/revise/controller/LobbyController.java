@@ -1,7 +1,11 @@
 package be.eurospacecenter.revise.controller;
 
+import be.eurospacecenter.revise.dto.LobbyResponse;
 import be.eurospacecenter.revise.service.LobbyService;
+import jakarta.validation.constraints.Pattern;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/lobbies")
@@ -14,12 +18,25 @@ public class LobbyController {
     }
 
     @PostMapping
-    public String createLobby() {
-        return lobbyService.createLobby();
+    public LobbyResponse createLobby() {
+        String lobbyCode = lobbyService.createLobby();
+        return new LobbyResponse(lobbyCode);
     }
 
     @PostMapping("/{lobbyCode}/join")
-    public void joinLobby(@PathVariable String lobbyCode, @RequestParam String teamLabel) {
-        lobbyService.joinLobby(lobbyCode, teamLabel);
+    public void joinLobby(
+            @PathVariable
+            @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")
+            String lobbyCode,
+
+            @RequestParam
+            @Pattern(regexp = "^[a-zA-Z0-9\\s-_]+$", message = "Le label de l'équipe contient des caractères non autorisés")
+            String teamLabel
+    ) {
+        try {
+            lobbyService.joinLobby(lobbyCode, teamLabel);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Erreur pour rejoindre le lobby : " + e.getMessage());
+        }
     }
 }
