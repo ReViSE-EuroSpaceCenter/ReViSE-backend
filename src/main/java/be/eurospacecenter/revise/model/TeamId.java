@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.model;
 
 public enum TeamId {
-    ING("ING"), MED("MED");
+    COOP("COOP"), EXPE("EXPE"), GECO("GECO"), INGE("INGE"), MECA("MECA"), MEDI("MEDI");
 
     public final String label;
 

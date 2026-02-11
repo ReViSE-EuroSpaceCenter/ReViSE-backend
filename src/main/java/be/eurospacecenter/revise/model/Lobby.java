@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.model;
 
+import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,9 +32,8 @@ public class Lobby {
     }
 
     public void startGame(UUID hostId) {
-        if (!host.id().equals(hostId)) {
-            throw new IllegalArgumentException("Seul l'hôte peut démarrer la partie");
-        }
+        validHostId(hostId);
+        validNumberOfTeams();
 
         // Logique pour démarrer la partie
         // Par exemple, déléguer à un objet GameManager ou similaire
@@ -45,5 +45,33 @@ public class Lobby {
 
     private boolean teamLabelTaken(String teamId) {
         return teams.values().stream().anyMatch(team -> team.label().equals(teamId));
+    }
+
+    private void validHostId(UUID hostId) {
+        if (!host.id().equals(hostId)) {
+            throw new InvalidStartLobbyException("Seul l'hôte peut démarrer la partie");
+        }
+    }
+
+    private void validNumberOfTeams() {
+        int numberOfTeams = teams.size();
+
+        if (numberOfTeams != 4 && numberOfTeams != 6) {
+            throw new InvalidStartLobbyException("Le nombre d'équipes doit être de 4 ou 6 pour démarrer la partie");
+        }
+
+        if (numberOfTeams == 4) {
+            validateFourTeamsLabels();
+        }
+    }
+
+    private void validateFourTeamsLabels() {
+        Set<String> validLabels = Set.of("INGE", "MEDI", "COOP", "MECA");
+
+        for (Team team : teams.values()) {
+            if (!validLabels.contains(team.label())) {
+                throw new InvalidStartLobbyException("Pour 4 équipes, les labels doivent être INGE, MEDI, COOP et MECA");
+            }
+        }
     }
 }

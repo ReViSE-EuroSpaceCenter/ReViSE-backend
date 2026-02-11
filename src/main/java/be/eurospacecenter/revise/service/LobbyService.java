@@ -51,7 +51,7 @@ public class LobbyService {
         notifier.notifyGameStarted(lobbyCode);
     }
 
-    private Lobby getLobby(String lobbyCode) {
+    public Lobby getLobby(String lobbyCode) {
         return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new IllegalArgumentException("Lobby introuvable"));
     }
 }
