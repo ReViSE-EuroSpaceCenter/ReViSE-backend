@@ -25,7 +25,7 @@ public class Lobby {
 
     public void addTeam(Team team) {
         if (teamLabelTaken(team.label())) {
-            throw new IllegalArgumentException("Cette équipe est déjà prise");
+            throw new InvalidStartLobbyException("Cette équipe est déjà prise");
         }
 
         teams.put(team.getId(), team);

@@ -66,7 +66,7 @@ class LobbyServiceTest {
 
         try {
             lobbyService.joinLobby(code, "INGE");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidStartLobbyException e) {
             assertThat(e.getMessage()).isEqualTo("Cette équipe est déjà prise");
         }
     }

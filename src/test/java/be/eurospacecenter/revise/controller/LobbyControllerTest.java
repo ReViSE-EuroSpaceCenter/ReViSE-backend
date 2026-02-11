@@ -52,7 +52,7 @@ class LobbyControllerTest {
         String lobbyCode = JsonPath.read(body, "$.lobbyCode");
 
         restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", "INGE").build(lobbyCode)).exchange().expectStatus().isOk();
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", "INGE").build(lobbyCode)).exchange().expectStatus().isNotFound();
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", "INGE").build(lobbyCode)).exchange().expectStatus().isBadRequest();
     }
 
     @Test
