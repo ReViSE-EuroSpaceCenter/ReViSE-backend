@@ -18,7 +18,7 @@ public class GameService {
 
     public void registerGame(String lobbyCode, Game game) {
         if (lobbyCode == null || lobbyCode.isEmpty()) {
-            throw new InvalidStartLobbyException("Impossible d'enregister une Game avec un lobby code invalide");
+            throw new InvalidStartLobbyException("Impossible d'enregistrer une Game avec un lobby code invalide");
         }
         games.put(lobbyCode, game);
     }
