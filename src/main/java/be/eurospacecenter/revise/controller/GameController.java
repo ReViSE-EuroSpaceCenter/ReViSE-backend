@@ -1,9 +1,12 @@
 package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.ScoreResponse;
+import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 import be.eurospacecenter.revise.service.GameService;
 import jakarta.validation.constraints.Pattern;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @RestController
@@ -21,7 +24,11 @@ public class GameController {
             @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")
             String lobbyCode
     ) {
-        int score = gameService.getGeneralScore(lobbyCode);
-        return new ScoreResponse(score);
+        try {
+            int score = gameService.getGeneralScore(lobbyCode);
+            return new ScoreResponse(score);
+        } catch (InvalidGameOperationException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erreur pour récupérer le score : " + e.getMessage());
+        }
     }
 }
