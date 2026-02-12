@@ -24,7 +24,7 @@ public class Lobby {
     }
 
     public Map<UUID, Team> getTeams() {
-        return teams;
+        return Collections.unmodifiableMap(teams);
     }
 
     public void addTeam(Team team) {
