@@ -37,8 +37,8 @@ public class LobbyController {
     ) {
         try {
             lobbyService.joinLobby(lobbyCode, teamLabel);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Erreur pour rejoindre le lobby : " + e.getMessage());
+        } catch (InvalidStartLobbyException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erreur pour démarrer le lobby : " + e.getMessage());
         }
     }
 
@@ -55,8 +55,6 @@ public class LobbyController {
             lobbyService.startGame(lobbyCode, hostId);
         } catch (InvalidStartLobbyException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erreur pour démarrer le lobby : " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Erreur pour démarrer le lobby : " + e.getMessage());
         }
     }
 }

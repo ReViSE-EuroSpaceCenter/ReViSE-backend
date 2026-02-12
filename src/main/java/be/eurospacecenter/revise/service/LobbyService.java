@@ -1,9 +1,6 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.model.Host;
-import be.eurospacecenter.revise.model.Lobby;
-import be.eurospacecenter.revise.model.Team;
-import be.eurospacecenter.revise.model.TeamId;
+import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.notification.LobbyNotifier;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +16,14 @@ public class LobbyService {
 
     protected final Map<String, Lobby> lobbies = new ConcurrentHashMap<>();
     private final SecureRandom random = new SecureRandom();
+    private final GameService gameService;
     private final LobbyNotifier notifier;
 
-    public LobbyService(LobbyNotifier notifier) {
+    public LobbyService(
+            GameService gameService,
+            LobbyNotifier notifier
+    ) {
+        this.gameService = gameService;
         this.notifier = notifier;
     }
 
@@ -46,7 +48,10 @@ public class LobbyService {
     public void startGame(String lobbyCode, UUID hostId) {
         Lobby lobby = getLobby(lobbyCode);
 
-        lobby.startGame(hostId);
+        lobby.validateLobby(hostId);
+
+        Game game = new Game(lobby.getHost(), lobby.getTeams());
+        gameService.registerGame(lobbyCode, game);
 
         notifier.notifyGameStarted(lobbyCode);
     }

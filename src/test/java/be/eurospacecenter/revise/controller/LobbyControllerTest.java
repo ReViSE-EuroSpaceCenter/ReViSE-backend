@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.model.Lobby;
+import be.eurospacecenter.revise.service.GameService;
 import be.eurospacecenter.revise.service.LobbyService;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,8 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
 class LobbyControllerTest {
@@ -23,6 +26,8 @@ class LobbyControllerTest {
 
     @Autowired
     private LobbyService lobbyService;
+    @Autowired
+    private GameService gameService;
 
     @Test
     void lobbyShouldReturnLobbyCode() {
@@ -52,7 +57,7 @@ class LobbyControllerTest {
         String lobbyCode = JsonPath.read(body, "$.lobbyCode");
 
         restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", "INGE").build(lobbyCode)).exchange().expectStatus().isOk();
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", "INGE").build(lobbyCode)).exchange().expectStatus().isNotFound();
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/join").queryParam("teamLabel", "INGE").build(lobbyCode)).exchange().expectStatus().isBadRequest();
     }
 
     @Test
@@ -118,9 +123,10 @@ class LobbyControllerTest {
             restTestClient.post().uri("/api/lobbies/" + lobbyCode + "/join?teamLabel=" + teamLabels.get(i)).exchange().expectStatus().isOk();
         }
 
-        var startRequest = restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", lobby.getHostId()).build(lobbyCode)).exchange();
+        var startRequest = restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", lobby.getHost().id()).build(lobbyCode)).exchange();
 
         if (shouldSucceed) {
+            assertNotNull(gameService.getGame(lobbyCode));
             startRequest.expectStatus().isOk();
         } else {
             startRequest.expectStatus().isBadRequest();
@@ -140,7 +146,7 @@ class LobbyControllerTest {
         for (String teamLabel : teamLabels) {
             restTestClient.post().uri("/api/lobbies/" + lobbyCode + "/join?teamLabel=" + teamLabel).exchange().expectStatus().isOk();
         }
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", lobby.getHostId()).build(lobbyCode)).exchange().expectStatus().isBadRequest();
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", lobby.getHost().id()).build(lobbyCode)).exchange().expectStatus().isBadRequest();
     }
 
     @Test
