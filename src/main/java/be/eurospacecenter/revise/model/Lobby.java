@@ -19,8 +19,12 @@ public class Lobby {
         return code;
     }
 
-    public List<Team> getTeams() {
-        return Collections.unmodifiableCollection(teams.values()).stream().toList();
+    public Host getHost() {
+        return host;
+    }
+
+    public Map<UUID, Team> getTeams() {
+        return teams;
     }
 
     public void addTeam(Team team) {
@@ -31,16 +35,9 @@ public class Lobby {
         teams.put(team.getId(), team);
     }
 
-    public void startGame(UUID hostId) {
+    public void validateLobby(UUID hostId) {
         validHostId(hostId);
         validNumberOfTeams();
-
-        // Logique pour démarrer la partie
-        // Par exemple, déléguer à un objet GameManager ou similaire
-    }
-
-    public UUID getHostId() {
-        return host.id();
     }
 
     private boolean teamLabelTaken(String teamId) {

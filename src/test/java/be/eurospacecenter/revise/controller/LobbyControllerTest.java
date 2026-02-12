@@ -118,7 +118,7 @@ class LobbyControllerTest {
             restTestClient.post().uri("/api/lobbies/" + lobbyCode + "/join?teamLabel=" + teamLabels.get(i)).exchange().expectStatus().isOk();
         }
 
-        var startRequest = restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", lobby.getHostId()).build(lobbyCode)).exchange();
+        var startRequest = restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", lobby.getHost().id()).build(lobbyCode)).exchange();
 
         if (shouldSucceed) {
             startRequest.expectStatus().isOk();
@@ -140,7 +140,7 @@ class LobbyControllerTest {
         for (String teamLabel : teamLabels) {
             restTestClient.post().uri("/api/lobbies/" + lobbyCode + "/join?teamLabel=" + teamLabel).exchange().expectStatus().isOk();
         }
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", lobby.getHostId()).build(lobbyCode)).exchange().expectStatus().isBadRequest();
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", lobby.getHost().id()).build(lobbyCode)).exchange().expectStatus().isBadRequest();
     }
 
     @Test

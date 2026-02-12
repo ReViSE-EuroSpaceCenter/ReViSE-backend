@@ -4,6 +4,7 @@ import be.eurospacecenter.revise.dto.LobbyEvent;
 import be.eurospacecenter.revise.dto.LobbyEventType;
 import be.eurospacecenter.revise.dto.TeamJoinedPayload;
 import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
+import be.eurospacecenter.revise.model.Team;
 import be.eurospacecenter.revise.notification.WebSocketLobbyNotifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ class LobbyServiceTest {
 
     private final SimpMessagingTemplate messagingTemplate = mock(SimpMessagingTemplate.class);
 
-    private final LobbyService lobbyService = new LobbyService(new WebSocketLobbyNotifier(messagingTemplate));
+    private final LobbyService lobbyService = new LobbyService(new GameService(), new WebSocketLobbyNotifier(messagingTemplate));
 
     @BeforeEach
     void setUp() {
@@ -56,7 +57,9 @@ class LobbyServiceTest {
         lobbyService.joinLobby(code, "INGE");
 
         assertThat(lobbyService.lobbies.get(code).getTeams()).hasSize(1);
-        assertThat(lobbyService.lobbies.get(code).getTeams().getFirst().label()).isEqualTo("INGE");
+        assertThat(lobbyService.lobbies.get(code).getTeams().values())
+                .extracting(Team::label)
+                .contains("INGE");
     }
 
     @Test
@@ -80,7 +83,7 @@ class LobbyServiceTest {
         lobbyService.joinLobby(code, "COOP");
         lobbyService.joinLobby(code, "MECA");
 
-        lobbyService.startGame(code, lobbyService.lobbies.get(code).getHostId());
+        lobbyService.startGame(code, lobbyService.lobbies.get(code).getHost().id());
 
         ArgumentCaptor<LobbyEvent> eventCaptor = ArgumentCaptor.forClass(LobbyEvent.class);
 
