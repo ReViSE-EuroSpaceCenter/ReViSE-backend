@@ -18,6 +18,9 @@ on:
       - reopened
       - synchronize
 
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   build:
