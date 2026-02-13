@@ -1,12 +1,11 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.ScoreResponse;
+import be.eurospacecenter.revise.dto.response.ScoreResponse;
 import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
+import be.eurospacecenter.revise.helper.ResponseStatusHelper;
 import be.eurospacecenter.revise.service.GameService;
 import jakarta.validation.constraints.Pattern;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 
 @RestController
@@ -28,7 +27,7 @@ public class GameController {
             int score = gameService.getGeneralScore(lobbyCode);
             return new ScoreResponse(score);
         } catch (InvalidGameOperationException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erreur pour récupérer le score : " + e.getMessage());
+            throw ResponseStatusHelper.badRequest("Erreur pour récupérer le score", e);
         }
     }
 }

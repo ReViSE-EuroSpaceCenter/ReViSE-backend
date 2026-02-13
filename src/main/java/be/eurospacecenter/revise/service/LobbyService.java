@@ -1,5 +1,9 @@
 package be.eurospacecenter.revise.service;
 
+import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
+import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
+import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
+import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.notification.LobbyNotifier;
 import org.springframework.stereotype.Service;
@@ -27,20 +31,29 @@ public class LobbyService {
         this.notifier = notifier;
     }
 
-    public String createLobby() {
+    public LobbyCreationResponse createLobby(int numberOfTeams) {
         String lobbyCode = generateCode(random);
-        Host host = new Host(UUID.randomUUID());
-        Lobby lobby = new Lobby(lobbyCode, host);
+        UUID hostId = UUID.randomUUID();
 
+        Lobby lobby = new Lobby(new Host(hostId), numberOfTeams);
         lobbies.put(lobbyCode, lobby);
-        return lobby.getCode();
+
+        return new LobbyCreationResponse(lobbyCode, hostId.toString());
     }
 
-    public void joinLobby(String lobbyCode, String teamLabel) {
+    public LobbyJoinedResponse joinLobby(String lobbyCode) {
         Lobby lobby = getLobby(lobbyCode);
+        UUID clientId = UUID.randomUUID();
 
-        Team team = new Team(TeamId.valueOf(teamLabel), UUID.randomUUID());
-        lobby.addTeam(team);
+        lobby.addTeam(new Team(clientId));
+        notifier.notifyClientJoined(lobbyCode);
+
+        return new LobbyJoinedResponse(clientId.toString(), lobby.getFreeTeamLabels());
+    }
+
+    public void assignTeam(String lobbyCode, UUID clientId, String teamLabel) {
+        Lobby lobby = getLobby(lobbyCode);
+        lobby.assignTeam(clientId, teamLabel);
 
         notifier.notifyTeamJoined(lobbyCode, teamLabel);
     }
@@ -48,15 +61,22 @@ public class LobbyService {
     public void startGame(String lobbyCode, UUID hostId) {
         Lobby lobby = getLobby(lobbyCode);
 
-        lobby.validateLobby(hostId);
+        lobby.startGame(hostId);
 
-        Game game = new Game(lobby.getHost(), lobby.getTeams());
+        Game game = new Game(lobby.getTeams());
         gameService.registerGame(lobbyCode, game);
 
         notifier.notifyGameStarted(lobbyCode);
     }
 
+    public void ensureClient(String lobbyCode, UUID clientId) {
+        Lobby lobby = getLobby(lobbyCode);
+        if (!lobby.isInLobby(clientId)) {
+            throw new NoAutoriseOperationException("Client introuvable dans le lobby");
+        }
+    }
+
     public Lobby getLobby(String lobbyCode) {
-        return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new IllegalArgumentException("Lobby introuvable"));
+        return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException("Lobby introuvable"));
     }
 }

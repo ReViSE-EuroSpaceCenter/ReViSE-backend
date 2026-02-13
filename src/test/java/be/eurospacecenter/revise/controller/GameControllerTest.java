@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.controller;
 
+import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.model.Game;
 import be.eurospacecenter.revise.model.Lobby;
 import be.eurospacecenter.revise.service.GameService;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.client.RestTestClient;
+
+import java.util.UUID;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -30,16 +33,17 @@ class GameControllerTest {
 
     @BeforeEach
     void setUp() {
-        var result = restTestClient.post().uri("/api/lobbies").exchange().expectStatus().isOk().expectBody().returnResult();
+        var result = restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies").queryParam("numberOfTeams", 4).build()).exchange().expectStatus().isCreated().expectBody().returnResult();
 
         String body = new String(result.getResponseBody());
         lobbyCode = JsonPath.read(body, "$.lobbyCode");
 
-        lobbyService.joinLobby(lobbyCode, "EXPE");
+        LobbyJoinedResponse response = lobbyService.joinLobby(lobbyCode);
+        lobbyService.assignTeam(lobbyCode, UUID.fromString(response.clientId()), "INGE");
 
         Lobby lobby = lobbyService.getLobby(lobbyCode);
 
-        Game game = new Game(lobby.getHost(), lobby.getTeams());
+        Game game = new Game(lobby.getTeams());
 
         gameService.registerGame(lobbyCode, game);
     }

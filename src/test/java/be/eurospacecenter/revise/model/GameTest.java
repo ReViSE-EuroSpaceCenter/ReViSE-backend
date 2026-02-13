@@ -21,11 +21,10 @@ class GameTest {
 
     @BeforeEach
     void setUp() {
-        Host host = new Host(UUID.randomUUID());
         idOfTheLoneTeam = UUID.randomUUID();
-        gameWithOneTeam = new Game(host, new ConcurrentHashMap<>(Map.of(idOfTheLoneTeam, new Team(TeamId.EXPE, idOfTheLoneTeam))));
-        gameWith4Teams = new Game(host, createTeams("INGE", "MECA", "EXPE", "GECO"));
-        gameWith6Teams = new Game(host, createTeams("INGE", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
+        gameWithOneTeam = new Game(new ConcurrentHashMap<>(Map.of(idOfTheLoneTeam, new Team(TeamLabel.EXPE, idOfTheLoneTeam))));
+        gameWith4Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO"));
+        gameWith6Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
     }
 
     @Test
@@ -49,8 +48,8 @@ class GameTest {
     private Map<UUID, Team> createTeams(String... labels) {
         Map<UUID, Team> teams = new ConcurrentHashMap<>();
         for (String label : labels) {
-            Team team = new Team(TeamId.valueOf(label), UUID.randomUUID());
-            teams.put(team.getId(), team);
+            Team team = new Team(TeamLabel.valueOf(label), UUID.randomUUID());
+            teams.put(team.getClientID(), team);
         }
         return teams;
     }

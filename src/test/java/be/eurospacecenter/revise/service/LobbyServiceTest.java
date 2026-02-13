@@ -1,115 +1,138 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.LobbyEvent;
-import be.eurospacecenter.revise.dto.LobbyEventType;
-import be.eurospacecenter.revise.dto.TeamJoinedPayload;
-import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
-import be.eurospacecenter.revise.model.Team;
-import be.eurospacecenter.revise.notification.WebSocketLobbyNotifier;
-import org.junit.jupiter.api.BeforeEach;
+import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
+import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
+import org.springframework.test.web.servlet.client.RestTestClient;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureRestTestClient
 class LobbyServiceTest {
 
-    private final SimpMessagingTemplate messagingTemplate = mock(SimpMessagingTemplate.class);
+    @Autowired
+    private RestTestClient restTestClient;
 
-    private final LobbyService lobbyService = new LobbyService(new GameService(), new WebSocketLobbyNotifier(messagingTemplate));
-
-    @BeforeEach
-    void setUp() {
-        lobbyService.lobbies.clear();
+    @Test
+    void lobbyShouldReturnLobbyCode() {
+        restTestClient.post()
+                .uri(uriBuilder -> uriBuilder.path("/api/lobbies")
+                        .queryParam("numberOfTeams", 4).build())
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.lobbyCode").exists();
     }
 
     @Test
-    void shouldNotifyTeamsWhenTeamJoins() {
-        String code = lobbyService.createLobby();
-        lobbyService.joinLobby(code, "INGE");
+    void joinLobbyShouldSucceed() {
+        LobbyCreationResponse lobby = createLobby(4);
 
-        ArgumentCaptor<LobbyEvent> eventCaptor = ArgumentCaptor.forClass(LobbyEvent.class);
-
-        verify(messagingTemplate).convertAndSend(eq("/topic/lobby/" + code), eventCaptor.capture());
-
-        LobbyEvent event = eventCaptor.getValue();
-        assertThat(event.type()).isEqualTo(LobbyEventType.TEAM_JOINED);
-
-        TeamJoinedPayload payload = (TeamJoinedPayload) event.payload();
-        assertThat(payload.teamLabel()).isEqualTo("INGE");
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/join", lobby.lobbyCode())
+                .exchange()
+                .expectStatus().isOk();
     }
 
     @Test
-    void shouldCreateLobbyWithUniqueCode() {
-        String code1 = lobbyService.createLobby();
-        String code2 = lobbyService.createLobby();
-
-        assertThat(code1).isNotEqualTo(code2);
+    void joinLobbyShouldFailForInvalidLobbyCode() {
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/join", "INVALID")
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @Test
-    void shouldAllowJoiningLobby() {
-        String code = lobbyService.createLobby();
-        lobbyService.joinLobby(code, "INGE");
+    void joinLobbyShouldFailForDuplicateTeamLabel() {
+        LobbyCreationResponse lobby = createLobby(4);
 
-        assertThat(lobbyService.lobbies.get(code).getTeams()).hasSize(1);
-        assertThat(lobbyService.lobbies.get(code).getTeams().values())
-                .extracting(Team::label)
-                .contains("INGE");
+        LobbyJoinedResponse firstClient = joinLobby(lobby.lobbyCode());
+        assignTeam(lobby.lobbyCode(), firstClient.clientId(), "INGE");
+
+        LobbyJoinedResponse secondClient = joinLobby(lobby.lobbyCode());
+        restTestClient.post()
+                .uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/team")
+                        .queryParam("clientId", secondClient.clientId())
+                        .queryParam("teamLabel", "INGE")
+                        .build(lobby.lobbyCode()))
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @Test
-    void shouldNotAllowDuplicateTeamLabels() {
-        String code = lobbyService.createLobby();
-        lobbyService.joinLobby(code, "INGE");
+    void joinLobbyShouldSucceedForDifferentTeamLabels() {
+        LobbyCreationResponse lobby = createLobby(4);
 
-        try {
-            lobbyService.joinLobby(code, "INGE");
-        } catch (InvalidStartLobbyException e) {
-            assertThat(e.getMessage()).isEqualTo("Cette équipe est déjà prise");
-        }
+        LobbyJoinedResponse firstClient = joinLobby(lobby.lobbyCode());
+        assignTeam(lobby.lobbyCode(), firstClient.clientId(), "INGE");
+
+        LobbyJoinedResponse secondClient = joinLobby(lobby.lobbyCode());
+        assignTeam(lobby.lobbyCode(), secondClient.clientId(), "GECO");
+    }
+
+    /* ====================
+       START LOBBY
+       ==================== */
+
+    @Test
+    void startLobbyShouldFailForInvalidLobbyCode() {
+        restTestClient.post()
+                .uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start")
+                        .queryParam("hostId", UUID.randomUUID())
+                        .build("INVALID"))
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @Test
-    void shouldNotifyGameStarted() {
-        String code = lobbyService.createLobby();
+    void startLobbyShouldFailForDifferentHostId() {
+        LobbyCreationResponse lobby = createLobby(4);
 
-        lobbyService.joinLobby(code, "INGE");
-        lobbyService.joinLobby(code, "MEDI");
-        lobbyService.joinLobby(code, "COOP");
-        lobbyService.joinLobby(code, "MECA");
-
-        lobbyService.startGame(code, lobbyService.lobbies.get(code).getHost().id());
-
-        ArgumentCaptor<LobbyEvent> eventCaptor = ArgumentCaptor.forClass(LobbyEvent.class);
-
-        verify(messagingTemplate, times(5)).convertAndSend(eq("/topic/lobby/" + code), eventCaptor.capture());
-
-        LobbyEvent event = eventCaptor.getValue();
-        assertThat(event.type()).isEqualTo(LobbyEventType.GAME_STARTED);
+        restTestClient.post()
+                .uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start")
+                        .queryParam("hostId", UUID.randomUUID())
+                        .build(lobby.lobbyCode()))
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
-    @Test
-    void shouldNotAllowNonHostToStartGame() {
-        String code = lobbyService.createLobby();
-        try {
-            lobbyService.startGame(code, UUID.randomUUID());
-        } catch (InvalidStartLobbyException e) {
-            assertThat(e.getMessage()).isEqualTo("Seul l'hôte peut démarrer la partie");
-        }
+    /* ====================
+       HELPERS
+       ==================== */
+
+    private LobbyCreationResponse createLobby(int numberOfTeams) {
+        return restTestClient.post()
+                .uri(uriBuilder -> uriBuilder.path("/api/lobbies")
+                        .queryParam("numberOfTeams", numberOfTeams)
+                        .build())
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(LobbyCreationResponse.class)
+                .returnResult()
+                .getResponseBody();
     }
 
-    @Test
-    void shouldNotAllowJoiningNonExistentLobby() {
-        lobbyService.createLobby();
-        try {
-            lobbyService.joinLobby("INVALID", "INGE");
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage()).isEqualTo("Lobby introuvable");
-        }
+    private LobbyJoinedResponse joinLobby(String lobbyCode) {
+        return restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/join", lobbyCode)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(LobbyJoinedResponse.class)
+                .returnResult()
+                .getResponseBody();
+    }
+
+    private void assignTeam(String lobbyCode, String clientId, String teamLabel) {
+        restTestClient.post()
+                .uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/team")
+                        .queryParam("clientId", clientId)
+                        .queryParam("teamLabel", teamLabel)
+                        .build(lobbyCode))
+                .exchange()
+                .expectStatus().isNoContent();
     }
 }
