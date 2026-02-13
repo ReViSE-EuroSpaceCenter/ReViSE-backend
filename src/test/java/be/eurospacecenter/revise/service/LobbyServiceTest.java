@@ -97,7 +97,7 @@ class LobbyServiceTest {
                         .queryParam("hostId", UUID.randomUUID())
                         .build(lobby.lobbyCode()))
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isForbidden();
     }
 
     /* ====================

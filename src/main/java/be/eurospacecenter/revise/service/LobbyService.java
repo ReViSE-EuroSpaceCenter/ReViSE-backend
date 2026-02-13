@@ -79,4 +79,11 @@ public class LobbyService {
     public Lobby getLobby(String lobbyCode) {
         return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException("Lobby introuvable"));
     }
+
+    public void ensureHost(String lobbyCode, UUID hostId) {
+        Lobby lobby = getLobby(lobbyCode);
+        if (!lobby.isHost(hostId)) {
+            throw new NoAutoriseOperationException("Action réservée à l'hôte du lobby");
+        }
+    }
 }

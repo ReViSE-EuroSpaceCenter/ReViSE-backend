@@ -54,7 +54,7 @@ public class Lobby {
                 .toList();
     }
 
-    public void startGame(UUID hostId) {
+    public boolean startGame(UUID hostId) {
         ensureHost(hostId);
 
         List<String> teamLabels = teams.values().stream()
@@ -67,10 +67,16 @@ public class Lobby {
                     "Le nombre d'équipes ou les labels ne sont pas valides pour démarrer la partie"
             );
         }
+
+        return true;
     }
 
     public boolean isInLobby(UUID clientId) {
         return teams.containsKey(clientId);
+    }
+
+    public boolean isHost(UUID hostId) {
+        return host.id().equals(hostId);
     }
 
     /* ======================

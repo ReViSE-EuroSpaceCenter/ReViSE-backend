@@ -69,8 +69,6 @@ public class LobbyController {
             lobbyService.assignTeam(lobbyCode, clientId, teamLabel);
         } catch (NoAutoriseOperationException e) {
             throw ResponseStatusHelper.forbidden("Action non autorisée", e);
-        } catch (NotFoundException e) {
-            throw ResponseStatusHelper.notFound("Lobby ou client introuvable", e);
         } catch (IllegalArgumentException e) {
             throw ResponseStatusHelper.badRequest("Impossible d'assigner l'équipe", e);
         }
@@ -87,9 +85,10 @@ public class LobbyController {
             UUID hostId
     ) {
         try {
+            lobbyService.ensureHost(lobbyCode, hostId);
             lobbyService.startGame(lobbyCode, hostId);
-        } catch (NotFoundException e) {
-            throw ResponseStatusHelper.notFound("Lobby introuvable", e);
+        } catch (NoAutoriseOperationException e){
+            throw ResponseStatusHelper.forbidden("Action non autorisée", e);
         } catch (InvalidStartLobbyException e) {
             throw ResponseStatusHelper.badRequest("Impossible de démarrer la partie", e);
         }

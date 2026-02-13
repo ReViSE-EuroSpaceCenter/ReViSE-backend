@@ -2,8 +2,7 @@ package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
-import be.eurospacecenter.revise.service.GameService;
-import be.eurospacecenter.revise.service.LobbyService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,12 +18,6 @@ class LobbyControllerTest {
     @Autowired
     private RestTestClient restTestClient;
 
-    @Autowired
-    private LobbyService lobbyService;
-
-    @Autowired
-    private GameService gameService;
-
     /* ====================
        LOBBY CREATION
        ==================== */
@@ -32,6 +25,16 @@ class LobbyControllerTest {
     @Test
     void lobbyShouldReturnLobbyCode() {
         restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies").queryParam("numberOfTeams", 4).build()).exchange().expectStatus().isCreated().expectBody().jsonPath("$.lobbyCode").exists();
+    }
+
+    @Test
+    void lobbyShouldReturnHostId() {
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies").queryParam("numberOfTeams", 4).build()).exchange().expectStatus().isCreated().expectBody().jsonPath("$.hostId").exists();
+    }
+
+    @Test
+    void lobbyShouldFailForInvalidNumberOfTeams() {
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies").queryParam("numberOfTeams", 3).build()).exchange().expectStatus().isBadRequest();
     }
 
     /* ====================
@@ -77,6 +80,18 @@ class LobbyControllerTest {
         assignTeam(lobby.lobbyCode(), secondClient.clientId(), "GECO");
     }
 
+    @Test
+    void joinLobbyShouldFailForUnkownClient() {
+        LobbyCreationResponse lobby = createLobby(4);
+
+        LobbyJoinedResponse client = joinLobby(lobby.lobbyCode());
+        UUID newClientId = UUID.randomUUID();
+
+        Assertions.assertNotEquals(client.clientId(), newClientId.toString());
+
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/team").queryParam("clientId", newClientId).queryParam("teamLabel", "INGE").build(lobby.lobbyCode())).exchange().expectStatus().isForbidden();
+    }
+
     /* ====================
        START LOBBY
        ==================== */
@@ -90,7 +105,14 @@ class LobbyControllerTest {
     void startLobbyShouldFailForDifferentHostId() {
         LobbyCreationResponse lobby = createLobby(4);
 
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", UUID.randomUUID()).build(lobby.lobbyCode())).exchange().expectStatus().isBadRequest();
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", UUID.randomUUID()).build(lobby.lobbyCode())).exchange().expectStatus().isForbidden();
+    }
+
+    @Test
+    void startGameShouldFailForUnassignedTeam() {
+        LobbyCreationResponse lobby = createLobby(4);
+
+        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", lobby.hostId()).build(lobby.lobbyCode())).exchange().expectStatus().isBadRequest();
     }
 
     /* ====================
