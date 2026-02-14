@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+import java.util.Map;
 import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -17,11 +18,15 @@ class LobbyServiceTest {
     @Autowired
     private RestTestClient restTestClient;
 
+    /* ====================
+       LOBBY CREATION
+       ==================== */
+
     @Test
     void lobbyShouldReturnLobbyCode() {
         restTestClient.post()
-                .uri(uriBuilder -> uriBuilder.path("/api/lobbies")
-                        .queryParam("numberOfTeams", 4).build())
+                .uri("/api/lobbies")
+                .body(Map.of("numberOfTeams", 4))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()
@@ -54,11 +59,13 @@ class LobbyServiceTest {
         assignTeam(lobby.lobbyCode(), firstClient.clientId(), "INGE");
 
         LobbyJoinedResponse secondClient = joinLobby(lobby.lobbyCode());
+
         restTestClient.post()
-                .uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/team")
-                        .queryParam("clientId", secondClient.clientId())
-                        .queryParam("teamLabel", "INGE")
-                        .build(lobby.lobbyCode()))
+                .uri("/api/lobbies/{lobbyCode}/team", lobby.lobbyCode())
+                .body(Map.of(
+                        "clientId", secondClient.clientId(),
+                        "teamLabel", "INGE"
+                ))
                 .exchange()
                 .expectStatus().isBadRequest();
     }
@@ -81,9 +88,8 @@ class LobbyServiceTest {
     @Test
     void startLobbyShouldFailForInvalidLobbyCode() {
         restTestClient.post()
-                .uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start")
-                        .queryParam("hostId", UUID.randomUUID())
-                        .build("INVALID"))
+                .uri("/api/lobbies/{lobbyCode}/start", "INVALID")
+                .body(Map.of("hostId", UUID.randomUUID()))
                 .exchange()
                 .expectStatus().isBadRequest();
     }
@@ -93,9 +99,8 @@ class LobbyServiceTest {
         LobbyCreationResponse lobby = createLobby(4);
 
         restTestClient.post()
-                .uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start")
-                        .queryParam("hostId", UUID.randomUUID())
-                        .build(lobby.lobbyCode()))
+                .uri("/api/lobbies/{lobbyCode}/start", lobby.lobbyCode())
+                .body(Map.of("hostId", UUID.randomUUID()))
                 .exchange()
                 .expectStatus().isForbidden();
     }
@@ -106,9 +111,8 @@ class LobbyServiceTest {
 
     private LobbyCreationResponse createLobby(int numberOfTeams) {
         return restTestClient.post()
-                .uri(uriBuilder -> uriBuilder.path("/api/lobbies")
-                        .queryParam("numberOfTeams", numberOfTeams)
-                        .build())
+                .uri("/api/lobbies")
+                .body(Map.of("numberOfTeams", numberOfTeams))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(LobbyCreationResponse.class)
@@ -128,10 +132,11 @@ class LobbyServiceTest {
 
     private void assignTeam(String lobbyCode, String clientId, String teamLabel) {
         restTestClient.post()
-                .uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/team")
-                        .queryParam("clientId", clientId)
-                        .queryParam("teamLabel", teamLabel)
-                        .build(lobbyCode))
+                .uri("/api/lobbies/{lobbyCode}/team", lobbyCode)
+                .body(Map.of(
+                        "clientId", clientId,
+                        "teamLabel", teamLabel
+                ))
                 .exchange()
                 .expectStatus().isNoContent();
     }

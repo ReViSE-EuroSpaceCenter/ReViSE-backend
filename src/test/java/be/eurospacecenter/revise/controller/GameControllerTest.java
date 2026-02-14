@@ -13,6 +13,7 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTe
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -33,7 +34,13 @@ class GameControllerTest {
 
     @BeforeEach
     void setUp() {
-        var result = restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies").queryParam("numberOfTeams", 4).build()).exchange().expectStatus().isCreated().expectBody().returnResult();
+        var result = restTestClient.post()
+                .uri("/api/lobbies")
+                .body(Map.of("numberOfTeams", 4))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .returnResult();
 
         String body = new String(result.getResponseBody());
         lobbyCode = JsonPath.read(body, "$.lobbyCode");
@@ -44,7 +51,6 @@ class GameControllerTest {
         Lobby lobby = lobbyService.getLobby(lobbyCode);
 
         Game game = new Game(lobby.getTeams());
-
         gameService.registerGame(lobbyCode, game);
     }
 

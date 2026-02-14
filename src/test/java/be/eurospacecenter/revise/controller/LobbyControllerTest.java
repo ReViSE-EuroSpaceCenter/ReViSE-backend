@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+import java.util.Map;
 import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -24,17 +25,33 @@ class LobbyControllerTest {
 
     @Test
     void lobbyShouldReturnLobbyCode() {
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies").queryParam("numberOfTeams", 4).build()).exchange().expectStatus().isCreated().expectBody().jsonPath("$.lobbyCode").exists();
+        restTestClient.post()
+                .uri("/api/lobbies")
+                .body(Map.of("numberOfTeams", 4))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.lobbyCode").exists();
     }
 
     @Test
     void lobbyShouldReturnHostId() {
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies").queryParam("numberOfTeams", 4).build()).exchange().expectStatus().isCreated().expectBody().jsonPath("$.hostId").exists();
+        restTestClient.post()
+                .uri("/api/lobbies")
+                .body(Map.of("numberOfTeams", 4))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.hostId").exists();
     }
 
     @Test
     void lobbyShouldFailForInvalidNumberOfTeams() {
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies").queryParam("numberOfTeams", 3).build()).exchange().expectStatus().isBadRequest();
+        restTestClient.post()
+                .uri("/api/lobbies")
+                .body(Map.of("numberOfTeams", 3))
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     /* ====================
@@ -45,17 +62,26 @@ class LobbyControllerTest {
     void joinLobbyShouldSucceed() {
         LobbyCreationResponse lobby = createLobby(4);
 
-        restTestClient.post().uri("/api/lobbies/{lobbyCode}/join", lobby.lobbyCode()).exchange().expectStatus().isOk();
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/join", lobby.lobbyCode())
+                .exchange()
+                .expectStatus().isOk();
     }
 
     @Test
     void joinLobbyShouldFailForUnkownLobbyCode() {
-        restTestClient.post().uri("/api/lobbies/{lobbyCode}/join", "INVALD").exchange().expectStatus().isNotFound();
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/join", "INVALD")
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @Test
     void joinLobbyShouldFailForInvalidLobbyCode() {
-        restTestClient.post().uri("/api/lobbies/{lobbyCode}/join", "INVALID").exchange().expectStatus().isBadRequest();
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/join", "INVALID")
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @Test
@@ -66,7 +92,15 @@ class LobbyControllerTest {
         assignTeam(lobby.lobbyCode(), firstClient.clientId(), "INGE");
 
         LobbyJoinedResponse secondClient = joinLobby(lobby.lobbyCode());
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/team").queryParam("clientId", secondClient.clientId()).queryParam("teamLabel", "INGE").build(lobby.lobbyCode())).exchange().expectStatus().isBadRequest();
+
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/team", lobby.lobbyCode())
+                .body(Map.of(
+                        "clientId", secondClient.clientId(),
+                        "teamLabel", "INGE"
+                ))
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @Test
@@ -89,7 +123,14 @@ class LobbyControllerTest {
 
         Assertions.assertNotEquals(client.clientId(), newClientId.toString());
 
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/team").queryParam("clientId", newClientId).queryParam("teamLabel", "INGE").build(lobby.lobbyCode())).exchange().expectStatus().isForbidden();
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/team", lobby.lobbyCode())
+                .body(Map.of(
+                        "clientId", newClientId,
+                        "teamLabel", "INGE"
+                ))
+                .exchange()
+                .expectStatus().isForbidden();
     }
 
     /* ====================
@@ -98,21 +139,33 @@ class LobbyControllerTest {
 
     @Test
     void startLobbyShouldFailForInvalidLobbyCode() {
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", UUID.randomUUID()).build("INVALID")).exchange().expectStatus().isBadRequest();
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/start", "INVALID")
+                .body(Map.of("hostId", UUID.randomUUID()))
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @Test
     void startLobbyShouldFailForDifferentHostId() {
         LobbyCreationResponse lobby = createLobby(4);
 
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", UUID.randomUUID()).build(lobby.lobbyCode())).exchange().expectStatus().isForbidden();
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/start", lobby.lobbyCode())
+                .body(Map.of("hostId", UUID.randomUUID()))
+                .exchange()
+                .expectStatus().isForbidden();
     }
 
     @Test
     void startGameShouldFailForUnassignedTeam() {
         LobbyCreationResponse lobby = createLobby(4);
 
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/start").queryParam("hostId", lobby.hostId()).build(lobby.lobbyCode())).exchange().expectStatus().isBadRequest();
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/start", lobby.lobbyCode())
+                .body(Map.of("hostId", lobby.hostId()))
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     /* ====================
@@ -120,14 +173,34 @@ class LobbyControllerTest {
        ==================== */
 
     private LobbyCreationResponse createLobby(int numberOfTeams) {
-        return restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies").queryParam("numberOfTeams", numberOfTeams).build()).exchange().expectStatus().isCreated().expectBody(LobbyCreationResponse.class).returnResult().getResponseBody();
+        return restTestClient.post()
+                .uri("/api/lobbies")
+                .body(Map.of("numberOfTeams", numberOfTeams))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(LobbyCreationResponse.class)
+                .returnResult()
+                .getResponseBody();
     }
 
     private LobbyJoinedResponse joinLobby(String lobbyCode) {
-        return restTestClient.post().uri("/api/lobbies/{lobbyCode}/join", lobbyCode).exchange().expectStatus().isOk().expectBody(LobbyJoinedResponse.class).returnResult().getResponseBody();
+        return restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/join", lobbyCode)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(LobbyJoinedResponse.class)
+                .returnResult()
+                .getResponseBody();
     }
 
     private void assignTeam(String lobbyCode, String clientId, String teamLabel) {
-        restTestClient.post().uri(uriBuilder -> uriBuilder.path("/api/lobbies/{lobbyCode}/team").queryParam("clientId", clientId).queryParam("teamLabel", teamLabel).build(lobbyCode)).exchange().expectStatus().isNoContent();
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/team", lobbyCode)
+                .body(Map.of(
+                        "clientId", clientId,
+                        "teamLabel", teamLabel
+                ))
+                .exchange()
+                .expectStatus().isNoContent();
     }
 }
