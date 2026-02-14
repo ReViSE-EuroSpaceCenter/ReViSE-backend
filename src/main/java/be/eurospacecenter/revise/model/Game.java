@@ -7,16 +7,10 @@ import java.util.UUID;
 
 public class Game {
 
-    private final Host host;
     private final Map<UUID, Team> teams;
 
-    public Game(Host host, Map<UUID, Team> teams) {
-        this.host = host;
+    public Game(Map<UUID, Team> teams) {
         this.teams = teams;
-    }
-
-    public Host getHost() {
-        return host;
     }
 
     public void removeRessource(UUID id, ResourceType type, int amount) {

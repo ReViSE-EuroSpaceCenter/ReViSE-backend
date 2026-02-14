@@ -3,9 +3,8 @@ package be.eurospacecenter.revise.service;
 import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
 import be.eurospacecenter.revise.model.Game;
-import be.eurospacecenter.revise.model.Host;
 import be.eurospacecenter.revise.model.Team;
-import be.eurospacecenter.revise.model.TeamId;
+import be.eurospacecenter.revise.model.TeamLabel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,10 +23,8 @@ class GameServiceTest {
     @BeforeEach
     void setUp() {
         gameService.games.clear();
-        Host host = new Host(UUID.randomUUID());
-
-        gameWith4Teams = new Game(host, createTeams("INGE", "MECA", "EXPE", "GECO"));
-        gameWith6Teams = new Game(host, createTeams("INGE", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
+        gameWith4Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO"));
+        gameWith6Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
     }
 
 
@@ -82,8 +79,8 @@ class GameServiceTest {
     private Map<UUID, Team> createTeams(String... labels) {
         Map<UUID, Team> teams = new ConcurrentHashMap<>();
         for (String label : labels) {
-            Team team = new Team(TeamId.valueOf(label), UUID.randomUUID());
-            teams.put(team.getId(), team);
+            Team team = new Team(TeamLabel.valueOf(label), UUID.randomUUID());
+            teams.put(team.getClientID(), team);
         }
         return teams;
     }
