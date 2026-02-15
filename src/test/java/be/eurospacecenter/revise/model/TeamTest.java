@@ -19,7 +19,7 @@ class TeamTest {
 
     @BeforeEach
     void setUp() {
-        TeamId teamLabel = TeamId.INGE;
+        TeamLabel teamLabel = TeamLabel.INGE;
         id = UUID.randomUUID();
 
         team = new Team(teamLabel, id);
@@ -27,8 +27,8 @@ class TeamTest {
 
     @Test
     void teamCreation() {
-        assertEquals("INGE", team.label());
-        assertEquals(id, team.getId());
+        assertEquals("INGE", team.getLabel());
+        assertEquals(id, team.getClientID());
         assertFalse(team.isFirstBonusMissionCompleted());
         assertFalse(team.isSecondBonusMissionCompleted());
         assertEquals(25, team.score());
@@ -85,7 +85,7 @@ class TeamTest {
     @ParameterizedTest
     @ValueSource(ints = {-1, 7})
     void removeHuman_invalid(int removed) {
-        assertThrows(IllegalArgumentException.class, () ->  team.remove(ResourceType.HUMAN, removed));
+        assertThrows(IllegalArgumentException.class, () -> team.remove(ResourceType.HUMAN, removed));
     }
 
     @ParameterizedTest
