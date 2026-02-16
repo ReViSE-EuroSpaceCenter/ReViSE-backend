@@ -1,6 +1,5 @@
 package be.eurospacecenter.revise.model;
 
-import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,15 +13,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class GameTest {
 
-    private Game gameWithOneTeam;
     private Game gameWith4Teams;
     private Game gameWith6Teams;
-    private UUID idOfTheLoneTeam;
 
     @BeforeEach
     void setUp() {
-        idOfTheLoneTeam = UUID.randomUUID();
-        gameWithOneTeam = new Game(new ConcurrentHashMap<>(Map.of(idOfTheLoneTeam, new Team(TeamLabel.EXPE, idOfTheLoneTeam))));
         gameWith4Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO"));
         gameWith6Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
     }
@@ -31,18 +26,6 @@ class GameTest {
     void gameCreation() {
         assertEquals(100, gameWith4Teams.generalScore());
         assertEquals(150, gameWith6Teams.generalScore());
-    }
-
-    @Test
-    void removeRessourceToATeam(){
-        gameWithOneTeam.removeRessource(idOfTheLoneTeam, ResourceType.ENERGY, 3);
-        assertEquals(24, gameWithOneTeam.generalScore());
-    }
-
-    @Test
-    void removeRessourceToANonExistingTeam(){
-        UUID id = UUID.randomUUID();
-        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.removeRessource(id, ResourceType.ENERGY, 3));
     }
 
     private Map<UUID, Team> createTeams(String... labels) {

@@ -8,6 +8,8 @@ public class Team {
     private final UUID clientId;
     private TeamLabel label;
 
+    private final boolean[] missionsCompleted = new boolean[6];
+
     private boolean firstBonusMissionCompleted;
     private boolean secondBonusMissionCompleted;
 
@@ -46,20 +48,25 @@ public class Team {
         return label != null;
     }
 
-    public boolean isFirstBonusMissionCompleted() {
-        return firstBonusMissionCompleted;
+    public boolean isMissionCompleted(MissionType missionType) {
+        return switch (missionType) {
+            case CLASSIC_1, CLASSIC_2, CLASSIC_3,
+                 CLASSIC_4, CLASSIC_5, CLASSIC_6 -> missionsCompleted[missionType.ordinal()];
+            case BONUS_1 -> firstBonusMissionCompleted;
+            case BONUS_2 -> secondBonusMissionCompleted;
+        };
     }
 
-    public boolean isSecondBonusMissionCompleted() {
-        return secondBonusMissionCompleted;
-    }
-
-    public void completeFirstBonusMission() {
-        firstBonusMissionCompleted = true;
-    }
-
-    public void completeSecondBonusMission() {
-        secondBonusMissionCompleted = true;
+    public void completeMission(MissionType missionType) {
+        switch (missionType) {
+            case CLASSIC_1, CLASSIC_2, CLASSIC_3,
+                 CLASSIC_4, CLASSIC_5, CLASSIC_6 -> {
+                int missionNumber = missionType.ordinal() + 1;
+                missionsCompleted[missionNumber - 1] = true;
+            }
+            case BONUS_1 -> firstBonusMissionCompleted = true;
+            case BONUS_2 -> secondBonusMissionCompleted = true;
+        }
     }
 
     public void remove(ResourceType type, int amount) {

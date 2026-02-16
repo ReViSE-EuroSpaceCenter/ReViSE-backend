@@ -29,8 +29,8 @@ class TeamTest {
     void teamCreation() {
         assertEquals("INGE", team.getLabel());
         assertEquals(id, team.getClientID());
-        assertFalse(team.isFirstBonusMissionCompleted());
-        assertFalse(team.isSecondBonusMissionCompleted());
+        assertFalse(team.isMissionCompleted(MissionType.BONUS_1));
+        assertFalse(team.isMissionCompleted(MissionType.BONUS_2));
         assertEquals(25, team.score());
     }
 
@@ -117,22 +117,22 @@ class TeamTest {
 
     @Test
     void completeFirstBonusMission() {
-        assertFalse(team.isFirstBonusMissionCompleted());
+        assertFalse(team.isMissionCompleted(MissionType.BONUS_1));
 
-        team.completeFirstBonusMission();
+        team.completeMission(MissionType.BONUS_1);
 
-        assertTrue(team.isFirstBonusMissionCompleted());
-        assertFalse(team.isSecondBonusMissionCompleted());
+        assertTrue(team.isMissionCompleted(MissionType.BONUS_1));
+        assertFalse(team.isMissionCompleted(MissionType.BONUS_2));
     }
 
     @Test
     void completeSecondBonusMission() {
-        assertFalse(team.isSecondBonusMissionCompleted());
+        assertFalse(team.isMissionCompleted(MissionType.BONUS_2));
 
-        team.completeSecondBonusMission();
+        team.completeMission(MissionType.BONUS_2);
 
-        assertTrue(team.isSecondBonusMissionCompleted());
-        assertFalse(team.isFirstBonusMissionCompleted());
+        assertTrue(team.isMissionCompleted(MissionType.BONUS_2));
+        assertFalse(team.isMissionCompleted(MissionType.BONUS_1));
     }
 
 }
