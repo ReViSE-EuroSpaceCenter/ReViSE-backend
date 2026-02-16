@@ -48,7 +48,7 @@ public class LobbyService {
         lobby.addTeam(new Team(clientId));
         notifier.notifyClientJoined(lobbyCode);
 
-        return new LobbyJoinedResponse(clientId.toString(), lobby.getFreeTeamLabels());
+        return new LobbyJoinedResponse(clientId.toString(), lobby.getFreeTeamLabels(), lobby.getAllTeamLabels());
     }
 
     public void assignTeam(String lobbyCode, UUID clientId, String teamLabel) {

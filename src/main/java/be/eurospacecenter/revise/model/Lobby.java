@@ -43,29 +43,22 @@ public class Lobby {
     }
 
     public List<String> getFreeTeamLabels() {
-        Set<String> takenLabels = teams.values().stream()
-                .filter(Team::hasLabel)
-                .map(Team::getLabel)
-                .collect(Collectors.toSet());
+        Set<String> takenLabels = teams.values().stream().filter(Team::hasLabel).map(Team::getLabel).collect(Collectors.toSet());
 
-        return TeamLabel.getAllowedLabels(isFourTeamsMode).stream()
-                .map(Enum::name)
-                .filter(label -> !takenLabels.contains(label))
-                .toList();
+        return TeamLabel.getAllowedLabels(isFourTeamsMode).stream().map(Enum::name).filter(label -> !takenLabels.contains(label)).toList();
+    }
+
+    public List<String> getAllTeamLabels() {
+        return TeamLabel.getAllowedLabels(isFourTeamsMode).stream().map(Enum::name).toList();
     }
 
     public boolean startGame(UUID hostId) {
         ensureHost(hostId);
 
-        List<String> teamLabels = teams.values().stream()
-                .filter(Team::hasLabel)
-                .map(Team::getLabel)
-                .toList();
+        List<String> teamLabels = teams.values().stream().filter(Team::hasLabel).map(Team::getLabel).toList();
 
         if (!TeamLabel.isValidTeams(teamLabels, isFourTeamsMode)) {
-            throw new InvalidStartLobbyException(
-                    "Le nombre d'équipes ou les labels ne sont pas valides pour démarrer la partie"
-            );
+            throw new InvalidStartLobbyException("Le nombre d'équipes ou les labels ne sont pas valides pour démarrer la partie");
         }
 
         return true;
@@ -110,8 +103,7 @@ public class Lobby {
     }
 
     private void ensureLabelNotTaken(String teamLabel) {
-        boolean alreadyTaken = teams.values().stream()
-                .anyMatch(team -> teamLabel.equals(team.getLabel()));
+        boolean alreadyTaken = teams.values().stream().anyMatch(team -> teamLabel.equals(team.getLabel()));
 
         if (alreadyTaken) {
             throw new IllegalArgumentException("Cette équipe est déjà prise");
