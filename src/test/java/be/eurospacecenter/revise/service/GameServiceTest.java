@@ -5,6 +5,9 @@ import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
 import be.eurospacecenter.revise.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Map;
 import java.util.UUID;
@@ -12,9 +15,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureRestTestClient
 class GameServiceTest {
 
-    private final GameService gameService = new GameService();
+    @Autowired
+    private GameService gameService;
     private Game gameWithOneTeam;
     private Game gameWith4Teams;
     private Game gameWith6Teams;

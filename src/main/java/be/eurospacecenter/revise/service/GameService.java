@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.service;
 import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
 import be.eurospacecenter.revise.model.*;
+import be.eurospacecenter.revise.notification.GameNotifier;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.UUID;
@@ -12,9 +13,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GameService {
 
     protected final Map<String, Game> games = new ConcurrentHashMap<>();
+    private final GameNotifier notifier;
 
-    public GameService() {
-        // Rajouter maybe notifier
+    public GameService(GameNotifier notifier) {
+        this.notifier = notifier;
     }
 
     public void registerGame(String lobbyCode, Game game) {
@@ -28,7 +30,9 @@ public class GameService {
         try {
             Game game = getGame(lobbyCode);
             game.completeTeamMission(clientId, missionType, resources);
-            // Rajouter une notification pour informer le prof que la mission de l'équipe a été complétée
+
+            String teamLabel = game.getTeamLabel(clientId);
+            notifier.notifyTeamMissionCompleted(lobbyCode, teamLabel, missionType);
         } catch (NullPointerException e) {
             throw new InvalidGameOperationException("Impossible de terminer la mission pour la partie");
         }

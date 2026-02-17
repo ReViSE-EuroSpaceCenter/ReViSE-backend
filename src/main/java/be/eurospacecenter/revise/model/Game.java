@@ -12,6 +12,10 @@ public class Game {
     public Game(Map<UUID, Team> teams) {
         this.teams = teams;
     }
+    
+    public String getTeamLabel(UUID id) {
+        return teams.get(id).getLabel();
+    }
 
     public void completeTeamMission(UUID id, MissionType missionType, Map<ResourceType, Integer> resources) {
         try {
