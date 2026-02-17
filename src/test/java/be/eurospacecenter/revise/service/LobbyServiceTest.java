@@ -86,6 +86,24 @@ class LobbyServiceTest {
        ==================== */
 
     @Test
+    void startLobbyShouldSucceed() {
+        LobbyCreationResponse lobby = createLobby(4);
+
+        String[] teams = {"COOP", "EXPE", "INGE", "GECO"};
+
+        for (String team : teams) {
+            LobbyJoinedResponse client = joinLobby(lobby.lobbyCode());
+            assignTeam(lobby.lobbyCode(), client.clientId(), team);
+        }
+
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/start", lobby.lobbyCode())
+                .body(Map.of("hostId", lobby.hostId()))
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
     void startLobbyShouldFailForInvalidLobbyCode() {
         restTestClient.post()
                 .uri("/api/lobbies/{lobbyCode}/start", "INVALID")

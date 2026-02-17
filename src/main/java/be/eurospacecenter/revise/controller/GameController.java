@@ -7,6 +7,7 @@ import be.eurospacecenter.revise.helper.ResponseStatusHelper;
 import be.eurospacecenter.revise.service.GameService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -20,6 +21,7 @@ public class GameController {
     }
 
     @PostMapping("/{lobbyCode}/complete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void completeATeamMission(
             @PathVariable
             @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")

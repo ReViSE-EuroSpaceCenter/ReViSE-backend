@@ -1,5 +1,7 @@
 package be.eurospacecenter.revise.model;
 
+import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
+
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
@@ -58,6 +60,9 @@ public class Team {
     }
 
     public void completeMission(MissionType missionType) {
+        if (isMissionCompleted(missionType)) {
+            throw new InvalidGameOperationException("La mission était déjà complétée.");
+        }
         switch (missionType) {
             case CLASSIC_1, CLASSIC_2, CLASSIC_3,
                  CLASSIC_4, CLASSIC_5, CLASSIC_6 -> {

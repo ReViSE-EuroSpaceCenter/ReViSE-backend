@@ -2,9 +2,7 @@ package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
-import be.eurospacecenter.revise.model.Game;
-import be.eurospacecenter.revise.model.Team;
-import be.eurospacecenter.revise.model.TeamLabel;
+import be.eurospacecenter.revise.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,12 +15,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameServiceTest {
 
     private final GameService gameService = new GameService();
+    private Game gameWithOneTeam;
     private Game gameWith4Teams;
     private Game gameWith6Teams;
+    private UUID idOfTheLoneTeam;
 
     @BeforeEach
     void setUp() {
         gameService.games.clear();
+        idOfTheLoneTeam = UUID.randomUUID();
+        gameWithOneTeam = new Game(new ConcurrentHashMap<>(Map.of(idOfTheLoneTeam, new Team(TeamLabel.EXPE, idOfTheLoneTeam))));
         gameWith4Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO"));
         gameWith6Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
     }
@@ -60,6 +62,21 @@ class GameServiceTest {
     void shouldFailToRegisterGameWithEmptyLobbyCode() {
         assertThrows(InvalidStartLobbyException.class, () -> gameService.registerGame("", gameWith4Teams));
         assertNull(gameService.getGame(""));
+    }
+
+    @Test
+    void shouldCompleteTeamMission() {
+        gameService.registerGame("XXXXXX", gameWithOneTeam);
+
+        gameService.completeATeamMission("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1, Map.of(ResourceType.ENERGY, 4));
+
+        assertEquals(24, gameService.getGeneralScore("XXXXXX"));
+    }
+
+    @Test
+    void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
+        Map<ResourceType, Integer> resources = Map.of(ResourceType.ENERGY, 4);
+        assertThrows(InvalidGameOperationException.class, () -> gameService.completeATeamMission("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1, resources));
     }
 
     @Test

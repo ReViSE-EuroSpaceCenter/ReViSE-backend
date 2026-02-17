@@ -16,12 +16,10 @@ public class Game {
     public void completeTeamMission(UUID id, MissionType missionType, Map<ResourceType, Integer> resources) {
         try {
             Team team = teams.get(id);
-            removeRessources(team, resources);
             team.completeMission(missionType);
+            removeRessources(team, resources);
         } catch (NullPointerException e) {
             throw new InvalidGameOperationException("Équipe introuvable");
-        } catch (IllegalArgumentException e) {
-            throw new InvalidGameOperationException("Numéro de mission invalide");
         }
     }
 
@@ -35,7 +33,7 @@ public class Game {
                 int amount = resources.getOrDefault(type, 0);
                 team.remove(type, amount);
             }
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             throw new InvalidGameOperationException("Impossible de retirer les ressources à l'équipe");
         }
     }

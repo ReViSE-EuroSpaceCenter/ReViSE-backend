@@ -1,9 +1,11 @@
 package be.eurospacecenter.revise.model;
 
+import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -39,7 +41,7 @@ class TeamTest {
             "0,25",
             "10,22"
     })
-    void removeEnergy_valid(int removed, int expectedScore) {
+    void removeEnergyValid(int removed, int expectedScore) {
         team.remove(ResourceType.ENERGY, removed);
         assertEquals(expectedScore, team.score());
     }
@@ -57,7 +59,7 @@ class TeamTest {
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 41})
-    void removeEnergy_invalid(int removed) {
+    void removeEnergyInvalid(int removed) {
         assertThrows(IllegalArgumentException.class, () -> team.remove(ResourceType.ENERGY, removed));
     }
 
@@ -66,7 +68,7 @@ class TeamTest {
             "0,25",
             "3,22"
     })
-    void removeHuman_valid(int removed, int expectedScore) {
+    void removeHumanValid(int removed, int expectedScore) {
         team.remove(ResourceType.HUMAN, removed);
         assertEquals(expectedScore, team.score());
     }
@@ -115,24 +117,27 @@ class TeamTest {
         assertThrows(IllegalArgumentException.class, () -> team.remove(ResourceType.CLOCK, removed));
     }
 
-    @Test
-    void completeFirstBonusMission() {
-        assertFalse(team.isMissionCompleted(MissionType.BONUS_1));
+    @ParameterizedTest
+    @EnumSource(MissionType.class)
+    void completeMission_shouldOnlyCompleteSelectedMission(MissionType missionToComplete) {
+        for (MissionType mission : MissionType.values()) {
+            assertFalse(team.isMissionCompleted(mission));
+        }
 
+        team.completeMission(missionToComplete);
+
+        for (MissionType mission : MissionType.values()) {
+            if (mission == missionToComplete) {
+                assertTrue(team.isMissionCompleted(mission));
+            } else {
+                assertFalse(team.isMissionCompleted(mission));
+            }
+        }
+    }
+
+    @Test
+    void completeMissionAlreadyCompleted() {
         team.completeMission(MissionType.BONUS_1);
-
-        assertTrue(team.isMissionCompleted(MissionType.BONUS_1));
-        assertFalse(team.isMissionCompleted(MissionType.BONUS_2));
+        assertThrows(InvalidGameOperationException.class, () -> team.completeMission(MissionType.BONUS_1));
     }
-
-    @Test
-    void completeSecondBonusMission() {
-        assertFalse(team.isMissionCompleted(MissionType.BONUS_2));
-
-        team.completeMission(MissionType.BONUS_2);
-
-        assertTrue(team.isMissionCompleted(MissionType.BONUS_2));
-        assertFalse(team.isMissionCompleted(MissionType.BONUS_1));
-    }
-
 }
