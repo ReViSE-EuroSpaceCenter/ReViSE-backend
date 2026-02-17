@@ -31,6 +31,7 @@ class GameControllerTest {
     private GameService gameService;
 
     private String lobbyCode;
+    private UUID teamClientId;
 
     @BeforeEach
     void setUp() {
@@ -46,13 +47,47 @@ class GameControllerTest {
         lobbyCode = JsonPath.read(body, "$.lobbyCode");
 
         LobbyJoinedResponse response = lobbyService.joinLobby(lobbyCode);
-        lobbyService.assignTeam(lobbyCode, UUID.fromString(response.clientId()), "INGE");
+        teamClientId = UUID.fromString(response.clientId());
+        lobbyService.assignTeam(lobbyCode, teamClientId, "INGE");
 
         Lobby lobby = lobbyService.getLobby(lobbyCode);
 
         Game game = new Game(lobby.getTeams());
         gameService.registerGame(lobbyCode, game);
     }
+
+    @Test
+    void completeMissionShouldSucceed() {
+        restTestClient.post()
+                .uri("/api/games/" + lobbyCode + "/complete")
+                .body(Map.of(
+                    "clientId", teamClientId,
+                    "missionNumber", "CLASSIC_1",
+                    "resources",  Map.of(
+                            "ENERGY", 1,
+                            "HUMAN", 2
+                    )
+                ))
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    void completeMissionShouldFailWithNonExistingGame() {
+        restTestClient.post()
+                .uri("/api/games/XXXXXX/complete")
+                .body(Map.of(
+                        "clientId", teamClientId,
+                        "missionNumber", "CLASSIC_1",
+                        "resources",  Map.of(
+                                "ENERGY", 1,
+                                "HUMAN", 2
+                        )
+                ))
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
 
     @Test
     void scoreShouldReturnScoreOfTheGame() {

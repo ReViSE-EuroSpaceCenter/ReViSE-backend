@@ -31,11 +31,7 @@ public class LobbyController {
             @RequestBody @Valid
             CreateLobbyRequest request
     ) {
-        try {
-            return lobbyService.createLobby(request.numberOfTeams());
-        } catch (IllegalArgumentException e) {
-            throw ResponseStatusHelper.badRequest("Impossible de créer le lobby", e);
-        }
+        return lobbyService.createLobby(request.numberOfTeams());
     }
 
     @PostMapping("/{lobbyCode}/join")

@@ -12,18 +12,33 @@ public class Game {
     public Game(Map<UUID, Team> teams) {
         this.teams = teams;
     }
+    
+    public String getTeamLabel(UUID id) {
+        return teams.get(id).getLabel();
+    }
 
-    public void removeRessource(UUID id, ResourceType type, int amount) {
+    public void completeTeamMission(UUID id, MissionType missionType, Map<ResourceType, Integer> resources) {
         try {
             Team team = teams.get(id);
-            team.remove(type, amount);
+            team.completeMission(missionType);
+            removeRessources(team, resources);
         } catch (NullPointerException e) {
             throw new InvalidGameOperationException("Équipe introuvable");
         }
-
     }
 
     public int generalScore() {
         return teams.values().stream().mapToInt(Team::score).sum();
+    }
+
+    private void removeRessources(Team team, Map<ResourceType, Integer> resources) {
+        try {
+            for (ResourceType type : ResourceType.values()) {
+                int amount = resources.getOrDefault(type, 0);
+                team.remove(type, amount);
+            }
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new InvalidGameOperationException("Impossible de retirer les ressources à l'équipe");
+        }
     }
 }

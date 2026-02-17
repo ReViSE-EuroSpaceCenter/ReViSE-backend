@@ -29,20 +29,46 @@ class GameTest {
 
     @Test
     void gameCreation() {
+        assertEquals(25, gameWithOneTeam.generalScore());
         assertEquals(100, gameWith4Teams.generalScore());
         assertEquals(150, gameWith6Teams.generalScore());
     }
 
     @Test
-    void removeRessourceToATeam(){
-        gameWithOneTeam.removeRessource(idOfTheLoneTeam, ResourceType.ENERGY, 3);
-        assertEquals(24, gameWithOneTeam.generalScore());
+    void completeTeamMissionWithoutUsingRessources() {
+        gameWithOneTeam.completeTeamMission(idOfTheLoneTeam, MissionType.CLASSIC_1, Map.of());
+
+        assertEquals(25, gameWithOneTeam.generalScore());
     }
 
     @Test
-    void removeRessourceToANonExistingTeam(){
+    void completeTeamMissionWithUsingRessources() {
+        gameWithOneTeam.completeTeamMission(idOfTheLoneTeam, MissionType.CLASSIC_1, Map.of(ResourceType.ENERGY, 3, ResourceType.HUMAN, 1));
+        assertEquals(23, gameWithOneTeam.generalScore());
+    }
+
+    @Test
+    void completeTeamMissionWithNullRessources() {
+        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.completeTeamMission(idOfTheLoneTeam, MissionType.CLASSIC_1, null));
+    }
+
+    @Test
+    void completeTeamMissionWithUsingTooManyRessources() {
+        Map<ResourceType, Integer> resources = Map.of(ResourceType.ENERGY, 50);
+        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.completeTeamMission(idOfTheLoneTeam, MissionType.CLASSIC_1, resources));
+    }
+
+    @Test
+    void completeTeamMissionWithUsingNegativeRessources() {
+        Map<ResourceType, Integer> resources = Map.of(ResourceType.ENERGY, -5);
+        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.completeTeamMission(idOfTheLoneTeam, MissionType.CLASSIC_1, resources));
+    }
+
+    @Test
+    void completeTeamMissionWithInvalidTeam() {
+        Map<ResourceType, Integer> resources = Map.of(ResourceType.ENERGY, 5);
         UUID id = UUID.randomUUID();
-        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.removeRessource(id, ResourceType.ENERGY, 3));
+        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.completeTeamMission(id, MissionType.CLASSIC_1, resources));
     }
 
     private Map<UUID, Team> createTeams(String... labels) {
