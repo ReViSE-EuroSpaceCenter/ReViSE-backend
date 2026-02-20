@@ -27,7 +27,7 @@ public enum TeamLabel {
         return labels.size() == allowed.size() && allowed.stream().allMatch(label -> labels.contains(label.name()));
     }
 
-    static Set<TeamLabel> getAllowedLabels(boolean isFourTeamsMode) {
+    public static Set<TeamLabel> getAllowedLabels(boolean isFourTeamsMode) {
         return isFourTeamsMode ? FOUR_TEAMS_MODE : SIX_TEAMS_MODE;
     }
 

@@ -5,6 +5,8 @@ import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.notification.GameNotifier;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,5 +51,9 @@ public class GameService {
 
     public Game getGame(String lobbyCode) {
         return games.get(lobbyCode);
+    }
+
+    protected void clearGames(List<String> toRemove) {
+        toRemove.forEach(games::remove);
     }
 }
