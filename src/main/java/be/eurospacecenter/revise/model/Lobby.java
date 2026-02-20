@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.model;
 import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -15,13 +16,15 @@ public class Lobby {
     private final Host host;
     private final Map<UUID, Team> teams;
     private final boolean isFourTeamsMode;
+    private final LocalDateTime createdAt;
 
-    public Lobby(Host host, int numberOfTeams) {
+    public Lobby(Host host, int numberOfTeams, LocalDateTime createdAt) {
         validateTeamCount(numberOfTeams);
 
         this.host = Objects.requireNonNull(host);
         this.teams = new ConcurrentHashMap<>();
         this.isFourTeamsMode = numberOfTeams == TEAM_COUNT_FOUR;
+        this.createdAt = createdAt;
     }
 
     public Map<UUID, Team> getTeams() {
@@ -53,7 +56,9 @@ public class Lobby {
     }
 
     public boolean startGame(UUID hostId) {
-        ensureHost(hostId);
+        if (!isHost(hostId)) {
+            throw new InvalidStartLobbyException("Seul l'hôte peut démarrer la partie");
+        }
 
         List<String> teamLabels = teams.values().stream().filter(Team::hasLabel).map(Team::getLabel).toList();
 
@@ -70,6 +75,10 @@ public class Lobby {
 
     public boolean isHost(UUID hostId) {
         return host.id().equals(hostId);
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return this.createdAt;
     }
 
     /* ======================
@@ -107,12 +116,6 @@ public class Lobby {
 
         if (alreadyTaken) {
             throw new IllegalArgumentException("Cette équipe est déjà prise");
-        }
-    }
-
-    private void ensureHost(UUID hostId) {
-        if (!host.id().equals(hostId)) {
-            throw new InvalidStartLobbyException("Seul l'hôte peut démarrer la partie");
         }
     }
 }
