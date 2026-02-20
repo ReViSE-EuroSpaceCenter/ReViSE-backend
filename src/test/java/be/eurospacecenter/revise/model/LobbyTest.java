@@ -61,7 +61,7 @@ class LobbyTest {
 
     @Test
     void shouldStartGameWith4Teams() {
-        lobby4Teams.assignTeam(team1Id, "INGE");
+        lobby4Teams.assignTeam(team1Id, "AERO");
         lobby4Teams.assignTeam(team2Id, "COOP");
         lobby4Teams.assignTeam(team3Id, "EXPE");
         lobby4Teams.assignTeam(team4Id, "GECO");
@@ -71,7 +71,7 @@ class LobbyTest {
 
     @Test
     void shouldStartGameWith6Teams() {
-        lobby6Teams.assignTeam(team1Id, "INGE");
+        lobby6Teams.assignTeam(team1Id, "AERO");
         lobby6Teams.assignTeam(team2Id, "MECA");
         lobby6Teams.assignTeam(team3Id, "EXPE");
         lobby6Teams.assignTeam(team4Id, "GECO");
@@ -83,7 +83,7 @@ class LobbyTest {
 
     @Test
     void shouldNotStartGameWithWrongHostId() {
-        lobby4Teams.assignTeam(team1Id, "INGE");
+        lobby4Teams.assignTeam(team1Id, "AERO");
         lobby4Teams.assignTeam(team2Id, "COOP");
         lobby4Teams.assignTeam(team3Id, "EXPE");
         lobby4Teams.assignTeam(team4Id, "GECO");
@@ -94,7 +94,7 @@ class LobbyTest {
 
     @Test
     void shouldNotStartGameWithWrong4Teams() {
-        lobby4Teams.assignTeam(team1Id, "INGE");
+        lobby4Teams.assignTeam(team1Id, "AERO");
 
         assertThrows(IllegalArgumentException.class, () -> lobby4Teams.assignTeam(team2Id, "MECA"));
     }
@@ -111,19 +111,19 @@ class LobbyTest {
     @Test
     void shouldNotAssignTeamWithUnknownClientId() {
         UUID wrongClientId = UUID.randomUUID();
-        assertThrows(NotFoundException.class, () -> lobby4Teams.assignTeam(wrongClientId, "INGE"));
+        assertThrows(NotFoundException.class, () -> lobby4Teams.assignTeam(wrongClientId, "AERO"));
     }
 
     @Test
     void shouldNotAssignTeamWithDuplicateLabel() {
-        lobby4Teams.assignTeam(team1Id, "INGE");
+        lobby4Teams.assignTeam(team1Id, "AERO");
 
-        assertThrows(IllegalArgumentException.class, () -> lobby4Teams.assignTeam(team2Id, "INGE"));
+        assertThrows(IllegalArgumentException.class, () -> lobby4Teams.assignTeam(team2Id, "AERO"));
     }
 
     @Test
     void shouldNotAssignTeamTwice() {
-        lobby4Teams.assignTeam(team1Id, "INGE");
+        lobby4Teams.assignTeam(team1Id, "AERO");
 
         assertThrows(IllegalArgumentException.class, () -> lobby4Teams.assignTeam(team1Id, "COOP"));
     }

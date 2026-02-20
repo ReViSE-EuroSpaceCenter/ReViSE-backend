@@ -56,7 +56,7 @@ class LobbyServiceTest {
         LobbyCreationResponse lobby = createLobby(4);
 
         LobbyJoinedResponse firstClient = joinLobby(lobby.lobbyCode());
-        assignTeam(lobby.lobbyCode(), firstClient.clientId(), "INGE");
+        assignTeam(lobby.lobbyCode(), firstClient.clientId(), "AERO");
 
         LobbyJoinedResponse secondClient = joinLobby(lobby.lobbyCode());
 
@@ -64,7 +64,7 @@ class LobbyServiceTest {
                 .uri("/api/lobbies/{lobbyCode}/team", lobby.lobbyCode())
                 .body(Map.of(
                         "clientId", secondClient.clientId(),
-                        "teamLabel", "INGE"
+                        "teamLabel", "AERO"
                 ))
                 .exchange()
                 .expectStatus().isBadRequest();
@@ -75,7 +75,7 @@ class LobbyServiceTest {
         LobbyCreationResponse lobby = createLobby(4);
 
         LobbyJoinedResponse firstClient = joinLobby(lobby.lobbyCode());
-        assignTeam(lobby.lobbyCode(), firstClient.clientId(), "INGE");
+        assignTeam(lobby.lobbyCode(), firstClient.clientId(), "AERO");
 
         LobbyJoinedResponse secondClient = joinLobby(lobby.lobbyCode());
         assignTeam(lobby.lobbyCode(), secondClient.clientId(), "GECO");
@@ -89,7 +89,7 @@ class LobbyServiceTest {
     void startLobbyShouldSucceed() {
         LobbyCreationResponse lobby = createLobby(4);
 
-        String[] teams = {"COOP", "EXPE", "INGE", "GECO"};
+        String[] teams = {"COOP", "EXPE", "AERO", "GECO"};
 
         for (String team : teams) {
             LobbyJoinedResponse client = joinLobby(lobby.lobbyCode());

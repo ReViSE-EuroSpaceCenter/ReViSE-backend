@@ -7,9 +7,9 @@ import java.util.Set;
 
 public enum TeamLabel {
 
-    COOP, EXPE, GECO, INGE, MECA, MEDI;
+    COOP, EXPE, GECO, AERO, MECA, MEDI;
 
-    private static final Set<TeamLabel> FOUR_TEAMS_MODE = EnumSet.of(COOP, EXPE, GECO, INGE);
+    private static final Set<TeamLabel> FOUR_TEAMS_MODE = EnumSet.of(COOP, EXPE, GECO, AERO);
 
     private static final Set<TeamLabel> SIX_TEAMS_MODE = EnumSet.allOf(TeamLabel.class);
 

@@ -17,22 +17,24 @@ import static org.junit.jupiter.api.Assertions.*;
 class TeamTest {
 
     private Team team;
+    private Team teamMeca;
     private UUID id;
 
     @BeforeEach
     void setUp() {
-        TeamLabel teamLabel = TeamLabel.INGE;
         id = UUID.randomUUID();
 
-        team = new Team(teamLabel, id);
+        team = new Team(TeamLabel.AERO, id);
+        teamMeca = new Team(TeamLabel.MECA, id);
     }
 
     @Test
     void teamCreation() {
-        assertEquals("INGE", team.getLabel());
+        assertEquals("AERO", team.getLabel());
         assertEquals(id, team.getClientID());
-        assertFalse(team.isMissionCompleted(MissionType.BONUS_1));
-        assertFalse(team.isMissionCompleted(MissionType.BONUS_2));
+        assertFalse(team.isMissionBonusCompleted(MissionType.BONUS_1));
+        assertFalse(team.isMissionBonusCompleted(MissionType.BONUS_2));
+        assertEquals(0, team.getMissionCompletionPercentage());
         assertEquals(25, team.score());
     }
 
@@ -119,25 +121,73 @@ class TeamTest {
 
     @ParameterizedTest
     @EnumSource(MissionType.class)
-    void completeMission_shouldOnlyCompleteSelectedMission(MissionType missionToComplete) {
-        for (MissionType mission : MissionType.values()) {
-            assertFalse(team.isMissionCompleted(mission));
+    void changeMissionStateOnTeam(MissionType missionToComplete) {
+        boolean isBonus = missionToComplete.name().startsWith("BONUS");
+
+        if (isBonus) {
+            assertFalse(team.isMissionBonusCompleted(missionToComplete));
+        } else {
+            assertEquals(0, team.getMissionCompletionPercentage());
         }
 
-        team.completeMission(missionToComplete);
+        if (missionToComplete == MissionType.CLASSIC_8) {
+            assertThrows(InvalidGameOperationException.class, () -> team.changeMissionState(missionToComplete));
+            return;
+        }
 
-        for (MissionType mission : MissionType.values()) {
-            if (mission == missionToComplete) {
-                assertTrue(team.isMissionCompleted(mission));
-            } else {
-                assertFalse(team.isMissionCompleted(mission));
-            }
+        team.changeMissionState(missionToComplete);
+
+        if (isBonus) {
+            assertTrue(team.isMissionBonusCompleted(missionToComplete));
+        } else {
+            assertEquals(100f / 7, team.getMissionCompletionPercentage(), 0.001);
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(MissionType.class)
+    void changeMissionStateOnMecaTeam(MissionType missionToComplete) {
+        boolean isBonus = missionToComplete.name().startsWith("BONUS");
+
+        if (isBonus) {
+            assertFalse(teamMeca.isMissionBonusCompleted(missionToComplete));
+        } else {
+            assertEquals(0, teamMeca.getMissionCompletionPercentage());
+        }
+
+        teamMeca.changeMissionState(missionToComplete);
+
+        if (isBonus) {
+            assertTrue(teamMeca.isMissionBonusCompleted(missionToComplete));
+        } else {
+            assertEquals(100f / 8, teamMeca.getMissionCompletionPercentage(), 0.001);
         }
     }
 
     @Test
-    void completeMissionAlreadyCompleted() {
-        team.completeMission(MissionType.BONUS_1);
-        assertThrows(InvalidGameOperationException.class, () -> team.completeMission(MissionType.BONUS_1));
+    void checkMissionBonusStateWithAClassicMission() {
+        assertThrows(IllegalArgumentException.class, () -> team.isMissionBonusCompleted(MissionType.CLASSIC_1));
+    }
+
+    @Test
+    void changeMissionBonusStateTwice() {
+        assertFalse(team.isMissionBonusCompleted(MissionType.BONUS_1));
+
+        team.changeMissionState(MissionType.BONUS_1);
+        assertTrue(team.isMissionBonusCompleted(MissionType.BONUS_1));
+
+        team.changeMissionState(MissionType.BONUS_1);
+        assertFalse(team.isMissionBonusCompleted(MissionType.BONUS_1));
+    }
+
+    @Test
+    void changeMissionClassicStateTwice() {
+        assertEquals(0, team.getMissionCompletionPercentage());
+
+        team.changeMissionState(MissionType.CLASSIC_1);
+        assertEquals((float) 100 / 7, team.getMissionCompletionPercentage(), 0.001);
+
+        team.changeMissionState(MissionType.CLASSIC_1);
+        assertEquals(0, team.getMissionCompletionPercentage());
     }
 }

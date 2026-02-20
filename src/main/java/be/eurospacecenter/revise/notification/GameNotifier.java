@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.notification;
 
-import be.eurospacecenter.revise.model.MissionType;
+import be.eurospacecenter.revise.model.TeamProgression;
 
 public interface GameNotifier {
-    void notifyTeamMissionCompleted(String lobbyCode, String teamLabel, MissionType missionType);
+    void notifyTeamProgression(String lobbyCode, String teamLabel, TeamProgression teamProgression);
 }

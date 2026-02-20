@@ -10,7 +10,7 @@ public class Team {
     private final UUID clientId;
     private TeamLabel label;
 
-    private final boolean[] missionsCompleted = new boolean[6];
+    private final boolean[] missionsCompleted = new boolean[8];
 
     private boolean firstBonusMissionCompleted;
     private boolean secondBonusMissionCompleted;
@@ -50,28 +50,33 @@ public class Team {
         return label != null;
     }
 
-    public boolean isMissionCompleted(MissionType missionType) {
+    public void changeMissionState(MissionType missionType) {
+        validateClassic8Access(missionType);
+
+        switch (missionType) {
+            case CLASSIC_1, CLASSIC_2, CLASSIC_3, CLASSIC_4,
+                 CLASSIC_5, CLASSIC_6, CLASSIC_7, CLASSIC_8 ->
+                    missionsCompleted[missionType.ordinal()] = !missionsCompleted[missionType.ordinal()];
+
+            case BONUS_1 -> firstBonusMissionCompleted = !firstBonusMissionCompleted;
+            case BONUS_2 -> secondBonusMissionCompleted = !secondBonusMissionCompleted;
+        }
+    }
+
+    public boolean isMissionBonusCompleted(MissionType missionType) {
         return switch (missionType) {
-            case CLASSIC_1, CLASSIC_2, CLASSIC_3,
-                 CLASSIC_4, CLASSIC_5, CLASSIC_6 -> missionsCompleted[missionType.ordinal()];
             case BONUS_1 -> firstBonusMissionCompleted;
             case BONUS_2 -> secondBonusMissionCompleted;
+            default -> throw new IllegalArgumentException(
+                    "Mission non bonus : " + missionType
+            );
         };
     }
 
-    public void completeMission(MissionType missionType) {
-        if (isMissionCompleted(missionType)) {
-            throw new InvalidGameOperationException("La mission était déjà complétée.");
-        }
-        switch (missionType) {
-            case CLASSIC_1, CLASSIC_2, CLASSIC_3,
-                 CLASSIC_4, CLASSIC_5, CLASSIC_6 -> {
-                int missionNumber = missionType.ordinal() + 1;
-                missionsCompleted[missionNumber - 1] = true;
-            }
-            case BONUS_1 -> firstBonusMissionCompleted = true;
-            case BONUS_2 -> secondBonusMissionCompleted = true;
-        }
+    public float getMissionCompletionPercentage() {
+        int totalMissions = label == TeamLabel.MECA ? 8 : 7;
+        int completedMissions = countCompletedMissions();
+        return (float) completedMissions / totalMissions * 100;
     }
 
     public void remove(ResourceType type, int amount) {
@@ -88,5 +93,17 @@ public class Team {
         for (ResourceType type : ResourceType.values()) {
             resources.put(type, new Resource(type.max()));
         }
+    }
+
+    private void validateClassic8Access(MissionType missionType) {
+        if (missionType == MissionType.CLASSIC_8 && label != TeamLabel.MECA) {
+            throw new InvalidGameOperationException("Seule l'équipe MECA peut compléter la mission CLASSIC_8.");
+        }
+    }
+
+    private int countCompletedMissions() {
+        return (int) java.util.stream.IntStream.range(0, missionsCompleted.length)
+                .filter(i -> missionsCompleted[i])
+                .count();
     }
 }

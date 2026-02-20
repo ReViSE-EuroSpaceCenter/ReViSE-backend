@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.request.CompleteTeamMissionRequest;
+import be.eurospacecenter.revise.dto.request.TeamMissionStatusUpdateRequest;
 import be.eurospacecenter.revise.dto.response.ScoreResponse;
 import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 import be.eurospacecenter.revise.helper.ResponseStatusHelper;
@@ -20,7 +20,7 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @PostMapping("/{lobbyCode}/complete")
+    @PutMapping("/{lobbyCode}/missions")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void completeATeamMission(
             @PathVariable
@@ -28,16 +28,16 @@ public class GameController {
             String lobbyCode,
 
             @RequestBody @Valid
-            CompleteTeamMissionRequest request
+            TeamMissionStatusUpdateRequest request
     ) {
         try {
-            gameService.completeATeamMission(lobbyCode, request.clientId(), request.missionNumber(), request.resources());
+            gameService.changeATeamMissionState(lobbyCode, request.clientId(), request.missionNumber());
         } catch (InvalidGameOperationException e) {
             throw ResponseStatusHelper.badRequest("Erreur pour terminer la mission", e);
         }
     }
 
-    @PostMapping("/{lobbyCode}/score")
+    @GetMapping("/{lobbyCode}/score")
     public ScoreResponse calculateScore(
             @PathVariable
             @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")

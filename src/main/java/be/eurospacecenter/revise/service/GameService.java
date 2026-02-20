@@ -26,13 +26,14 @@ public class GameService {
         games.put(lobbyCode, game);
     }
 
-    public void completeATeamMission(String lobbyCode, UUID clientId, MissionType missionType, Map<ResourceType, Integer> resources) {
+    public void changeATeamMissionState(String lobbyCode, UUID clientId, MissionType missionType) {
         try {
             Game game = getGame(lobbyCode);
-            game.completeTeamMission(clientId, missionType, resources);
+            game.changeTeamMissionState(clientId, missionType);
 
             String teamLabel = game.getTeamLabel(clientId);
-            notifier.notifyTeamMissionCompleted(lobbyCode, teamLabel, missionType);
+            TeamProgression teamProgression = game.getTeamProgression(clientId);
+            notifier.notifyTeamProgression(lobbyCode, teamLabel, teamProgression);
         } catch (NullPointerException e) {
             throw new InvalidGameOperationException("Impossible de terminer la mission pour la partie");
         }

@@ -17,11 +17,22 @@ public class Game {
         return teams.get(id).getLabel();
     }
 
-    public void completeTeamMission(UUID id, MissionType missionType, Map<ResourceType, Integer> resources) {
+    public void changeTeamMissionState(UUID id, MissionType missionType) {
         try {
             Team team = teams.get(id);
-            team.completeMission(missionType);
-            removeRessources(team, resources);
+            team.changeMissionState(missionType);
+        } catch (NullPointerException e) {
+            throw new InvalidGameOperationException("Équipe introuvable");
+        }
+    }
+
+    public TeamProgression getTeamProgression(UUID id) {
+        try {
+            Team team = teams.get(id);
+            boolean firstBonusMissionCompleted = team.isMissionBonusCompleted(MissionType.BONUS_1);
+            boolean secondBonusMissionCompleted = team.isMissionBonusCompleted(MissionType.BONUS_2);
+            float classicMissionPercentage = team.getMissionCompletionPercentage();
+            return new TeamProgression(classicMissionPercentage, firstBonusMissionCompleted, secondBonusMissionCompleted);
         } catch (NullPointerException e) {
             throw new InvalidGameOperationException("Équipe introuvable");
         }
@@ -29,16 +40,5 @@ public class Game {
 
     public int generalScore() {
         return teams.values().stream().mapToInt(Team::score).sum();
-    }
-
-    private void removeRessources(Team team, Map<ResourceType, Integer> resources) {
-        try {
-            for (ResourceType type : ResourceType.values()) {
-                int amount = resources.getOrDefault(type, 0);
-                team.remove(type, amount);
-            }
-        } catch (IllegalArgumentException | NullPointerException e) {
-            throw new InvalidGameOperationException("Impossible de retirer les ressources à l'équipe");
-        }
     }
 }

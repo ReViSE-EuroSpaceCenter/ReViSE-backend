@@ -31,8 +31,8 @@ class GameServiceTest {
         gameService.games.clear();
         idOfTheLoneTeam = UUID.randomUUID();
         gameWithOneTeam = new Game(new ConcurrentHashMap<>(Map.of(idOfTheLoneTeam, new Team(TeamLabel.EXPE, idOfTheLoneTeam))));
-        gameWith4Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO"));
-        gameWith6Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
+        gameWith4Teams = new Game(createTeams("AERO", "MECA", "EXPE", "GECO"));
+        gameWith6Teams = new Game(createTeams("AERO", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
     }
 
 
@@ -74,15 +74,16 @@ class GameServiceTest {
     void shouldCompleteTeamMission() {
         gameService.registerGame("XXXXXX", gameWithOneTeam);
 
-        gameService.completeATeamMission("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1, Map.of(ResourceType.ENERGY, 4));
+        gameService.changeATeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1);
 
-        assertEquals(24, gameService.getGeneralScore("XXXXXX"));
+        TeamProgression progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
+
+        assertEquals(100f / 7, progression.classicMissionPercentage(), 0.001);
     }
 
     @Test
     void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
-        Map<ResourceType, Integer> resources = Map.of(ResourceType.ENERGY, 4);
-        assertThrows(InvalidGameOperationException.class, () -> gameService.completeATeamMission("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1, resources));
+        assertThrows(InvalidGameOperationException.class, () -> gameService.changeATeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1));
     }
 
     @Test

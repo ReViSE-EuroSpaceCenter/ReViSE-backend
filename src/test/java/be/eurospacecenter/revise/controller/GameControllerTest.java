@@ -48,7 +48,7 @@ class GameControllerTest {
 
         LobbyJoinedResponse response = lobbyService.joinLobby(lobbyCode);
         teamClientId = UUID.fromString(response.clientId());
-        lobbyService.assignTeam(lobbyCode, teamClientId, "INGE");
+        lobbyService.assignTeam(lobbyCode, teamClientId, "AERO");
 
         Lobby lobby = lobbyService.getLobby(lobbyCode);
 
@@ -58,15 +58,11 @@ class GameControllerTest {
 
     @Test
     void completeMissionShouldSucceed() {
-        restTestClient.post()
-                .uri("/api/games/" + lobbyCode + "/complete")
+        restTestClient.put()
+                .uri("/api/games/" + lobbyCode + "/missions")
                 .body(Map.of(
                     "clientId", teamClientId,
-                    "missionNumber", "CLASSIC_1",
-                    "resources",  Map.of(
-                            "ENERGY", 1,
-                            "HUMAN", 2
-                    )
+                    "missionNumber", "CLASSIC_1"
                 ))
                 .exchange()
                 .expectStatus().isNoContent();
@@ -74,15 +70,11 @@ class GameControllerTest {
 
     @Test
     void completeMissionShouldFailWithNonExistingGame() {
-        restTestClient.post()
-                .uri("/api/games/XXXXXX/complete")
+        restTestClient.put()
+                .uri("/api/games/XXXXXX/missions")
                 .body(Map.of(
                         "clientId", teamClientId,
-                        "missionNumber", "CLASSIC_1",
-                        "resources",  Map.of(
-                                "ENERGY", 1,
-                                "HUMAN", 2
-                        )
+                        "missionNumber", "CLASSIC_1"
                 ))
                 .exchange()
                 .expectStatus().isBadRequest();
@@ -91,7 +83,7 @@ class GameControllerTest {
 
     @Test
     void scoreShouldReturnScoreOfTheGame() {
-        restTestClient.post()
+        restTestClient.get()
                 .uri("/api/games/" + lobbyCode + "/score")
                 .exchange()
                 .expectStatus().isOk()
@@ -101,6 +93,6 @@ class GameControllerTest {
 
     @Test
     void scoreShouldFailWithNonExistingGame() {
-        restTestClient.post().uri("/api/games/" + "AAAAAA" + "/score" ).exchange().expectStatus().isBadRequest();
+        restTestClient.get().uri("/api/games/" + "AAAAAA" + "/score" ).exchange().expectStatus().isBadRequest();
     }
 }

@@ -14,7 +14,7 @@ class TeamLabelTest {
         assertTrue(TeamLabel.isValidLabel("COOP", true));
         assertTrue(TeamLabel.isValidLabel("EXPE", true));
         assertTrue(TeamLabel.isValidLabel("GECO", true));
-        assertTrue(TeamLabel.isValidLabel("INGE", true));
+        assertTrue(TeamLabel.isValidLabel("AERO", true));
     }
 
     @Test
@@ -44,7 +44,7 @@ class TeamLabelTest {
 
     @Test
     void validTeams_fourTeamsMode() {
-        List<String> labels = List.of("COOP", "EXPE", "GECO", "INGE");
+        List<String> labels = List.of("COOP", "EXPE", "GECO", "AERO");
 
         assertTrue(TeamLabel.isValidTeams(labels, true));
     }
@@ -58,7 +58,7 @@ class TeamLabelTest {
 
     @Test
     void extraLabel_fourTeamsMode() {
-        List<String> labels = List.of("COOP", "EXPE", "GECO", "INGE", "MECA");
+        List<String> labels = List.of("COOP", "EXPE", "GECO", "AERO", "MECA");
 
         assertFalse(TeamLabel.isValidTeams(labels, true));
     }
@@ -72,21 +72,21 @@ class TeamLabelTest {
 
     @Test
     void validTeams_sixTeamsMode() {
-        List<String> labels = List.of("COOP", "EXPE", "GECO", "INGE", "MECA", "MEDI");
+        List<String> labels = List.of("COOP", "EXPE", "GECO", "AERO", "MECA", "MEDI");
 
         assertTrue(TeamLabel.isValidTeams(labels, false));
     }
 
     @Test
     void duplicateLabels() {
-        List<String> labels = List.of("COOP", "COOP", "GECO", "INGE");
+        List<String> labels = List.of("COOP", "COOP", "GECO", "AERO");
 
         assertFalse(TeamLabel.isValidTeams(labels, true));
     }
 
     @Test
     void unknownLabelForTeam() {
-        List<String> labels = List.of("COOP", "EXPE", "UNKNOWN", "INGE");
+        List<String> labels = List.of("COOP", "EXPE", "UNKNOWN", "AERO");
 
         assertFalse(TeamLabel.isValidTeams(labels, true));
     }
@@ -96,7 +96,7 @@ class TeamLabelTest {
         Set<TeamLabel> allowed = TeamLabel.getAllowedLabels(true);
 
         assertEquals(4, allowed.size());
-        assertTrue(allowed.containsAll(List.of(TeamLabel.COOP, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.INGE)));
+        assertTrue(allowed.containsAll(List.of(TeamLabel.COOP, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.AERO)));
     }
 
     @Test
