@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static be.eurospacecenter.revise.helper.LobbyCode.generateCode;
 
-
 @Service
 public class LobbyService {
 
@@ -110,7 +109,7 @@ public class LobbyService {
     }
 
     // DO NOT USE, only for testing purposes
-    protected void addLobby(String lobbyCode, Lobby lobby) {
+    public void addLobby(String lobbyCode, Lobby lobby) {
         lobbies.put(lobbyCode, lobby);
     }
 }
