@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
+import be.eurospacecenter.revise.dto.response.LobbyInfoResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
@@ -48,6 +49,12 @@ public class LobbyService {
         return new LobbyCreationResponse(lobbyCode, hostId.toString());
     }
 
+    public LobbyInfoResponse getLobbyInfo(String lobbyCode) {
+        Lobby lobby = getLobby(lobbyCode);
+
+        return new LobbyInfoResponse(lobby.getFreeTeamLabels(), lobby.getAllTeamLabels());
+    }
+
     public LobbyJoinedResponse joinLobby(String lobbyCode) {
         Lobby lobby = getLobby(lobbyCode);
         UUID clientId = UUID.randomUUID();
@@ -60,6 +67,8 @@ public class LobbyService {
 
     public void assignTeam(String lobbyCode, UUID clientId, String teamLabel) {
         Lobby lobby = getLobby(lobbyCode);
+        ensureClient(lobby, clientId);
+
         lobby.assignTeam(clientId, teamLabel);
 
         notifier.notifyTeamJoined(lobbyCode, teamLabel);
@@ -67,6 +76,7 @@ public class LobbyService {
 
     public void startGame(String lobbyCode, UUID hostId) {
         Lobby lobby = getLobby(lobbyCode);
+        ensureHost(lobby, hostId);
 
         lobby.startGame(hostId);
 
@@ -76,20 +86,18 @@ public class LobbyService {
         notifier.notifyGameStarted(lobbyCode);
     }
 
-    public Lobby getLobby(String lobbyCode) {
+    protected Lobby getLobby(String lobbyCode) {
         return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException("Lobby introuvable"));
     }
 
-    public void ensureClient(String lobbyCode, UUID clientId) {
-        Lobby lobby = getLobby(lobbyCode);
-        if (!lobby.isInLobby(clientId)) {
+    protected void ensureClient(Lobby lobby, UUID clientId) {
+        if (!lobby.isClient(clientId)) {
             throw new NoAutoriseOperationException("Client introuvable dans le lobby");
         }
     }
 
-    public void ensureHost(String lobbyCode, UUID hostId) {
-        Lobby lobby = getLobby(lobbyCode);
-        if (!lobby.isHost(hostId)) {
+    protected void ensureHost(Lobby lobby, UUID hostId) {
+        if (lobby.isNotHost(hostId)) {
             throw new NoAutoriseOperationException("Action réservée à l'hôte du lobby");
         }
     }
@@ -117,4 +125,5 @@ public class LobbyService {
     protected void addLobby(String lobbyCode, Lobby lobby) {
         lobbies.put(lobbyCode, lobby);
     }
+
 }

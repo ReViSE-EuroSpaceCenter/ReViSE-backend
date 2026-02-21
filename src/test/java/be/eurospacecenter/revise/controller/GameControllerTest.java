@@ -1,9 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
-import be.eurospacecenter.revise.model.Game;
-import be.eurospacecenter.revise.model.Lobby;
-import be.eurospacecenter.revise.service.GameService;
+import be.eurospacecenter.revise.model.TeamLabel;
 import be.eurospacecenter.revise.service.LobbyService;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +11,7 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTe
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,9 +25,6 @@ class GameControllerTest {
 
     @Autowired
     private LobbyService lobbyService;
-
-    @Autowired
-    private GameService gameService;
 
     private String lobbyCode;
     private UUID teamClientId;
@@ -45,15 +41,17 @@ class GameControllerTest {
 
         String body = new String(result.getResponseBody());
         lobbyCode = JsonPath.read(body, "$.lobbyCode");
+        UUID hostId = UUID.fromString(JsonPath.read(body, "$.hostId"));
 
-        LobbyJoinedResponse response = lobbyService.joinLobby(lobbyCode);
-        teamClientId = UUID.fromString(response.clientId());
-        lobbyService.assignTeam(lobbyCode, teamClientId, "INGE");
+        List<TeamLabel> labels = TeamLabel.getAllowedLabels(true).stream().toList();
 
-        Lobby lobby = lobbyService.getLobby(lobbyCode);
+        for (int i = 0 ; i < 4 ; i++) {
+            LobbyJoinedResponse response = lobbyService.joinLobby(lobbyCode);
+            teamClientId = UUID.fromString(response.clientId());
+            lobbyService.assignTeam(lobbyCode, teamClientId, labels.get(i).toString());
+        }
 
-        Game game = new Game(lobby.getTeams());
-        gameService.registerGame(lobbyCode, game);
+        lobbyService.startGame(lobbyCode, hostId);
     }
 
     @Test
@@ -96,7 +94,7 @@ class GameControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.score").isEqualTo(25);
+                .jsonPath("$.score").isEqualTo(100);
     }
 
     @Test

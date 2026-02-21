@@ -4,6 +4,7 @@ import be.eurospacecenter.revise.dto.request.AssignTeamRequest;
 import be.eurospacecenter.revise.dto.request.CreateLobbyRequest;
 import be.eurospacecenter.revise.dto.request.StartLobbyRequest;
 import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
+import be.eurospacecenter.revise.dto.response.LobbyInfoResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
@@ -34,6 +35,19 @@ public class LobbyController {
         return lobbyService.createLobby(request.numberOfTeams());
     }
 
+    @GetMapping("/{lobbyCode}")
+    public LobbyInfoResponse getLobbyInfo(
+            @PathVariable
+            @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")
+            String lobbyCode
+    ) {
+        try {
+            return lobbyService.getLobbyInfo(lobbyCode);
+        } catch (NotFoundException e) {
+            throw ResponseStatusHelper.notFound("Impossible de récupérer les informations du lobby", e);
+        }
+    }
+
     @PostMapping("/{lobbyCode}/join")
     public LobbyJoinedResponse joinLobby(
             @PathVariable
@@ -58,7 +72,6 @@ public class LobbyController {
             AssignTeamRequest request
     ) {
         try {
-            lobbyService.ensureClient(lobbyCode, request.clientId());
             lobbyService.assignTeam(
                     lobbyCode,
                     request.clientId(),
@@ -82,7 +95,6 @@ public class LobbyController {
             StartLobbyRequest request
     ) {
         try {
-            lobbyService.ensureHost(lobbyCode, request.hostId());
             lobbyService.startGame(lobbyCode, request.hostId());
         } catch (NoAutoriseOperationException e) {
             throw ResponseStatusHelper.forbidden("Action non autorisée", e);
@@ -90,4 +102,5 @@ public class LobbyController {
             throw ResponseStatusHelper.badRequest("Impossible de démarrer la partie", e);
         }
     }
+
 }
