@@ -15,19 +15,15 @@ public class Team {
     private boolean firstBonusMissionCompleted;
     private boolean secondBonusMissionCompleted;
 
-    private final Map<ResourceType, Resource> resources = new EnumMap<>(ResourceType.class);
+    private final Map<ResourceType, Integer> resources = new EnumMap<>(ResourceType.class);
 
     public Team(UUID clientId) {
         this.clientId = clientId;
-
-        initResources();
     }
 
     public Team(TeamLabel label, UUID clientId) {
         this.label = label;
         this.clientId = clientId;
-
-        initResources();
     }
 
     public String getLabel() {
@@ -51,7 +47,7 @@ public class Team {
     }
 
     public void changeMissionState(MissionType missionType) {
-        validateClassic8Access(missionType);
+        ensureOnlyMecaCanCompleteClassic8(missionType);
 
         switch (missionType) {
             case CLASSIC_1, CLASSIC_2, CLASSIC_3, CLASSIC_4,
@@ -63,39 +59,11 @@ public class Team {
         }
     }
 
-    public boolean isMissionBonusCompleted(MissionType missionType) {
-        return switch (missionType) {
-            case BONUS_1 -> firstBonusMissionCompleted;
-            case BONUS_2 -> secondBonusMissionCompleted;
-            default -> throw new IllegalArgumentException(
-                    "Mission non bonus : " + missionType
-            );
-        };
+    public TeamProgression getProgression() {
+        return new TeamProgression(getMissionCompletionPercentage(), firstBonusMissionCompleted, secondBonusMissionCompleted);
     }
 
-    public float getMissionCompletionPercentage() {
-        int totalMissions = label == TeamLabel.MECA ? 8 : 7;
-        int completedMissions = countCompletedMissions();
-        return (float) completedMissions / totalMissions * 100;
-    }
-
-    public void remove(ResourceType type, int amount) {
-        resources.get(type).remove(amount);
-    }
-
-    public int score() {
-        return resources.get(ResourceType.ENERGY).remaining() / 3
-                + resources.get(ResourceType.HUMAN).remaining()
-                + resources.get(ResourceType.CLOCK).remaining();
-    }
-
-    private void initResources() {
-        for (ResourceType type : ResourceType.values()) {
-            resources.put(type, new Resource(type.max()));
-        }
-    }
-
-    private void validateClassic8Access(MissionType missionType) {
+    private void ensureOnlyMecaCanCompleteClassic8(MissionType missionType) {
         if (missionType == MissionType.CLASSIC_8 && label != TeamLabel.MECA) {
             throw new InvalidGameOperationException("Seule l'équipe MECA peut compléter la mission CLASSIC_8.");
         }
@@ -105,5 +73,11 @@ public class Team {
         return (int) java.util.stream.IntStream.range(0, missionsCompleted.length)
                 .filter(i -> missionsCompleted[i])
                 .count();
+    }
+
+    private float getMissionCompletionPercentage() {
+        int totalMissions = label == TeamLabel.MECA ? 8 : 7;
+        int completedMissions = countCompletedMissions();
+        return (float) completedMissions / totalMissions * 100;
     }
 }

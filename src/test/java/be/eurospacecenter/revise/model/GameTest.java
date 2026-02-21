@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.model;
 
-import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
+import be.eurospacecenter.revise.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,16 +15,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameTest {
 
     private Game gameWithOneTeam;
-    private Game gameWith4Teams;
-    private Game gameWith6Teams;
     private UUID idOfTheLoneTeam;
 
     @BeforeEach
     void setUp() {
         idOfTheLoneTeam = UUID.randomUUID();
         gameWithOneTeam = new Game(new ConcurrentHashMap<>(Map.of(idOfTheLoneTeam, new Team(TeamLabel.EXPE, idOfTheLoneTeam))));
-        gameWith4Teams = new Game(createTeams("AERO", "MECA", "EXPE", "GECO"));
-        gameWith6Teams = new Game(createTeams("AERO", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
     }
 
     @Test
@@ -33,10 +29,6 @@ class GameTest {
         assertEquals(0, progressionOfTheLoneTeam.classicMissionPercentage());
         assertFalse(progressionOfTheLoneTeam.firstBonusMissionCompleted());
         assertFalse(progressionOfTheLoneTeam.secondBonusMissionCompleted());
-
-        assertEquals(25, gameWithOneTeam.generalScore());
-        assertEquals(100, gameWith4Teams.generalScore());
-        assertEquals(150, gameWith6Teams.generalScore());
     }
 
     @Test
@@ -72,21 +64,12 @@ class GameTest {
     @Test
     void completeTeamMissionWithInvalidTeam() {
         UUID id = UUID.randomUUID();
-        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.changeTeamMissionState(id, MissionType.CLASSIC_1));
+        assertThrows(NotFoundException.class, () -> gameWithOneTeam.changeTeamMissionState(id, MissionType.CLASSIC_1));
     }
 
     @Test
     void getTeamProgressionWithInvalidTeam() {
         UUID id = UUID.randomUUID();
-        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.getTeamProgression(id));
-    }
-
-    private Map<UUID, Team> createTeams(String... labels) {
-        Map<UUID, Team> teams = new ConcurrentHashMap<>();
-        for (String label : labels) {
-            Team team = new Team(TeamLabel.valueOf(label), UUID.randomUUID());
-            teams.put(team.getClientID(), team);
-        }
-        return teams;
+        assertThrows(NotFoundException.class, () -> gameWithOneTeam.getTeamProgression(id));
     }
 }

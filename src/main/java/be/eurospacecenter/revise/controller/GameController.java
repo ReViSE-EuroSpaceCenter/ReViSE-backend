@@ -1,8 +1,8 @@
 package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.request.TeamMissionStatusUpdateRequest;
-import be.eurospacecenter.revise.dto.response.ScoreResponse;
 import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
+import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.helper.ResponseStatusHelper;
 import be.eurospacecenter.revise.service.GameService;
 import jakarta.validation.Valid;
@@ -31,23 +31,9 @@ public class GameController {
             TeamMissionStatusUpdateRequest request
     ) {
         try {
-            gameService.changeATeamMissionState(lobbyCode, request.clientId(), request.missionNumber());
-        } catch (InvalidGameOperationException e) {
+            gameService.changeTeamMissionState(lobbyCode, request.clientId(), request.missionNumber());
+        } catch (InvalidGameOperationException | NotFoundException e) {
             throw ResponseStatusHelper.badRequest("Erreur pour terminer la mission", e);
-        }
-    }
-
-    @GetMapping("/{lobbyCode}/score")
-    public ScoreResponse calculateScore(
-            @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")
-            String lobbyCode
-    ) {
-        try {
-            int score = gameService.getGeneralScore(lobbyCode);
-            return new ScoreResponse(score);
-        } catch (InvalidGameOperationException e) {
-            throw ResponseStatusHelper.badRequest("Erreur pour récupérer le score", e);
         }
     }
 }

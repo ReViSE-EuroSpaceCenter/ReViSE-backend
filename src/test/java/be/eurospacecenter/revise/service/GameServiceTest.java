@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
+import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,14 +67,14 @@ class GameServiceTest {
     @Test
     void shouldFailToRegisterGameWithEmptyLobbyCode() {
         assertThrows(InvalidStartLobbyException.class, () -> gameService.registerGame("", gameWith4Teams));
-        assertNull(gameService.getGame(""));
+        assertThrows(NotFoundException.class, () -> gameService.getGame(""));
     }
 
     @Test
     void shouldCompleteTeamMission() {
         gameService.registerGame("XXXXXX", gameWithOneTeam);
 
-        gameService.changeATeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1);
+        gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1);
 
         TeamProgression progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
 
@@ -83,21 +83,7 @@ class GameServiceTest {
 
     @Test
     void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
-        assertThrows(InvalidGameOperationException.class, () -> gameService.changeATeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1));
-    }
-
-    @Test
-    void shouldGetGeneralScoreGame() {
-        gameService.registerGame("XXXXXX", gameWith4Teams);
-        gameService.registerGame("YYYYYY", gameWith6Teams);
-
-        assertEquals(100, gameService.getGeneralScore("XXXXXX"));
-        assertEquals(150, gameService.getGeneralScore("YYYYYY"));
-    }
-
-    @Test
-    void shouldFailToGetGeneralScoreGameWithNonExistingLobbyCode() {
-        assertThrows(InvalidGameOperationException.class, () -> gameService.getGeneralScore("XXXXXX"));
+        assertThrows(NotFoundException.class, () -> gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1));
     }
 
     private Map<UUID, Team> createTeams(String... labels) {

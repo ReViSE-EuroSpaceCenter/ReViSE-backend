@@ -1,11 +1,12 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
+import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.notification.GameNotifier;
 import org.springframework.stereotype.Service;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,29 +27,16 @@ public class GameService {
         games.put(lobbyCode, game);
     }
 
-    public void changeATeamMissionState(String lobbyCode, UUID clientId, MissionType missionType) {
-        try {
-            Game game = getGame(lobbyCode);
-            game.changeTeamMissionState(clientId, missionType);
+    public void changeTeamMissionState(String lobbyCode, UUID clientId, MissionType missionType) {
+        Game game = getGame(lobbyCode);
+        game.changeTeamMissionState(clientId, missionType);
 
-            String teamLabel = game.getTeamLabel(clientId);
-            TeamProgression teamProgression = game.getTeamProgression(clientId);
-            notifier.notifyTeamProgression(lobbyCode, teamLabel, teamProgression);
-        } catch (NullPointerException e) {
-            throw new InvalidGameOperationException("Impossible de terminer la mission pour la partie");
-        }
-    }
-
-    public int getGeneralScore(String lobbyCode) {
-        try {
-            Game game = getGame(lobbyCode);
-            return game.generalScore();
-        } catch (NullPointerException e) {
-            throw new InvalidGameOperationException("Impossible de récupérer le score de la partie");
-        }
+        String teamLabel = game.getTeamLabel(clientId);
+        TeamProgression teamProgression = game.getTeamProgression(clientId);
+        notifier.notifyTeamProgression(lobbyCode, teamLabel, teamProgression);
     }
 
     public Game getGame(String lobbyCode) {
-        return games.get(lobbyCode);
+        return Optional.ofNullable(games.get(lobbyCode)).orElseThrow(() -> new NotFoundException("Game introuvable"));
     }
 }

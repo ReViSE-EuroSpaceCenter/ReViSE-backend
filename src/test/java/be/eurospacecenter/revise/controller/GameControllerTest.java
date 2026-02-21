@@ -79,20 +79,4 @@ class GameControllerTest {
                 .exchange()
                 .expectStatus().isBadRequest();
     }
-
-
-    @Test
-    void scoreShouldReturnScoreOfTheGame() {
-        restTestClient.get()
-                .uri("/api/games/" + lobbyCode + "/score")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.score").isEqualTo(25);
-    }
-
-    @Test
-    void scoreShouldFailWithNonExistingGame() {
-        restTestClient.get().uri("/api/games/" + "AAAAAA" + "/score" ).exchange().expectStatus().isBadRequest();
-    }
 }

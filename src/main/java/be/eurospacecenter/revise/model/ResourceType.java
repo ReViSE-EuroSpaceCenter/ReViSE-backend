@@ -10,9 +10,5 @@ public enum ResourceType {
     ResourceType(int max) {
         this.max = max;
     }
-
-    public int max() {
-        return max;
-    }
 }
 
