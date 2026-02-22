@@ -56,15 +56,11 @@ class GameControllerTest {
 
     @Test
     void completeMissionShouldSucceed() {
-        restTestClient.post()
-                .uri("/api/games/" + lobbyCode + "/complete")
+        restTestClient.put()
+                .uri("/api/games/" + lobbyCode + "/missions")
                 .body(Map.of(
                     "clientId", teamClientId,
-                    "missionNumber", "CLASSIC_1",
-                    "resources",  Map.of(
-                            "ENERGY", 1,
-                            "HUMAN", 2
-                    )
+                    "missionNumber", "CLASSIC_1"
                 ))
                 .exchange()
                 .expectStatus().isNoContent();
@@ -72,33 +68,13 @@ class GameControllerTest {
 
     @Test
     void completeMissionShouldFailWithNonExistingGame() {
-        restTestClient.post()
-                .uri("/api/games/XXXXXX/complete")
+        restTestClient.put()
+                .uri("/api/games/XXXXXX/missions")
                 .body(Map.of(
                         "clientId", teamClientId,
-                        "missionNumber", "CLASSIC_1",
-                        "resources",  Map.of(
-                                "ENERGY", 1,
-                                "HUMAN", 2
-                        )
+                        "missionNumber", "CLASSIC_1"
                 ))
                 .exchange()
                 .expectStatus().isBadRequest();
-    }
-
-
-    @Test
-    void scoreShouldReturnScoreOfTheGame() {
-        restTestClient.post()
-                .uri("/api/games/" + lobbyCode + "/score")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.score").isEqualTo(100);
-    }
-
-    @Test
-    void scoreShouldFailWithNonExistingGame() {
-        restTestClient.post().uri("/api/games/" + "AAAAAA" + "/score" ).exchange().expectStatus().isBadRequest();
     }
 }

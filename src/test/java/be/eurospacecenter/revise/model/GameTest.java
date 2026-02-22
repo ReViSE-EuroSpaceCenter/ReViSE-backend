@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.model;
 
-import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
+import be.eurospacecenter.revise.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,68 +15,61 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameTest {
 
     private Game gameWithOneTeam;
-    private Game gameWith4Teams;
-    private Game gameWith6Teams;
     private UUID idOfTheLoneTeam;
 
     @BeforeEach
     void setUp() {
         idOfTheLoneTeam = UUID.randomUUID();
         gameWithOneTeam = new Game(new ConcurrentHashMap<>(Map.of(idOfTheLoneTeam, new Team(TeamLabel.EXPE, idOfTheLoneTeam))));
-        gameWith4Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO"));
-        gameWith6Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
     }
 
     @Test
     void gameCreation() {
-        assertEquals(25, gameWithOneTeam.generalScore());
-        assertEquals(100, gameWith4Teams.generalScore());
-        assertEquals(150, gameWith6Teams.generalScore());
+        TeamProgression progressionOfTheLoneTeam = gameWithOneTeam.getTeamProgression(idOfTheLoneTeam);
+        assertEquals(0, progressionOfTheLoneTeam.classicMissionPercentage());
+        assertFalse(progressionOfTheLoneTeam.firstBonusMissionCompleted());
+        assertFalse(progressionOfTheLoneTeam.secondBonusMissionCompleted());
     }
 
     @Test
-    void completeTeamMissionWithoutUsingRessources() {
-        gameWithOneTeam.completeTeamMission(idOfTheLoneTeam, MissionType.CLASSIC_1, Map.of());
+    void completeTeamClassicMission() {
+        gameWithOneTeam.changeTeamMissionState(idOfTheLoneTeam, MissionType.CLASSIC_1);
+        TeamProgression progressionOfTheLoneTeam = gameWithOneTeam.getTeamProgression(idOfTheLoneTeam);
 
-        assertEquals(25, gameWithOneTeam.generalScore());
+        assertEquals(100f / 7, progressionOfTheLoneTeam.classicMissionPercentage(), 0.001);
+        assertFalse(progressionOfTheLoneTeam.firstBonusMissionCompleted());
+        assertFalse(progressionOfTheLoneTeam.secondBonusMissionCompleted());
     }
 
     @Test
-    void completeTeamMissionWithUsingRessources() {
-        gameWithOneTeam.completeTeamMission(idOfTheLoneTeam, MissionType.CLASSIC_1, Map.of(ResourceType.ENERGY, 3, ResourceType.HUMAN, 1));
-        assertEquals(23, gameWithOneTeam.generalScore());
+    void changeTeamFirstBonusMissionState() {
+        gameWithOneTeam.changeTeamMissionState(idOfTheLoneTeam, MissionType.BONUS_1);
+        TeamProgression progressionOfTheLoneTeam = gameWithOneTeam.getTeamProgression(idOfTheLoneTeam);
+
+        assertEquals(0, progressionOfTheLoneTeam.classicMissionPercentage());
+        assertTrue(progressionOfTheLoneTeam.firstBonusMissionCompleted());
+        assertFalse(progressionOfTheLoneTeam.secondBonusMissionCompleted());
     }
 
     @Test
-    void completeTeamMissionWithNullRessources() {
-        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.completeTeamMission(idOfTheLoneTeam, MissionType.CLASSIC_1, null));
-    }
+    void changeTeamSecondBonusMissionState() {
+        gameWithOneTeam.changeTeamMissionState(idOfTheLoneTeam, MissionType.BONUS_2);
+        TeamProgression progressionOfTheLoneTeam = gameWithOneTeam.getTeamProgression(idOfTheLoneTeam);
 
-    @Test
-    void completeTeamMissionWithUsingTooManyRessources() {
-        Map<ResourceType, Integer> resources = Map.of(ResourceType.ENERGY, 50);
-        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.completeTeamMission(idOfTheLoneTeam, MissionType.CLASSIC_1, resources));
-    }
-
-    @Test
-    void completeTeamMissionWithUsingNegativeRessources() {
-        Map<ResourceType, Integer> resources = Map.of(ResourceType.ENERGY, -5);
-        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.completeTeamMission(idOfTheLoneTeam, MissionType.CLASSIC_1, resources));
+        assertEquals(0, progressionOfTheLoneTeam.classicMissionPercentage());
+        assertFalse(progressionOfTheLoneTeam.firstBonusMissionCompleted());
+        assertTrue(progressionOfTheLoneTeam.secondBonusMissionCompleted());
     }
 
     @Test
     void completeTeamMissionWithInvalidTeam() {
-        Map<ResourceType, Integer> resources = Map.of(ResourceType.ENERGY, 5);
         UUID id = UUID.randomUUID();
-        assertThrows(InvalidGameOperationException.class, () -> gameWithOneTeam.completeTeamMission(id, MissionType.CLASSIC_1, resources));
+        assertThrows(NotFoundException.class, () -> gameWithOneTeam.changeTeamMissionState(id, MissionType.CLASSIC_1));
     }
 
-    private Map<UUID, Team> createTeams(String... labels) {
-        Map<UUID, Team> teams = new ConcurrentHashMap<>();
-        for (String label : labels) {
-            Team team = new Team(TeamLabel.valueOf(label), UUID.randomUUID());
-            teams.put(team.getClientID(), team);
-        }
-        return teams;
+    @Test
+    void getTeamProgressionWithInvalidTeam() {
+        UUID id = UUID.randomUUID();
+        assertThrows(NotFoundException.class, () -> gameWithOneTeam.getTeamProgression(id));
     }
 }

@@ -1,8 +1,9 @@
 package be.eurospacecenter.revise.model;
 
-import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
+import be.eurospacecenter.revise.exceptions.NotFoundException;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class Game {
@@ -17,28 +18,17 @@ public class Game {
         return teams.get(id).getLabel();
     }
 
-    public void completeTeamMission(UUID id, MissionType missionType, Map<ResourceType, Integer> resources) {
-        try {
-            Team team = teams.get(id);
-            team.completeMission(missionType);
-            removeRessources(team, resources);
-        } catch (NullPointerException e) {
-            throw new InvalidGameOperationException("Équipe introuvable");
-        }
+    public void changeTeamMissionState(UUID id, MissionType missionType) {
+        Team team = getTeam(id);
+        team.changeMissionState(missionType);
     }
 
-    public int generalScore() {
-        return teams.values().stream().mapToInt(Team::score).sum();
+    public TeamProgression getTeamProgression(UUID id) {
+        Team team = getTeam(id);
+        return team.getProgression();
     }
 
-    private void removeRessources(Team team, Map<ResourceType, Integer> resources) {
-        try {
-            for (ResourceType type : ResourceType.values()) {
-                int amount = resources.getOrDefault(type, 0);
-                team.remove(type, amount);
-            }
-        } catch (IllegalArgumentException | NullPointerException e) {
-            throw new InvalidGameOperationException("Impossible de retirer les ressources à l'équipe");
-        }
+    public Team getTeam(UUID id) {
+        return Optional.ofNullable(teams.get(id)).orElseThrow(() -> new NotFoundException("Équipe introuvable"));
     }
 }

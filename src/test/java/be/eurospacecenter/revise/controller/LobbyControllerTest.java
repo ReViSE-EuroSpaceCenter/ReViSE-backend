@@ -107,7 +107,7 @@ class LobbyControllerTest {
         LobbyCreationResponse lobby = createLobby(4);
 
         LobbyJoinedResponse firstClient = joinLobby(lobby.lobbyCode());
-        assignTeam(lobby.lobbyCode(), firstClient.clientId(), "INGE");
+        assignTeam(lobby.lobbyCode(), firstClient.clientId(), "AERO");
 
         LobbyJoinedResponse secondClient = joinLobby(lobby.lobbyCode());
 
@@ -115,7 +115,7 @@ class LobbyControllerTest {
                 .uri("/api/lobbies/{lobbyCode}/team", lobby.lobbyCode())
                 .body(Map.of(
                         "clientId", secondClient.clientId(),
-                        "teamLabel", "INGE"
+                        "teamLabel", "AERO"
                 ))
                 .exchange()
                 .expectStatus().isBadRequest();
@@ -126,7 +126,7 @@ class LobbyControllerTest {
         LobbyCreationResponse lobby = createLobby(4);
 
         LobbyJoinedResponse firstClient = joinLobby(lobby.lobbyCode());
-        assignTeam(lobby.lobbyCode(), firstClient.clientId(), "INGE");
+        assignTeam(lobby.lobbyCode(), firstClient.clientId(), "AERO");
 
         LobbyJoinedResponse secondClient = joinLobby(lobby.lobbyCode());
         assignTeam(lobby.lobbyCode(), secondClient.clientId(), "GECO");
@@ -145,7 +145,7 @@ class LobbyControllerTest {
                 .uri("/api/lobbies/{lobbyCode}/team", lobby.lobbyCode())
                 .body(Map.of(
                         "clientId", newClientId,
-                        "teamLabel", "INGE"
+                        "teamLabel", "AERO"
                 ))
                 .exchange()
                 .expectStatus().isForbidden();

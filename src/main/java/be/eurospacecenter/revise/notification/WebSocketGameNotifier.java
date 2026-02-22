@@ -3,8 +3,8 @@ package be.eurospacecenter.revise.notification;
 import be.eurospacecenter.revise.dto.event.GameEvent;
 import be.eurospacecenter.revise.dto.event.GameEventType;
 
-import be.eurospacecenter.revise.dto.response.TeamMissionCompletedResponse;
-import be.eurospacecenter.revise.model.MissionType;
+import be.eurospacecenter.revise.dto.response.TeamProgressionResponse;
+import be.eurospacecenter.revise.model.TeamProgression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -22,12 +22,12 @@ public class WebSocketGameNotifier implements GameNotifier {
     }
 
     @Override
-    public void notifyTeamMissionCompleted(String lobbyCode, String teamLabel, MissionType missionType) {
-        logger.info("Sending TEAM_MISSION_COMPLETED event for game: {} with team: {} and mission: {}", lobbyCode, teamLabel, missionType);
-        GameEvent event = new GameEvent(GameEventType.TEAM_MISSION_COMPLETED, new TeamMissionCompletedResponse(teamLabel, missionType));
+    public void notifyTeamProgression(String lobbyCode, String teamLabel, TeamProgression teamProgression) {
+        logger.info("Sending TEAM_PROGRESSION event for game: {} with team: {} and progression: {}", lobbyCode, teamLabel, teamProgression);
+        GameEvent event = new GameEvent(GameEventType.TEAM_PROGRESSION, new TeamProgressionResponse(teamLabel, teamProgression));
 
         messagingTemplate.convertAndSend(GAME_TOPIC_PREFIX + lobbyCode, event);
-        logger.info("TEAM_MISSION_COMPLETED event sent successfully");
+        logger.info("TEAM_PROGRESSION event sent successfully");
 
     }
 }

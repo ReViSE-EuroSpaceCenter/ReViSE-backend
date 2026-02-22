@@ -7,6 +7,8 @@ public enum MissionType {
     CLASSIC_4,
     CLASSIC_5,
     CLASSIC_6,
+    CLASSIC_7,
+    CLASSIC_8,
     BONUS_1,
     BONUS_2
 }

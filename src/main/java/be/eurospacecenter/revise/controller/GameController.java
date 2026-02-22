@@ -1,8 +1,8 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.request.CompleteTeamMissionRequest;
-import be.eurospacecenter.revise.dto.response.ScoreResponse;
+import be.eurospacecenter.revise.dto.request.TeamMissionStatusUpdateRequest;
 import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
+import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.helper.ResponseStatusHelper;
 import be.eurospacecenter.revise.service.GameService;
 import jakarta.validation.Valid;
@@ -20,7 +20,7 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @PostMapping("/{lobbyCode}/complete")
+    @PutMapping("/{lobbyCode}/missions")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void completeATeamMission(
             @PathVariable
@@ -28,26 +28,12 @@ public class GameController {
             String lobbyCode,
 
             @RequestBody @Valid
-            CompleteTeamMissionRequest request
+            TeamMissionStatusUpdateRequest request
     ) {
         try {
-            gameService.completeATeamMission(lobbyCode, request.clientId(), request.missionNumber(), request.resources());
-        } catch (InvalidGameOperationException e) {
+            gameService.changeTeamMissionState(lobbyCode, request.clientId(), request.missionNumber());
+        } catch (InvalidGameOperationException | NotFoundException e) {
             throw ResponseStatusHelper.badRequest("Erreur pour terminer la mission", e);
-        }
-    }
-
-    @PostMapping("/{lobbyCode}/score")
-    public ScoreResponse calculateScore(
-            @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")
-            String lobbyCode
-    ) {
-        try {
-            int score = gameService.getGeneralScore(lobbyCode);
-            return new ScoreResponse(score);
-        } catch (InvalidGameOperationException e) {
-            throw ResponseStatusHelper.badRequest("Erreur pour récupérer le score", e);
         }
     }
 }
