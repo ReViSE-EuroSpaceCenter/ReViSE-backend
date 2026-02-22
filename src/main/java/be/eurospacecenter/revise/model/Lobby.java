@@ -12,11 +12,12 @@ public class Lobby {
 
     private static final int TEAM_COUNT_FOUR = 4;
     private static final int TEAM_COUNT_SIX = 6;
+    private static final int LOBBY_TTL = 12;
 
     private final Host host;
     private final Map<UUID, Team> teams;
     private final boolean isFourTeamsMode;
-    private final LocalDateTime createdAt;
+    private final LocalDateTime expiresAt;
 
     public Lobby(Host host, int numberOfTeams, LocalDateTime createdAt) {
         validateTeamCount(numberOfTeams);
@@ -24,7 +25,8 @@ public class Lobby {
         this.host = Objects.requireNonNull(host);
         this.teams = new ConcurrentHashMap<>();
         this.isFourTeamsMode = numberOfTeams == TEAM_COUNT_FOUR;
-        this.createdAt = createdAt;
+
+        this.expiresAt = createdAt.plusHours(LOBBY_TTL);
     }
 
     public Map<UUID, Team> getTeams() {
@@ -77,8 +79,8 @@ public class Lobby {
         return !host.id().equals(hostId);
     }
 
-    public LocalDateTime getCreatedAt() {
-        return this.createdAt;
+    public LocalDateTime getExpiresAt() {
+        return this.expiresAt;
     }
 
     /* ======================

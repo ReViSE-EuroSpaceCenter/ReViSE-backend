@@ -19,12 +19,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static be.eurospacecenter.revise.helper.LobbyCode.generateCode;
 
-
 @Service
 public class LobbyService {
 
     private static final Logger logger = LoggerFactory.getLogger(LobbyService.class);
-    private static final int TIME_BETWEEN_CLEARING = 12;
 
     protected final Map<String, Lobby> lobbies = new ConcurrentHashMap<>();
     private final SecureRandom random = new SecureRandom();
@@ -105,12 +103,9 @@ public class LobbyService {
     @Scheduled(cron = "0 0 */12 * * *")
     protected void clearLobbies() {
         List<String> toRemove = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.now();
 
         lobbies.forEach((code, lobby) -> {
-            LocalDateTime createdAt = lobby.getCreatedAt();
-
-            if (now.minusHours(TIME_BETWEEN_CLEARING).isAfter(createdAt)) {
+            if (LocalDateTime.now().isAfter(lobby.getExpiresAt())) {
                 toRemove.add(code);
             }
         });
@@ -122,7 +117,7 @@ public class LobbyService {
     }
 
     // DO NOT USE, only for testing purposes
-    protected void addLobby(String lobbyCode, Lobby lobby) {
+    public void addLobby(String lobbyCode, Lobby lobby) {
         lobbies.put(lobbyCode, lobby);
     }
 
