@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
+import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +31,8 @@ class GameServiceTest {
         gameService.games.clear();
         idOfTheLoneTeam = UUID.randomUUID();
         gameWithOneTeam = new Game(new ConcurrentHashMap<>(Map.of(idOfTheLoneTeam, new Team(TeamLabel.EXPE, idOfTheLoneTeam))));
-        gameWith4Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO"));
-        gameWith6Teams = new Game(createTeams("INGE", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
+        gameWith4Teams = new Game(createTeams("AERO", "MECA", "EXPE", "GECO"));
+        gameWith6Teams = new Game(createTeams("AERO", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
     }
 
 
@@ -67,36 +67,23 @@ class GameServiceTest {
     @Test
     void shouldFailToRegisterGameWithEmptyLobbyCode() {
         assertThrows(InvalidStartLobbyException.class, () -> gameService.registerGame("", gameWith4Teams));
-        assertNull(gameService.getGame(""));
+        assertThrows(NotFoundException.class, () -> gameService.getGame(""));
     }
 
     @Test
     void shouldCompleteTeamMission() {
         gameService.registerGame("XXXXXX", gameWithOneTeam);
 
-        gameService.completeATeamMission("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1, Map.of(ResourceType.ENERGY, 4));
+        gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1);
 
-        assertEquals(24, gameService.getGeneralScore("XXXXXX"));
+        TeamProgression progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
+
+        assertEquals(100f / 7, progression.classicMissionPercentage(), 0.001);
     }
 
     @Test
     void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
-        Map<ResourceType, Integer> resources = Map.of(ResourceType.ENERGY, 4);
-        assertThrows(InvalidGameOperationException.class, () -> gameService.completeATeamMission("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1, resources));
-    }
-
-    @Test
-    void shouldGetGeneralScoreGame() {
-        gameService.registerGame("XXXXXX", gameWith4Teams);
-        gameService.registerGame("YYYYYY", gameWith6Teams);
-
-        assertEquals(100, gameService.getGeneralScore("XXXXXX"));
-        assertEquals(150, gameService.getGeneralScore("YYYYYY"));
-    }
-
-    @Test
-    void shouldFailToGetGeneralScoreGameWithNonExistingLobbyCode() {
-        assertThrows(InvalidGameOperationException.class, () -> gameService.getGeneralScore("XXXXXX"));
+        assertThrows(NotFoundException.class, () -> gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1));
     }
 
     private Map<UUID, Team> createTeams(String... labels) {
