@@ -2,8 +2,6 @@ package be.eurospacecenter.revise.model;
 
 import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class Team {
@@ -14,8 +12,6 @@ public class Team {
 
     private boolean firstBonusMissionCompleted;
     private boolean secondBonusMissionCompleted;
-
-    private final Map<ResourceType, Integer> resources = new EnumMap<>(ResourceType.class);
 
     public Team(UUID clientId) {
         this.clientId = clientId;
