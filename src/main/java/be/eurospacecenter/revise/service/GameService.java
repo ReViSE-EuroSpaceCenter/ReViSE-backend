@@ -5,6 +5,8 @@ import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.notification.GameNotifier;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,5 +40,9 @@ public class GameService {
 
     public Game getGame(String lobbyCode) {
         return Optional.ofNullable(games.get(lobbyCode)).orElseThrow(() -> new NotFoundException("Game introuvable"));
+    }
+
+    protected void clearGames(List<String> toRemove) {
+        toRemove.forEach(games::remove);
     }
 }

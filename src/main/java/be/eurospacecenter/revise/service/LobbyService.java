@@ -6,17 +6,22 @@ import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.notification.LobbyNotifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static be.eurospacecenter.revise.helper.LobbyCode.generateCode;
 
-
 @Service
 public class LobbyService {
+
+    private static final Logger logger = LoggerFactory.getLogger(LobbyService.class);
 
     protected final Map<String, Lobby> lobbies = new ConcurrentHashMap<>();
     private final SecureRandom random = new SecureRandom();
@@ -35,7 +40,7 @@ public class LobbyService {
         String lobbyCode = generateCode(random);
         UUID hostId = UUID.randomUUID();
 
-        Lobby lobby = new Lobby(new Host(hostId), numberOfTeams);
+        Lobby lobby = new Lobby(new Host(hostId), numberOfTeams, LocalDateTime.now());
         lobbies.put(lobbyCode, lobby);
 
         return new LobbyCreationResponse(lobbyCode, hostId.toString());
@@ -69,6 +74,10 @@ public class LobbyService {
         notifier.notifyGameStarted(lobbyCode);
     }
 
+    public Lobby getLobby(String lobbyCode) {
+        return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException("Lobby introuvable"));
+    }
+
     public void ensureClient(String lobbyCode, UUID clientId) {
         Lobby lobby = getLobby(lobbyCode);
         if (!lobby.isInLobby(clientId)) {
@@ -76,14 +85,31 @@ public class LobbyService {
         }
     }
 
-    public Lobby getLobby(String lobbyCode) {
-        return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException("Lobby introuvable"));
-    }
-
     public void ensureHost(String lobbyCode, UUID hostId) {
         Lobby lobby = getLobby(lobbyCode);
         if (!lobby.isHost(hostId)) {
             throw new NoAutoriseOperationException("Action réservée à l'hôte du lobby");
         }
+    }
+
+    @Scheduled(cron = "0 0 */12 * * *")
+    protected void clearLobbies() {
+        List<String> toRemove = new ArrayList<>();
+
+        lobbies.forEach((code, lobby) -> {
+            if (LocalDateTime.now().isAfter(lobby.getExpiresAt())) {
+                toRemove.add(code);
+            }
+        });
+
+        toRemove.forEach(lobbies::remove);
+        gameService.clearGames(toRemove);
+
+        logger.info("Clearing {} games", toRemove.size());
+    }
+
+    // DO NOT USE, only for testing purposes
+    public void addLobby(String lobbyCode, Lobby lobby) {
+        lobbies.put(lobbyCode, lobby);
     }
 }

@@ -5,6 +5,7 @@ import be.eurospacecenter.revise.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,8 +23,8 @@ class LobbyTest {
     private final UUID team5Id = UUID.randomUUID();
     private final UUID team6Id = UUID.randomUUID();
 
-    private final Lobby lobby4Teams = new Lobby(host, 4);
-    private final Lobby lobby6Teams = new Lobby(host, 6);
+    private final Lobby lobby4Teams = new Lobby(host, 4, LocalDateTime.now());
+    private final Lobby lobby6Teams = new Lobby(host, 6, LocalDateTime.now());
 
     @BeforeEach
     void setUp() {
@@ -43,7 +44,7 @@ class LobbyTest {
 
     @Test
     void shouldNotStartGameWithEmptyTeam() {
-        Lobby lobby = new Lobby(host, 4);
+        Lobby lobby = new Lobby(host, 4, LocalDateTime.now());
 
         assertThrows(InvalidStartLobbyException.class, () -> lobby.startGame(hostId));
     }
@@ -102,10 +103,11 @@ class LobbyTest {
     @Test
     void shouldNotCreateLobbyWithInvalidNumberOfTeams() {
         Host h = new Host(UUID.randomUUID());
+        LocalDateTime now = LocalDateTime.now();
 
-        assertThrows(IllegalArgumentException.class, () -> new Lobby(h, 3));
-        assertThrows(IllegalArgumentException.class, () -> new Lobby(h, 5));
-        assertThrows(IllegalArgumentException.class, () -> new Lobby(h, 7));
+        assertThrows(IllegalArgumentException.class, () -> new Lobby(h, 3, now));
+        assertThrows(IllegalArgumentException.class, () -> new Lobby(h, 5, now));
+        assertThrows(IllegalArgumentException.class, () -> new Lobby(h, 7, now));
     }
 
     @Test
