@@ -2,6 +2,7 @@ package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,10 @@ class LobbyControllerTest {
                 .uri("/api/lobbies")
                 .body(Map.of("numberOfTeams", 3))
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.INVALID_NUMBER_OF_TEAMS);
     }
 
     /* ====================
@@ -73,7 +77,10 @@ class LobbyControllerTest {
         restTestClient.post()
                 .uri("/api/lobbies/{lobbyCode}/join", "INVALD")
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.LOBBY_NOT_FOUND);
     }
 
     @Test
@@ -81,7 +88,10 @@ class LobbyControllerTest {
         restTestClient.post()
                 .uri("/api/lobbies/{lobbyCode}/join", "INVALID")
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
     }
 
     @Test
@@ -100,7 +110,10 @@ class LobbyControllerTest {
                         "teamLabel", "AERO"
                 ))
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.TEAM_LABEL_ALREADY_TAKEN);
     }
 
     @Test
@@ -130,7 +143,10 @@ class LobbyControllerTest {
                         "teamLabel", "AERO"
                 ))
                 .exchange()
-                .expectStatus().isForbidden();
+                .expectStatus().isForbidden()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.CLIENT_NOT_IN_LOBBY);
     }
 
     /* ====================
@@ -143,7 +159,10 @@ class LobbyControllerTest {
                 .uri("/api/lobbies/{lobbyCode}/start", "INVALID")
                 .body(Map.of("hostId", UUID.randomUUID()))
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
     }
 
     @Test
@@ -154,7 +173,10 @@ class LobbyControllerTest {
                 .uri("/api/lobbies/{lobbyCode}/start", lobby.lobbyCode())
                 .body(Map.of("hostId", UUID.randomUUID()))
                 .exchange()
-                .expectStatus().isForbidden();
+                .expectStatus().isForbidden()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
     }
 
     @Test
@@ -165,7 +187,10 @@ class LobbyControllerTest {
                 .uri("/api/lobbies/{lobbyCode}/start", lobby.lobbyCode())
                 .body(Map.of("hostId", lobby.hostId()))
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.INVALID_TEAM_LABELS);
     }
 
     /* ====================

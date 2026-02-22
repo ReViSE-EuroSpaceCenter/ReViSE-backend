@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.model;
 
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 
 import java.util.Map;
@@ -29,6 +30,6 @@ public class Game {
     }
 
     public Team getTeam(UUID id) {
-        return Optional.ofNullable(teams.get(id)).orElseThrow(() -> new NotFoundException("Équipe introuvable"));
+        return Optional.ofNullable(teams.get(id)).orElseThrow(() -> new NotFoundException(ErrorKeys.TEAM_NOT_FOUND));
     }
 }

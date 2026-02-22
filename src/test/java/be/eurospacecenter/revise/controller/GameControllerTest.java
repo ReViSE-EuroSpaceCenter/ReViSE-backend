@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.model.Game;
 import be.eurospacecenter.revise.model.Lobby;
 import be.eurospacecenter.revise.service.GameService;
@@ -77,6 +78,9 @@ class GameControllerTest {
                         "missionNumber", "CLASSIC_1"
                 ))
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.GAME_NOT_FOUND);
     }
 }

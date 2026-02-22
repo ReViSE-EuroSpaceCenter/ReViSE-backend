@@ -5,17 +5,16 @@ import be.eurospacecenter.revise.dto.request.CreateLobbyRequest;
 import be.eurospacecenter.revise.dto.request.StartLobbyRequest;
 import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
-import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
-import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
-import be.eurospacecenter.revise.exceptions.NotFoundException;
-import be.eurospacecenter.revise.helper.ResponseStatusHelper;
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.service.LobbyService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("/api/lobbies")
 public class LobbyController {
 
@@ -37,57 +36,41 @@ public class LobbyController {
     @PostMapping("/{lobbyCode}/join")
     public LobbyJoinedResponse joinLobby(
             @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")
+            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode
     ) {
-        try {
-            return lobbyService.joinLobby(lobbyCode);
-        } catch (NotFoundException e) {
-            throw ResponseStatusHelper.notFound("Lobby introuvable", e);
-        }
+        return lobbyService.joinLobby(lobbyCode);
     }
 
     @PostMapping("/{lobbyCode}/team")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void assignTeam(
             @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")
+            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
 
             @RequestBody @Valid
             AssignTeamRequest request
     ) {
-        try {
-            lobbyService.ensureClient(lobbyCode, request.clientId());
-            lobbyService.assignTeam(
-                    lobbyCode,
-                    request.clientId(),
-                    request.teamLabel()
-            );
-        } catch (NoAutoriseOperationException e) {
-            throw ResponseStatusHelper.forbidden("Action non autorisée", e);
-        } catch (IllegalArgumentException e) {
-            throw ResponseStatusHelper.badRequest("Impossible d'assigner l'équipe", e);
-        }
+        lobbyService.ensureClient(lobbyCode, request.clientId());
+        lobbyService.assignTeam(
+                lobbyCode,
+                request.clientId(),
+                request.teamLabel()
+        );
     }
 
     @PostMapping("/{lobbyCode}/start")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void startLobby(
             @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")
+            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
 
             @RequestBody @Valid
             StartLobbyRequest request
     ) {
-        try {
-            lobbyService.ensureHost(lobbyCode, request.hostId());
-            lobbyService.startGame(lobbyCode, request.hostId());
-        } catch (NoAutoriseOperationException e) {
-            throw ResponseStatusHelper.forbidden("Action non autorisée", e);
-        } catch (InvalidStartLobbyException e) {
-            throw ResponseStatusHelper.badRequest("Impossible de démarrer la partie", e);
-        }
+        lobbyService.ensureHost(lobbyCode, request.hostId());
+        lobbyService.startGame(lobbyCode, request.hostId());
     }
 }

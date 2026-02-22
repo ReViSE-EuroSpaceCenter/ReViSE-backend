@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.model;
 
-import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
+import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,18 +46,18 @@ class LobbyTest {
     void shouldNotStartGameWithEmptyTeam() {
         Lobby lobby = new Lobby(host, 4, LocalDateTime.now());
 
-        assertThrows(InvalidStartLobbyException.class, () -> lobby.startGame(hostId));
+        assertThrows(IllegalArgumentException.class, () -> lobby.startGame(hostId));
     }
 
 
     @Test
     void shouldNotStartGameWith4TeamsWithoutLabel() {
-        assertThrows(InvalidStartLobbyException.class, () -> lobby4Teams.startGame(hostId));
+        assertThrows(IllegalArgumentException.class, () -> lobby4Teams.startGame(hostId));
     }
 
     @Test
     void shouldNotStartGameWith6TeamsWithoutLabel() {
-        assertThrows(InvalidStartLobbyException.class, () -> lobby6Teams.startGame(hostId));
+        assertThrows(IllegalArgumentException.class, () -> lobby6Teams.startGame(hostId));
     }
 
     @Test
@@ -90,7 +90,7 @@ class LobbyTest {
         lobby4Teams.assignTeam(team4Id, "GECO");
 
         UUID wrongHostId = UUID.randomUUID();
-        assertThrows(InvalidStartLobbyException.class, () -> lobby4Teams.startGame(wrongHostId));
+        assertThrows(NoAutoriseOperationException.class, () -> lobby4Teams.startGame(wrongHostId));
     }
 
     @Test

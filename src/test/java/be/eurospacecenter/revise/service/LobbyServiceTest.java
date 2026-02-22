@@ -2,7 +2,6 @@ package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
-import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.Host;
@@ -215,7 +214,7 @@ class LobbyServiceTest {
         UUID unknowId = UUID.randomUUID();
 
         Assertions.assertNotEquals(unknowId, hostIdFor4);
-        Assertions.assertThrows(InvalidStartLobbyException.class, () -> lobbyService.startGame(lobbyCodeFor4, unknowId));
+        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.startGame(lobbyCodeFor4, unknowId));
     }
 
     @Test
@@ -223,7 +222,7 @@ class LobbyServiceTest {
         UUID unknowId = UUID.randomUUID();
 
         Assertions.assertNotEquals(unknowId, hostIdFor6);
-        Assertions.assertThrows(InvalidStartLobbyException.class, () -> lobbyService.startGame(lobbyCodeFor6, unknowId));
+        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.startGame(lobbyCodeFor6, unknowId));
     }
 
     @Test

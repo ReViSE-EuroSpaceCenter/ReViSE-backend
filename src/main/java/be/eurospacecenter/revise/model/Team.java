@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.model;
 
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 
 import java.util.UUID;
@@ -61,7 +62,7 @@ public class Team {
 
     private void ensureOnlyMecaCanCompleteClassic8(MissionType missionType) {
         if (missionType == MissionType.CLASSIC_8 && label != TeamLabel.MECA) {
-            throw new InvalidGameOperationException("Seule l'équipe MECA peut compléter la mission CLASSIC_8.");
+            throw new InvalidGameOperationException(ErrorKeys.ONLY_MECA_COMPLETE_CLASSIC_8);
         }
     }
 

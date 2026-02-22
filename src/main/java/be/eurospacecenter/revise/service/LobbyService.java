@@ -2,6 +2,7 @@ package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
@@ -75,20 +76,20 @@ public class LobbyService {
     }
 
     public Lobby getLobby(String lobbyCode) {
-        return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException("Lobby introuvable"));
+        return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.LOBBY_NOT_FOUND));
     }
 
     public void ensureClient(String lobbyCode, UUID clientId) {
         Lobby lobby = getLobby(lobbyCode);
         if (!lobby.isInLobby(clientId)) {
-            throw new NoAutoriseOperationException("Client introuvable dans le lobby");
+            throw new NoAutoriseOperationException(ErrorKeys.CLIENT_NOT_IN_LOBBY);
         }
     }
 
     public void ensureHost(String lobbyCode, UUID hostId) {
         Lobby lobby = getLobby(lobbyCode);
-        if (!lobby.isHost(hostId)) {
-            throw new NoAutoriseOperationException("Action réservée à l'hôte du lobby");
+        if (lobby.isNotHost(hostId)) {
+            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
         }
     }
 

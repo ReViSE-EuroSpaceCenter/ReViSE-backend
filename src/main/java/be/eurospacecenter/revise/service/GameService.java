@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.notification.GameNotifier;
@@ -24,7 +24,7 @@ public class GameService {
 
     public void registerGame(String lobbyCode, Game game) {
         if (lobbyCode == null || lobbyCode.isEmpty()) {
-            throw new InvalidStartLobbyException("Impossible d'enregistrer une Game avec un lobby code invalide");
+            throw new IllegalArgumentException(ErrorKeys.INVALID_LOBBY_CODE);
         }
         games.put(lobbyCode, game);
     }
@@ -39,7 +39,7 @@ public class GameService {
     }
 
     public Game getGame(String lobbyCode) {
-        return Optional.ofNullable(games.get(lobbyCode)).orElseThrow(() -> new NotFoundException("Game introuvable"));
+        return Optional.ofNullable(games.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.GAME_NOT_FOUND));
     }
 
     protected void clearGames(List<String> toRemove) {

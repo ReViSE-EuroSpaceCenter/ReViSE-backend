@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.model;
 
-import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 
 import java.time.LocalDateTime;
@@ -58,14 +59,14 @@ public class Lobby {
     }
 
     public boolean startGame(UUID hostId) {
-        if (!isHost(hostId)) {
-            throw new InvalidStartLobbyException("Seul l'hôte peut démarrer la partie");
+        if (isNotHost(hostId)) {
+            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
         }
 
         List<String> teamLabels = teams.values().stream().filter(Team::hasLabel).map(Team::getLabel).toList();
 
         if (!TeamLabel.isValidTeams(teamLabels, isFourTeamsMode)) {
-            throw new InvalidStartLobbyException("Le nombre d'équipes ou les labels ne sont pas valides pour démarrer la partie");
+            throw new IllegalArgumentException(ErrorKeys.INVALID_TEAM_LABELS);
         }
 
         return true;
@@ -75,8 +76,8 @@ public class Lobby {
         return teams.containsKey(clientId);
     }
 
-    public boolean isHost(UUID hostId) {
-        return host.id().equals(hostId);
+    public boolean isNotHost(UUID hostId) {
+        return !host.id().equals(hostId);
     }
 
     public LocalDateTime getExpiresAt() {
@@ -89,27 +90,23 @@ public class Lobby {
 
     private static void validateTeamCount(int teamCount) {
         if (teamCount != TEAM_COUNT_FOUR && teamCount != TEAM_COUNT_SIX) {
-            throw new IllegalArgumentException("Le nombre d'équipes doit être de 4 ou 6");
+            throw new IllegalArgumentException(ErrorKeys.INVALID_NUMBER_OF_TEAMS);
         }
     }
 
-    private Team getTeam(UUID clientId) {
-        Team team = teams.get(clientId);
-        if (team == null) {
-            throw new NotFoundException("Client non trouvé dans le lobby");
-        }
-        return team;
+    private Team getTeam(UUID id) {
+        return Optional.ofNullable(teams.get(id)).orElseThrow(() -> new NotFoundException(ErrorKeys.TEAM_NOT_FOUND));
     }
 
     private void validateTeamLabel(String teamLabel) {
         if (!TeamLabel.isValidLabel(teamLabel, isFourTeamsMode)) {
-            throw new IllegalArgumentException("Label d'équipe invalide : " + teamLabel);
+            throw new IllegalArgumentException(ErrorKeys.INVALID_TEAM_LABEL);
         }
     }
 
     private void ensureTeamNotAlreadyAssigned(Team team) {
         if (team.hasLabel()) {
-            throw new IllegalArgumentException("Ce client a déjà une équipe assignée");
+            throw new IllegalArgumentException(ErrorKeys.CLIENT_ALREADY_CHOSE_TEAM);
         }
     }
 
@@ -117,7 +114,7 @@ public class Lobby {
         boolean alreadyTaken = teams.values().stream().anyMatch(team -> teamLabel.equals(team.getLabel()));
 
         if (alreadyTaken) {
-            throw new IllegalArgumentException("Cette équipe est déjà prise");
+            throw new IllegalArgumentException(ErrorKeys.TEAM_LABEL_ALREADY_TAKEN);
         }
     }
 }
