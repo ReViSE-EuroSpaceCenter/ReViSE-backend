@@ -54,6 +54,24 @@ class LobbyControllerTest {
                 .expectStatus().isBadRequest();
     }
 
+    @Test
+    void getInfoForLobbyShouldSucceed() {
+        LobbyCreationResponse lobby = createLobby(4);
+
+        restTestClient.get()
+                .uri("/api/lobbies/{lobbyCode}", lobby.lobbyCode())
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void getInfoForUnknownLobbyShouldFailed() {
+        restTestClient.get()
+                .uri("/api/lobbies/{lobbyCode}", "INVALD")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
     /* ====================
        JOIN LOBBY
        ==================== */

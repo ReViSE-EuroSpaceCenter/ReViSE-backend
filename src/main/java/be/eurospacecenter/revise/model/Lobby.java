@@ -58,7 +58,7 @@ public class Lobby {
     }
 
     public boolean startGame(UUID hostId) {
-        if (!isHost(hostId)) {
+        if (isNotHost(hostId)) {
             throw new InvalidStartLobbyException("Seul l'hôte peut démarrer la partie");
         }
 
@@ -71,12 +71,12 @@ public class Lobby {
         return true;
     }
 
-    public boolean isInLobby(UUID clientId) {
+    public boolean isClient(UUID clientId) {
         return teams.containsKey(clientId);
     }
 
-    public boolean isHost(UUID hostId) {
-        return host.id().equals(hostId);
+    public boolean isNotHost(UUID hostId) {
+        return !host.id().equals(hostId);
     }
 
     public LocalDateTime getExpiresAt() {

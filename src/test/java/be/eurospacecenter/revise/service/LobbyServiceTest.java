@@ -1,8 +1,8 @@
 package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
+import be.eurospacecenter.revise.dto.response.LobbyInfoResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
-import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.Host;
@@ -215,7 +215,7 @@ class LobbyServiceTest {
         UUID unknowId = UUID.randomUUID();
 
         Assertions.assertNotEquals(unknowId, hostIdFor4);
-        Assertions.assertThrows(InvalidStartLobbyException.class, () -> lobbyService.startGame(lobbyCodeFor4, unknowId));
+        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.startGame(lobbyCodeFor4, unknowId));
     }
 
     @Test
@@ -223,52 +223,65 @@ class LobbyServiceTest {
         UUID unknowId = UUID.randomUUID();
 
         Assertions.assertNotEquals(unknowId, hostIdFor6);
-        Assertions.assertThrows(InvalidStartLobbyException.class, () -> lobbyService.startGame(lobbyCodeFor6, unknowId));
+        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.startGame(lobbyCodeFor6, unknowId));
     }
 
     @Test
     void ensureHostShouldSucceedForHost() {
-        Assertions.assertDoesNotThrow(() -> lobbyService.ensureHost(lobbyCodeFor6, hostIdFor6));
+        Lobby lobby = lobbyService.getLobby(lobbyCodeFor6);
+
+        Assertions.assertDoesNotThrow(() -> lobbyService.ensureHost(lobby, hostIdFor6));
     }
 
     @Test
     void ensureHostShouldFailForUnknownHost() {
+        Lobby lobby = lobbyService.getLobby(lobbyCodeFor6);
         UUID unknowId = UUID.randomUUID();
 
         Assertions.assertNotEquals(unknowId, hostIdFor6);
-        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.ensureHost(lobbyCodeFor6, unknowId));
+        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.ensureHost(lobby, unknowId));
     }
 
     @Test
-    void ensureHostShouldFailForUnknownLobby() {
-        Assertions.assertThrows(NotFoundException.class, () -> lobbyService.ensureHost("INVALID", hostIdFor4));
+    void ensureHostShouldFailForDifferentLobby() {
+        LobbyCreationResponse newLobbyRes = lobbyService.createLobby(4);
+        String newLobbyCode = newLobbyRes.lobbyCode();
+        Lobby newLobby = lobbyService.getLobby(newLobbyCode);
+
+        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.ensureHost(newLobby, hostIdFor4));
     }
 
     @Test
     void ensureClientShouldSucceedForClient() {
+        Lobby lobby = lobbyService.getLobby(lobbyCodeFor6);
         LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
         UUID clientId = UUID.fromString(res.clientId());
 
-        Assertions.assertDoesNotThrow(() -> lobbyService.ensureClient(lobbyCodeFor6, clientId));
+        Assertions.assertDoesNotThrow(() -> lobbyService.ensureClient(lobby, clientId));
     }
 
     @Test
     void ensureClientShouldFailForUnknownClient() {
+        Lobby lobby = lobbyService.getLobby(lobbyCodeFor6);
         LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
         UUID clientId = UUID.fromString(res.clientId());
 
         UUID unknowId = UUID.randomUUID();
 
         Assertions.assertNotEquals(unknowId, clientId);
-        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.ensureClient(lobbyCodeFor6, unknowId));
+        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.ensureClient(lobby, unknowId));
     }
 
     @Test
-    void ensureClientShouldFailForUnknownLobby() {
+    void ensureClientShouldFailForDifferentLobby() {
         LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
         UUID clientId = UUID.fromString(res.clientId());
 
-        Assertions.assertThrows(NotFoundException.class, () -> lobbyService.ensureHost("INVALID", clientId));
+        LobbyCreationResponse newLobbyRes = lobbyService.createLobby(4);
+        String newLobbyCode = newLobbyRes.lobbyCode();
+        Lobby newLobby = lobbyService.getLobby(newLobbyCode);
+
+        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.ensureHost(newLobby, clientId));
     }
 
     @Test
@@ -299,4 +312,56 @@ class LobbyServiceTest {
         shouldNotBeThere.forEach((k, v) -> Assertions.assertFalse(lobbyService.lobbies.containsKey(k)));
     }
 
+    @Test
+    void getLobbyInfoShouldFailForUnknown() {
+        Assertions.assertThrows(NotFoundException.class, () -> lobbyService.getLobbyInfo("INVALID"));
+    }
+
+    @Test
+    void getLobbyInfoForFour() {
+        LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor4);
+
+        Assertions.assertEquals(4, res.allTeams().size());
+        Assertions.assertEquals(4, res.availableTeams().size());
+    }
+
+    @Test
+    void getLobbyInfoForSix() {
+        LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor6);
+
+        Assertions.assertEquals(6, res.allTeams().size());
+        Assertions.assertEquals(6, res.availableTeams().size());
+    }
+
+    @Test
+    void getLobbyInfoShouldDecreaseAtEachJoinedFor4() {
+        for (int i = 4; i > 0; i--) {
+            LobbyJoinedResponse joinedResponse = lobbyService.joinLobby(lobbyCodeFor4);
+
+            UUID clientId = UUID.fromString(joinedResponse.clientId());
+
+            LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor4);
+
+            Assertions.assertEquals(4, res.allTeams().size());
+            Assertions.assertEquals(i, res.availableTeams().size());
+
+            lobbyService.assignTeam(lobbyCodeFor4, clientId, res.availableTeams().get(i - 1));
+        }
+    }
+
+    @Test
+    void getLobbyInfoShouldDecreaseAtEachJoinedFor6() {
+        for (int i = 6; i > 0; i--) {
+            LobbyJoinedResponse joinedResponse = lobbyService.joinLobby(lobbyCodeFor6);
+
+            UUID clientId = UUID.fromString(joinedResponse.clientId());
+
+            LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor6);
+
+            Assertions.assertEquals(6, res.allTeams().size());
+            Assertions.assertEquals(i, res.availableTeams().size());
+
+            lobbyService.assignTeam(lobbyCodeFor6, clientId, res.availableTeams().get(i - 1));
+        }
+    }
 }
