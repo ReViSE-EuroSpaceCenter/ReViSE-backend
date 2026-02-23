@@ -40,11 +40,7 @@ public class LobbyController {
             @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")
             String lobbyCode
     ) {
-        try {
-            return lobbyService.getLobbyInfo(lobbyCode);
-        } catch (NotFoundException e) {
-            throw ResponseStatusHelper.notFound("Impossible de récupérer les informations du lobby", e);
-        }
+        return lobbyService.getLobbyInfo(lobbyCode);
     }
 
     @PostMapping("/{lobbyCode}/join")
@@ -66,7 +62,6 @@ public class LobbyController {
             @RequestBody @Valid
             AssignTeamRequest request
     ) {
-        lobbyService.ensureClient(lobbyCode, request.clientId());
         lobbyService.assignTeam(
                 lobbyCode,
                 request.clientId(),
@@ -84,7 +79,6 @@ public class LobbyController {
             @RequestBody @Valid
             StartLobbyRequest request
     ) {
-        lobbyService.ensureHost(lobbyCode, request.hostId());
         lobbyService.startGame(lobbyCode, request.hostId());
     }
 

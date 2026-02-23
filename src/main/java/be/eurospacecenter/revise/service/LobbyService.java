@@ -88,14 +88,14 @@ public class LobbyService {
     protected Lobby getLobby(String lobbyCode) {
         return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.LOBBY_NOT_FOUND));
     }
-  
-    protected void ensureClient(String lobbyCode, UUID clientId) {
-        if (!lobby.isInLobby(clientId)) {
+
+    protected void ensureClient(Lobby lobby, UUID clientId) {
+        if (!lobby.isClient(clientId)) {
             throw new NoAutoriseOperationException(ErrorKeys.CLIENT_NOT_IN_LOBBY);
         }
     }
 
-    protected void ensureHost(String lobbyCode, UUID hostId) {
+    protected void ensureHost(Lobby lobby, UUID hostId) {
         if (lobby.isNotHost(hostId)) {
             throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
         }
