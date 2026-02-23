@@ -2,9 +2,6 @@ package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
-import be.eurospacecenter.revise.model.Game;
-import be.eurospacecenter.revise.model.Lobby;
-import be.eurospacecenter.revise.service.GameService;
 import be.eurospacecenter.revise.model.TeamLabel;
 import be.eurospacecenter.revise.service.LobbyService;
 import com.jayway.jsonpath.JsonPath;
