@@ -72,7 +72,7 @@ public class Lobby {
         return true;
     }
 
-    public boolean isInLobby(UUID clientId) {
+    public boolean isClient(UUID clientId) {
         return teams.containsKey(clientId);
     }
 

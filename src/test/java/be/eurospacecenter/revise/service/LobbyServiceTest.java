@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
+import be.eurospacecenter.revise.dto.response.LobbyInfoResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
@@ -255,6 +256,7 @@ class LobbyServiceTest {
 
     @Test
     void ensureHostShouldFailForUnknownHost() {
+        Lobby lobby = lobbyService.getLobby(lobbyCodeFor6);
         UUID unknowId = UUID.randomUUID();
 
         assertNotEquals(unknowId, hostIdFor6);
@@ -274,6 +276,7 @@ class LobbyServiceTest {
 
     @Test
     void ensureClientShouldSucceedForClient() {
+        Lobby lobby = lobbyService.getLobby(lobbyCodeFor6);
         LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
         UUID clientId = UUID.fromString(res.clientId());
 
@@ -282,6 +285,7 @@ class LobbyServiceTest {
 
     @Test
     void ensureClientShouldFailForUnknownClient() {
+        Lobby lobby = lobbyService.getLobby(lobbyCodeFor6);
         LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
         UUID clientId = UUID.fromString(res.clientId());
 
@@ -295,7 +299,7 @@ class LobbyServiceTest {
     }
 
     @Test
-    void ensureClientShouldFailForUnknownLobby() {
+    void ensureClientShouldFailForDifferentLobby() {
         LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
         UUID clientId = UUID.fromString(res.clientId());
 
@@ -333,4 +337,56 @@ class LobbyServiceTest {
         shouldNotBeThere.forEach((k, v) -> assertFalse(lobbyService.lobbies.containsKey(k)));
     }
 
+    @Test
+    void getLobbyInfoShouldFailForUnknown() {
+        Assertions.assertThrows(NotFoundException.class, () -> lobbyService.getLobbyInfo("INVALID"));
+    }
+
+    @Test
+    void getLobbyInfoForFour() {
+        LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor4);
+
+        Assertions.assertEquals(4, res.allTeams().size());
+        Assertions.assertEquals(4, res.availableTeams().size());
+    }
+
+    @Test
+    void getLobbyInfoForSix() {
+        LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor6);
+
+        Assertions.assertEquals(6, res.allTeams().size());
+        Assertions.assertEquals(6, res.availableTeams().size());
+    }
+
+    @Test
+    void getLobbyInfoShouldDecreaseAtEachJoinedFor4() {
+        for (int i = 4; i > 0; i--) {
+            LobbyJoinedResponse joinedResponse = lobbyService.joinLobby(lobbyCodeFor4);
+
+            UUID clientId = UUID.fromString(joinedResponse.clientId());
+
+            LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor4);
+
+            Assertions.assertEquals(4, res.allTeams().size());
+            Assertions.assertEquals(i, res.availableTeams().size());
+
+            lobbyService.assignTeam(lobbyCodeFor4, clientId, res.availableTeams().get(i - 1));
+        }
+    }
+
+    @Test
+    void getLobbyInfoShouldDecreaseAtEachJoinedFor6() {
+        for (int i = 6; i > 0; i--) {
+            LobbyJoinedResponse joinedResponse = lobbyService.joinLobby(lobbyCodeFor6);
+
+            UUID clientId = UUID.fromString(joinedResponse.clientId());
+
+            LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor6);
+
+            Assertions.assertEquals(6, res.allTeams().size());
+            Assertions.assertEquals(i, res.availableTeams().size());
+
+            lobbyService.assignTeam(lobbyCodeFor6, clientId, res.availableTeams().get(i - 1));
+        }
+    }
 }
