@@ -1,15 +1,17 @@
 package be.eurospacecenter.revise.model;
 
-import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LobbyTest {
 
@@ -46,18 +48,30 @@ class LobbyTest {
     void shouldNotStartGameWithEmptyTeam() {
         Lobby lobby = new Lobby(host, 4, LocalDateTime.now());
 
-        assertThrows(InvalidStartLobbyException.class, () -> lobby.startGame(hostId));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () ->  lobby.startGame(hostId)
+        );
+        assertEquals(ErrorKeys.INVALID_TEAM_LABELS, ex.getMessage());
     }
 
 
     @Test
     void shouldNotStartGameWith4TeamsWithoutLabel() {
-        assertThrows(InvalidStartLobbyException.class, () -> lobby4Teams.startGame(hostId));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () ->  lobby4Teams.startGame(hostId)
+        );
+        assertEquals(ErrorKeys.INVALID_TEAM_LABELS, ex.getMessage());
     }
 
     @Test
     void shouldNotStartGameWith6TeamsWithoutLabel() {
-        assertThrows(InvalidStartLobbyException.class, () -> lobby6Teams.startGame(hostId));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () ->  lobby6Teams.startGame(hostId)
+        );
+        assertEquals(ErrorKeys.INVALID_TEAM_LABELS, ex.getMessage());
     }
 
     @Test
@@ -90,43 +104,72 @@ class LobbyTest {
         lobby4Teams.assignTeam(team4Id, "GECO");
 
         UUID wrongHostId = UUID.randomUUID();
-        assertThrows(InvalidStartLobbyException.class, () -> lobby4Teams.startGame(wrongHostId));
+
+        NoAutoriseOperationException ex = assertThrows(
+                NoAutoriseOperationException.class,
+                () -> lobby4Teams.startGame(wrongHostId)
+        );
+        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
 
     @Test
     void shouldNotStartGameWithWrong4Teams() {
         lobby4Teams.assignTeam(team1Id, "AERO");
 
-        assertThrows(IllegalArgumentException.class, () -> lobby4Teams.assignTeam(team2Id, "MECA"));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () ->  lobby6Teams.startGame(hostId)
+        );
+        assertEquals(ErrorKeys.INVALID_TEAM_LABELS, ex.getMessage());
     }
 
-    @Test
-    void shouldNotCreateLobbyWithInvalidNumberOfTeams() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 5, 7, 10})
+    void shouldNotCreateLobbyWithInvalidNumberOfTeams(int numberOfTeams) {
         Host h = new Host(UUID.randomUUID());
         LocalDateTime now = LocalDateTime.now();
 
-        assertThrows(IllegalArgumentException.class, () -> new Lobby(h, 3, now));
-        assertThrows(IllegalArgumentException.class, () -> new Lobby(h, 5, now));
-        assertThrows(IllegalArgumentException.class, () -> new Lobby(h, 7, now));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> new Lobby(h, numberOfTeams, now)
+        );
+
+        assertEquals(ErrorKeys.INVALID_NUMBER_OF_TEAMS, ex.getMessage());
     }
 
     @Test
     void shouldNotAssignTeamWithUnknownClientId() {
         UUID wrongClientId = UUID.randomUUID();
-        assertThrows(NotFoundException.class, () -> lobby4Teams.assignTeam(wrongClientId, "AERO"));
+
+        NotFoundException ex = assertThrows(
+                NotFoundException.class,
+                () -> lobby4Teams.assignTeam(wrongClientId, "AERO")
+        );
+
+        assertEquals(ErrorKeys.TEAM_NOT_FOUND, ex.getMessage());
     }
 
     @Test
     void shouldNotAssignTeamWithDuplicateLabel() {
         lobby4Teams.assignTeam(team1Id, "AERO");
 
-        assertThrows(IllegalArgumentException.class, () -> lobby4Teams.assignTeam(team2Id, "AERO"));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () ->  lobby4Teams.assignTeam(team2Id, "AERO")
+        );
+
+        assertEquals(ErrorKeys.TEAM_LABEL_ALREADY_TAKEN, ex.getMessage());
     }
 
     @Test
     void shouldNotAssignTeamTwice() {
         lobby4Teams.assignTeam(team1Id, "AERO");
 
-        assertThrows(IllegalArgumentException.class, () -> lobby4Teams.assignTeam(team1Id, "COOP"));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () ->  lobby4Teams.assignTeam(team1Id, "COOP")
+        );
+
+        assertEquals(ErrorKeys.CLIENT_ALREADY_CHOSE_TEAM, ex.getMessage());
     }
 }

@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.model;
 
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,8 +74,11 @@ class TeamTest {
 
     private void testMissionForTeamLabel(Team team, MissionType mission) {
         if (shouldThrowException(team, mission)) {
-            assertThrows(InvalidGameOperationException.class,
-                    () -> team.changeMissionState(mission));
+            InvalidGameOperationException ex = assertThrows(InvalidGameOperationException.class,
+                    () -> team.changeMissionState(mission)
+            );
+            assertEquals(ErrorKeys.ONLY_MECA_COMPLETE_CLASSIC_8, ex.getMessage());
+
             return;
         }
 

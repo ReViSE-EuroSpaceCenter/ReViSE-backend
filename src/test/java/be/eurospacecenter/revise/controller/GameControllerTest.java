@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.model.TeamLabel;
 import be.eurospacecenter.revise.service.LobbyService;
 import com.jayway.jsonpath.JsonPath;
@@ -55,7 +56,7 @@ class GameControllerTest {
     }
 
     @Test
-    void completeMissionShouldSucceed() {
+    void changeMissionStateShouldSucceed() {
         restTestClient.put()
                 .uri("/api/games/" + lobbyCode + "/missions")
                 .body(Map.of(
@@ -67,14 +68,47 @@ class GameControllerTest {
     }
 
     @Test
-    void completeMissionShouldFailWithNonExistingGame() {
+    void changeMissionStateShouldFailWithInvalidLobbyCode() {
         restTestClient.put()
-                .uri("/api/games/XXXXXX/missions")
+                .uri("/api/games/INVALID/missions")
                 .body(Map.of(
                         "clientId", teamClientId,
                         "missionNumber", "CLASSIC_1"
                 ))
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+    }
+
+    @Test
+    void changeMissionStateShouldFailWithInvalidUuid() {
+        restTestClient.put()
+                .uri("/api/games/" + lobbyCode + "/missions")
+                .body(Map.of(
+                        "clientId", "abc",
+                        "missionNumber", "CLASSIC_1"
+                ))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.INVALID_UUID);
+    }
+
+    @Test
+    void changeMissionStateShouldFailWithInvalidMission() {
+        restTestClient.put()
+                .uri("/api/games/" + lobbyCode + "/missions")
+                .body(Map.of(
+                        "clientId", teamClientId,
+                        "missionNumber", "INVALID_MISSION"
+                ))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.INVALID_MISSION_TYPE);
     }
 }

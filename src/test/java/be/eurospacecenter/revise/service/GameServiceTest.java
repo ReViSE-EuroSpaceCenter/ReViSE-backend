@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.exceptions.InvalidStartLobbyException;
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,13 +61,23 @@ class GameServiceTest {
 
     @Test
     void shouldFailToRegisterGameWithNullLobbyCode() {
-        assertThrows(InvalidStartLobbyException.class, () -> gameService.registerGame(null, gameWith4Teams));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> gameService.registerGame(null, gameWith4Teams)
+        );
+        assertEquals(ErrorKeys.INVALID_LOBBY_CODE, ex.getMessage());
     }
 
     @Test
     void shouldFailToRegisterGameWithEmptyLobbyCode() {
-        assertThrows(InvalidStartLobbyException.class, () -> gameService.registerGame("", gameWith4Teams));
-        assertThrows(NotFoundException.class, () -> gameService.getGame(""));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> gameService.registerGame("", gameWith4Teams)
+        );
+        assertEquals(ErrorKeys.INVALID_LOBBY_CODE, ex.getMessage());
+
+        NotFoundException ex2 = assertThrows(NotFoundException.class,
+                () -> gameService.getGame("")
+        );
+        assertEquals(ErrorKeys.GAME_NOT_FOUND, ex2.getMessage());
     }
 
     @Test
