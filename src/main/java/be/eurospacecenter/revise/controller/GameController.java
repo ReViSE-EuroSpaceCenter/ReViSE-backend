@@ -22,7 +22,7 @@ public class GameController {
 
     @PutMapping("/{lobbyCode}/missions")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void completeATeamMission(
+    public void changeTeamMissionState(
             @PathVariable
             @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,

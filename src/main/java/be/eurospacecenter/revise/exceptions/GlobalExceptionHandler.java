@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.exceptions;
 
+import be.eurospacecenter.revise.model.MissionType;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -7,6 +8,10 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import tools.jackson.databind.exc.InvalidFormatException;
+
+import java.util.Map;
+import java.util.UUID;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -54,9 +59,20 @@ public class GlobalExceptionHandler {
 
         problem.setTitle("Invalid request body");
 
-        String message = ex.getMostSpecificCause().getMessage();
+        Throwable cause = ex.getMostSpecificCause();
 
-        problem.setDetail(message);
+        if (cause instanceof InvalidFormatException invalidFormatException) {
+
+            String errorCode =
+                    TYPE_ERROR_MAP.get(invalidFormatException.getTargetType());
+
+            if (errorCode != null) {
+                problem.setDetail(errorCode);
+                return problem;
+            }
+        }
+
+        problem.setDetail(cause.getMessage());
 
         return problem;
     }
@@ -71,4 +87,9 @@ public class GlobalExceptionHandler {
         problem.setDetail(detail);
         return problem;
     }
+
+    private static final Map<Class<?>, String> TYPE_ERROR_MAP = Map.of(
+            UUID.class, ErrorKeys.INVALID_UUID,
+            MissionType.class, ErrorKeys.INVALID_MISSION_TYPE
+    );
 }

@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.model;
 
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,12 +65,20 @@ class GameTest {
     @Test
     void completeTeamMissionWithInvalidTeam() {
         UUID id = UUID.randomUUID();
-        assertThrows(NotFoundException.class, () -> gameWithOneTeam.changeTeamMissionState(id, MissionType.CLASSIC_1));
+        NotFoundException ex = assertThrows(
+                NotFoundException.class,
+                () -> gameWithOneTeam.changeTeamMissionState(id, MissionType.CLASSIC_1)
+        );
+        assertEquals(ErrorKeys.TEAM_NOT_FOUND, ex.getMessage());
     }
 
     @Test
     void getTeamProgressionWithInvalidTeam() {
         UUID id = UUID.randomUUID();
-        assertThrows(NotFoundException.class, () -> gameWithOneTeam.getTeamProgression(id));
+        NotFoundException ex = assertThrows(
+                NotFoundException.class,
+                () -> gameWithOneTeam.getTeamProgression(id)
+        );
+        assertEquals(ErrorKeys.TEAM_NOT_FOUND, ex.getMessage());
     }
 }

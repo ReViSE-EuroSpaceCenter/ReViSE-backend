@@ -2,12 +2,12 @@ package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.Host;
 import be.eurospacecenter.revise.model.Lobby;
 import be.eurospacecenter.revise.model.TeamLabel;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
@@ -51,9 +53,9 @@ class LobbyServiceTest {
 
         UUID hostId = UUID.fromString(res.hostId());
 
-        Assertions.assertNotNull(hostId);
-        Assertions.assertFalse(res.lobbyCode().isEmpty());
-        Assertions.assertEquals(6, res.lobbyCode().length());
+        assertNotNull(hostId);
+        assertFalse(res.lobbyCode().isEmpty());
+        assertEquals(6, res.lobbyCode().length());
     }
 
     @Test
@@ -62,9 +64,9 @@ class LobbyServiceTest {
 
         UUID hostId = UUID.fromString(res.hostId());
 
-        Assertions.assertNotNull(hostId);
-        Assertions.assertFalse(res.lobbyCode().isEmpty());
-        Assertions.assertEquals(6, res.lobbyCode().length());
+        assertNotNull(hostId);
+        assertFalse(res.lobbyCode().isEmpty());
+        assertEquals(6, res.lobbyCode().length());
     }
 
     @Test
@@ -73,9 +75,9 @@ class LobbyServiceTest {
 
         UUID clientId = UUID.fromString(res.clientId());
 
-        Assertions.assertNotNull(clientId);
-        Assertions.assertEquals(4, res.availableTeams().size());
-        Assertions.assertEquals(4, res.allTeams().size());
+        assertNotNull(clientId);
+        assertEquals(4, res.availableTeams().size());
+        assertEquals(4, res.allTeams().size());
     }
 
 
@@ -85,9 +87,9 @@ class LobbyServiceTest {
 
         UUID clientId = UUID.fromString(res.clientId());
 
-        Assertions.assertNotNull(clientId);
-        Assertions.assertEquals(6, res.availableTeams().size());
-        Assertions.assertEquals(6, res.allTeams().size());
+        assertNotNull(clientId);
+        assertEquals(6, res.availableTeams().size());
+        assertEquals(6, res.allTeams().size());
     }
 
     @Test
@@ -97,8 +99,8 @@ class LobbyServiceTest {
 
             UUID clientId = UUID.fromString(res.clientId());
 
-            Assertions.assertEquals(4, res.allTeams().size());
-            Assertions.assertEquals(i, res.availableTeams().size());
+            assertEquals(4, res.allTeams().size());
+            assertEquals(i, res.availableTeams().size());
 
             lobbyService.assignTeam(lobbyCodeFor4, clientId, res.availableTeams().get(i - 1));
         }
@@ -111,8 +113,8 @@ class LobbyServiceTest {
 
             UUID clientId = UUID.fromString(res.clientId());
 
-            Assertions.assertEquals(6, res.allTeams().size());
-            Assertions.assertEquals(i, res.availableTeams().size());
+            assertEquals(6, res.allTeams().size());
+            assertEquals(i, res.availableTeams().size());
 
             lobbyService.assignTeam(lobbyCodeFor6, clientId, res.availableTeams().get(i - 1));
         }
@@ -120,7 +122,10 @@ class LobbyServiceTest {
 
     @Test
     void joiningUnknownLobbyCodeShouldFail() {
-        Assertions.assertThrows(NotFoundException.class, () -> lobbyService.joinLobby("INVALID"));
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> lobbyService.joinLobby("INVALID")
+        );
+        assertEquals(ErrorKeys.LOBBY_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -137,7 +142,10 @@ class LobbyServiceTest {
             LobbyJoinedResponse secondTeam = lobbyService.joinLobby(lobbyCodeFor4);
             UUID secondId = UUID.fromString(secondTeam.clientId());
 
-            Assertions.assertThrows(IllegalArgumentException.class, () -> lobbyService.assignTeam(lobbyCodeFor4, secondId, label));
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> lobbyService.assignTeam(lobbyCodeFor4, secondId, label)
+            );
+            assertEquals(ErrorKeys.TEAM_LABEL_ALREADY_TAKEN, ex.getMessage());
         });
     }
 
@@ -156,7 +164,10 @@ class LobbyServiceTest {
             LobbyJoinedResponse secondTeam = lobbyService.joinLobby(lobbyCodeFor6);
             UUID secondId = UUID.fromString(secondTeam.clientId());
 
-            Assertions.assertThrows(IllegalArgumentException.class, () -> lobbyService.assignTeam(lobbyCodeFor6, secondId, label));
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> lobbyService.assignTeam(lobbyCodeFor6, secondId, label)
+            );
+            assertEquals(ErrorKeys.TEAM_LABEL_ALREADY_TAKEN, ex.getMessage());
         });
     }
 
@@ -172,7 +183,10 @@ class LobbyServiceTest {
 
             lobbyService.assignTeam(lobbyCodeFor4, firstId, label);
 
-            Assertions.assertThrows(IllegalArgumentException.class, () -> lobbyService.assignTeam(lobbyCodeFor4, firstId, label));
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> lobbyService.assignTeam(lobbyCodeFor4, firstId, label)
+            );
+            assertEquals(ErrorKeys.CLIENT_ALREADY_CHOSE_TEAM, ex.getMessage());
         });
     }
 
@@ -187,7 +201,7 @@ class LobbyServiceTest {
             lobbyService.assignTeam(lobbyCodeFor4, teamId, l.toString());
         });
 
-        Assertions.assertDoesNotThrow(() -> lobbyService.startGame(lobbyCodeFor4, hostIdFor4));
+        assertDoesNotThrow(() -> lobbyService.startGame(lobbyCodeFor4, hostIdFor4));
     }
 
     @Test
@@ -201,46 +215,61 @@ class LobbyServiceTest {
             lobbyService.assignTeam(lobbyCodeFor6, teamId, l.toString());
         });
 
-        Assertions.assertDoesNotThrow(() -> lobbyService.startGame(lobbyCodeFor6, hostIdFor6));
+        assertDoesNotThrow(() -> lobbyService.startGame(lobbyCodeFor6, hostIdFor6));
     }
 
     @Test
     void startingUnknownLobbyShouldFail() {
-        Assertions.assertThrows(NotFoundException.class, () -> lobbyService.startGame("INVALID", hostIdFor4));
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> lobbyService.startGame("INVALID", hostIdFor4)
+        );
+        assertEquals(ErrorKeys.LOBBY_NOT_FOUND, ex.getMessage());
     }
 
     @Test
     void startingLobbyWithWrongHostIdShouldFailFor4() {
         UUID unknowId = UUID.randomUUID();
 
-        Assertions.assertNotEquals(unknowId, hostIdFor4);
-        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.startGame(lobbyCodeFor4, unknowId));
+        assertNotEquals(unknowId, hostIdFor4);
+        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
+                () -> lobbyService.startGame(lobbyCodeFor4, unknowId)
+        );
+        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
 
     @Test
     void startingLobbyWithWrongHostIdShouldFailFor6() {
         UUID unknowId = UUID.randomUUID();
 
-        Assertions.assertNotEquals(unknowId, hostIdFor6);
-        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.startGame(lobbyCodeFor6, unknowId));
+        assertNotEquals(unknowId, hostIdFor6);
+        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
+                () -> lobbyService.startGame(lobbyCodeFor6, unknowId)
+        );
+        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
 
     @Test
     void ensureHostShouldSucceedForHost() {
-        Assertions.assertDoesNotThrow(() -> lobbyService.ensureHost(lobbyCodeFor6, hostIdFor6));
+        assertDoesNotThrow(() -> lobbyService.ensureHost(lobbyCodeFor6, hostIdFor6));
     }
 
     @Test
     void ensureHostShouldFailForUnknownHost() {
         UUID unknowId = UUID.randomUUID();
 
-        Assertions.assertNotEquals(unknowId, hostIdFor6);
-        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.ensureHost(lobbyCodeFor6, unknowId));
+        assertNotEquals(unknowId, hostIdFor6);
+        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
+                () -> lobbyService.ensureHost(lobbyCodeFor6, unknowId)
+        );
+        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
 
     @Test
     void ensureHostShouldFailForUnknownLobby() {
-        Assertions.assertThrows(NotFoundException.class, () -> lobbyService.ensureHost("INVALID", hostIdFor4));
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> lobbyService.ensureHost("INVALID", hostIdFor4)
+        );
+        assertEquals(ErrorKeys.LOBBY_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -248,7 +277,7 @@ class LobbyServiceTest {
         LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
         UUID clientId = UUID.fromString(res.clientId());
 
-        Assertions.assertDoesNotThrow(() -> lobbyService.ensureClient(lobbyCodeFor6, clientId));
+        assertDoesNotThrow(() -> lobbyService.ensureClient(lobbyCodeFor6, clientId));
     }
 
     @Test
@@ -258,8 +287,11 @@ class LobbyServiceTest {
 
         UUID unknowId = UUID.randomUUID();
 
-        Assertions.assertNotEquals(unknowId, clientId);
-        Assertions.assertThrows(NoAutoriseOperationException.class, () -> lobbyService.ensureClient(lobbyCodeFor6, unknowId));
+        assertNotEquals(unknowId, clientId);
+        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
+                () -> lobbyService.ensureClient(lobbyCodeFor6, unknowId)
+        );
+        assertEquals(ErrorKeys.CLIENT_NOT_IN_LOBBY, ex.getMessage());
     }
 
     @Test
@@ -267,7 +299,10 @@ class LobbyServiceTest {
         LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
         UUID clientId = UUID.fromString(res.clientId());
 
-        Assertions.assertThrows(NotFoundException.class, () -> lobbyService.ensureHost("INVALID", clientId));
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> lobbyService.ensureHost("INVALID", clientId)
+        );
+        assertEquals(ErrorKeys.LOBBY_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -294,8 +329,8 @@ class LobbyServiceTest {
 
         lobbyService.clearLobbies();
 
-        shouldBeThere.forEach((k, v) -> Assertions.assertTrue(lobbyService.lobbies.containsKey(k)));
-        shouldNotBeThere.forEach((k, v) -> Assertions.assertFalse(lobbyService.lobbies.containsKey(k)));
+        shouldBeThere.forEach((k, v) -> assertTrue(lobbyService.lobbies.containsKey(k)));
+        shouldNotBeThere.forEach((k, v) -> assertFalse(lobbyService.lobbies.containsKey(k)));
     }
 
 }

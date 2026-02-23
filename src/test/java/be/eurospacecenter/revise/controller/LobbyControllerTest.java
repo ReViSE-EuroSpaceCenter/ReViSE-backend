@@ -117,6 +117,43 @@ class LobbyControllerTest {
     }
 
     @Test
+    void assignTeamShouldFailForInvalidLobbyCode() {
+        LobbyCreationResponse lobby = createLobby(4);
+        LobbyJoinedResponse firstClient = joinLobby(lobby.lobbyCode());
+
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/team", "INVALID")
+                .body(Map.of(
+                        "clientId", firstClient.clientId(),
+                        "teamLabel", "AERO"
+                ))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+    }
+
+
+    @Test
+    void assignTeamShouldFailForInvalidUuid() {
+        LobbyCreationResponse lobby = createLobby(4);
+
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/team", lobby.lobbyCode())
+                .body(Map.of(
+                        "clientId", "INVALID_UUID",
+                        "teamLabel", "AERO"
+                ))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.INVALID_UUID);
+    }
+
+
+    @Test
     void joinLobbyShouldSucceedForDifferentTeamLabels() {
         LobbyCreationResponse lobby = createLobby(4);
 
@@ -163,6 +200,20 @@ class LobbyControllerTest {
                 .expectBody()
                 .jsonPath("$.detail")
                 .isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+    }
+
+    @Test
+    void startLobbyShouldFailForInvalidUuid() {
+        LobbyCreationResponse lobby = createLobby(4);
+
+        restTestClient.post()
+                .uri("/api/lobbies/{lobbyCode}/start", lobby.lobbyCode())
+                .body(Map.of("hostId","INVALID_UUID"))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.INVALID_UUID);
     }
 
     @Test
