@@ -29,7 +29,6 @@
     <properties>
         <java.version>21</java.version>
         <sonar.organization>revise-eurospacecenter</sonar.organization>
-        <assertj.version>3.27.7</assertj.version>
     </properties>
     <dependencies>
         <dependency>
