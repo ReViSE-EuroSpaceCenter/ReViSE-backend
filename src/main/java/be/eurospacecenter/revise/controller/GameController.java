@@ -2,6 +2,7 @@ package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.request.TeamMissionStatusUpdateRequest;
 import be.eurospacecenter.revise.dto.response.TeamMissionsResponse;
+import be.eurospacecenter.revise.dto.response.TeamsProgressionReponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.service.GameService;
 import jakarta.validation.Valid;
@@ -23,6 +24,15 @@ public class GameController {
         this.gameService = gameService;
     }
 
+    @GetMapping("/{lobbyCode}")
+    public TeamsProgressionReponse getGameInfo(
+            @PathVariable
+            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
+            String lobbyCode
+    ) {
+        return gameService.getTeamsProgression(lobbyCode);
+    }
+
     @GetMapping("/{lobbyCode}/{clientId}/missions")
     public TeamMissionsResponse getTeamMissions(
             @PathVariable
@@ -33,10 +43,10 @@ public class GameController {
             @Valid
             UUID clientId
     ) {
-        return gameService.getTeamMissions(lobbyCode, clientId);
+        return gameService.getTeamFullProgression(lobbyCode, clientId);
     }
 
-            @PutMapping("/{lobbyCode}/missions")
+    @PutMapping("/{lobbyCode}/missions")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeTeamMissionState(
             @PathVariable

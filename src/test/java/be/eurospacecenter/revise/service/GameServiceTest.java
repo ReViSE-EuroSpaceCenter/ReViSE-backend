@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.dto.response.TeamMissionsResponse;
+import be.eurospacecenter.revise.dto.response.TeamsProgressionReponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
@@ -98,14 +99,38 @@ class GameServiceTest {
     }
 
     @Test
-    void shouldGetTeamMissions() {
+    void shouldGetTeamFullProgression() {
         gameService.registerGame("XXXXXX", gameWithOneTeam);
 
-        TeamMissionsResponse response = gameService.getTeamMissions("XXXXXX", idOfTheLoneTeam);
+        TeamMissionsResponse response = gameService.getTeamFullProgression("XXXXXX", idOfTheLoneTeam);
 
         assertNotNull(response);
         assertEquals(7, response.completedMissions().size());
         assertNotNull(response.teamProgression());
+    }
+
+    @Test
+    void shouldGetFourTeamsProgression() {
+        gameService.registerGame("XXXXXX", gameWith4Teams);
+
+        TeamsProgressionReponse response = gameService.getTeamsProgression("XXXXXX");
+
+        assertNotNull(response);
+        assertEquals(4, response.teamsProgression().size());
+
+        TeamLabel.getAllowedLabels(true).forEach(label -> assertTrue(response.teamsProgression().containsKey(label.name())));
+    }
+
+    @Test
+    void shouldGetSixTeamsProgression() {
+        gameService.registerGame("XXXXXX", gameWith6Teams);
+
+        TeamsProgressionReponse response = gameService.getTeamsProgression("XXXXXX");
+
+        assertNotNull(response);
+        assertEquals(6, response.teamsProgression().size());
+
+        TeamLabel.getAllowedLabels(false).forEach(label -> assertTrue(response.teamsProgression().containsKey(label.name())));
     }
 
     private Map<UUID, Team> createTeams(String... labels) {

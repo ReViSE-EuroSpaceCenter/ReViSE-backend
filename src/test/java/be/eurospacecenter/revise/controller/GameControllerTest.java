@@ -129,4 +129,14 @@ class GameControllerTest {
                 .jsonPath("$.teamProgression").exists()
                 .jsonPath("$.completedMissions").exists();
     }
+
+    @Test
+    void getTeamsProgressionShouldSucceed() {
+        restTestClient.get()
+                .uri("/api/games/" + lobbyCode)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.teamsProgression").exists();
+    }
 }

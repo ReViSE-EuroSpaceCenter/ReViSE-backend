@@ -6,6 +6,7 @@ import be.eurospacecenter.revise.exceptions.NotFoundException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Game {
 
@@ -14,7 +15,7 @@ public class Game {
     public Game(Map<UUID, Team> teams) {
         this.teams = teams;
     }
-    
+
     public String getTeamLabel(UUID id) {
         return teams.get(id).getLabel();
     }
@@ -22,6 +23,10 @@ public class Game {
     public void changeTeamMissionState(UUID id, MissionType missionType) {
         Team team = getTeam(id);
         team.changeMissionState(missionType);
+    }
+
+    public Map<String, TeamProgression> teamsProgression() {
+        return teams.values().stream().collect(Collectors.toMap(Team::getLabel, Team::getProgression));
     }
 
     public TeamProgression getTeamProgression(UUID id) {
