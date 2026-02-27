@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.service;
 
+import be.eurospacecenter.revise.dto.response.TeamMissionsResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
@@ -94,6 +95,17 @@ class GameServiceTest {
     @Test
     void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
         assertThrows(NotFoundException.class, () -> gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1));
+    }
+
+    @Test
+    void shouldGetTeamMissions() {
+        gameService.registerGame("XXXXXX", gameWithOneTeam);
+
+        TeamMissionsResponse response = gameService.getTeamMissions("XXXXXX", idOfTheLoneTeam);
+
+        assertNotNull(response);
+        assertEquals(7, response.completedMissions().size());
+        assertNotNull(response.teamProgression());
     }
 
     private Map<UUID, Team> createTeams(String... labels) {

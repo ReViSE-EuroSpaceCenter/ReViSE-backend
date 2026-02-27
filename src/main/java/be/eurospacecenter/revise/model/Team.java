@@ -3,6 +3,8 @@ package be.eurospacecenter.revise.model;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class Team {
@@ -47,8 +49,7 @@ public class Team {
         ensureOnlyMecaCanCompleteClassic8(missionType);
 
         switch (missionType) {
-            case CLASSIC_1, CLASSIC_2, CLASSIC_3, CLASSIC_4,
-                 CLASSIC_5, CLASSIC_6, CLASSIC_7, CLASSIC_8 ->
+            case CLASSIC_1, CLASSIC_2, CLASSIC_3, CLASSIC_4, CLASSIC_5, CLASSIC_6, CLASSIC_7, CLASSIC_8 ->
                     missionsCompleted[missionType.ordinal()] = !missionsCompleted[missionType.ordinal()];
 
             case BONUS_1 -> firstBonusMissionCompleted = !firstBonusMissionCompleted;
@@ -58,6 +59,20 @@ public class Team {
 
     public TeamProgression getProgression() {
         return new TeamProgression(getMissionCompletionPercentage(), firstBonusMissionCompleted, secondBonusMissionCompleted);
+    }
+
+    public TeamFullProgression getFullProgression() {
+        TeamProgression baseProgression = getProgression();
+
+        Map<String, Boolean> missionStatusMap = new HashMap<>();
+
+        MissionType.getClassicMissions().stream().toList().forEach(missionType -> missionStatusMap.put(missionType.name(), missionsCompleted[missionType.ordinal()]));
+
+        if (label != TeamLabel.MECA) {
+            missionStatusMap.remove(MissionType.CLASSIC_8.name());
+        }
+
+        return new TeamFullProgression(missionStatusMap, baseProgression);
     }
 
     private void ensureOnlyMecaCanCompleteClassic8(MissionType missionType) {

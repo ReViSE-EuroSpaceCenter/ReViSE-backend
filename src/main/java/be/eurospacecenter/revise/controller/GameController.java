@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.request.TeamMissionStatusUpdateRequest;
+import be.eurospacecenter.revise.dto.response.TeamMissionsResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.service.GameService;
 import jakarta.validation.Valid;
@@ -8,6 +9,8 @@ import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 
 @RestController
@@ -20,7 +23,20 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @PutMapping("/{lobbyCode}/missions")
+    @GetMapping("/{lobbyCode}/{clientId}/missions")
+    public TeamMissionsResponse getTeamMissions(
+            @PathVariable
+            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
+            String lobbyCode,
+
+            @PathVariable
+            @Valid
+            UUID clientId
+    ) {
+        return gameService.getTeamMissions(lobbyCode, clientId);
+    }
+
+            @PutMapping("/{lobbyCode}/missions")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeTeamMissionState(
             @PathVariable

@@ -29,6 +29,12 @@ public class Game {
         return team.getProgression();
     }
 
+    public TeamFullProgression getTeamFullProgression(UUID clientId) {
+        Team team = getTeam(clientId);
+
+        return team.getFullProgression();
+    }
+
     public Team getTeam(UUID id) {
         return Optional.ofNullable(teams.get(id)).orElseThrow(() -> new NotFoundException(ErrorKeys.TEAM_NOT_FOUND));
     }

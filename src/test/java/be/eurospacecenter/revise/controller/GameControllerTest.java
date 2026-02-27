@@ -5,6 +5,7 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.model.TeamLabel;
 import be.eurospacecenter.revise.service.LobbyService;
 import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,13 @@ class GameControllerTest {
                 .expectBody()
                 .returnResult();
 
+
+        Assertions.assertNotNull(result.getResponseBody());
+
         String body = new String(result.getResponseBody());
+
+        Assertions.assertNotNull(body);
+
         lobbyCode = JsonPath.read(body, "$.lobbyCode");
         UUID hostId = UUID.fromString(JsonPath.read(body, "$.hostId"));
 
@@ -110,5 +117,16 @@ class GameControllerTest {
                 .expectBody()
                 .jsonPath("$.detail")
                 .isEqualTo(ErrorKeys.INVALID_MISSION_TYPE);
+    }
+
+    @Test
+    void getTeamMissionsShouldSucceed() {
+        restTestClient.get()
+                .uri("/api/games/" + lobbyCode + "/" + teamClientId + "/missions")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.teamProgression").exists()
+                .jsonPath("$.completedMissions").exists();
     }
 }
