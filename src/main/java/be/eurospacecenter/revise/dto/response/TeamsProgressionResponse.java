@@ -4,5 +4,5 @@ import be.eurospacecenter.revise.model.TeamProgression;
 
 import java.util.Map;
 
-public record TeamsProgressionReponse(Map<String, TeamProgression> teamsProgression) {
+public record TeamsProgressionResponse(Map<String, TeamProgression> teamsProgression) {
 }
