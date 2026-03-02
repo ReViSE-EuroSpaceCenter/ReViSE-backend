@@ -126,8 +126,9 @@ class GameControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.teamProgression").exists()
-                .jsonPath("$.completedMissions").exists();
+                .jsonPath("$.teamFullProgression").exists()
+                .jsonPath("$.teamFullProgression.teamProgression").exists()
+                .jsonPath("$.teamFullProgression.completedMissions").exists();
     }
 
     @Test

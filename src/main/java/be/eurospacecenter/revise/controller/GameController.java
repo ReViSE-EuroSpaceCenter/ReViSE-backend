@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.request.TeamMissionStatusUpdateRequest;
-import be.eurospacecenter.revise.dto.response.TeamMissionsResponse;
+import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
 import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.service.GameService;
@@ -34,7 +34,7 @@ public class GameController {
     }
 
     @GetMapping("/{lobbyCode}/{clientId}/missions")
-    public TeamMissionsResponse getTeamMissions(
+    public TeamFullProgressionResponse getTeamMissions(
             @PathVariable
             @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,

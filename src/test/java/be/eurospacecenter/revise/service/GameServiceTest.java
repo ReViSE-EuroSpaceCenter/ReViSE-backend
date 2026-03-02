@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.TeamMissionsResponse;
+import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
 import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
@@ -102,11 +102,11 @@ class GameServiceTest {
     void shouldGetTeamFullProgression() {
         gameService.registerGame("XXXXXX", gameWithOneTeam);
 
-        TeamMissionsResponse response = gameService.getTeamFullProgression("XXXXXX", idOfTheLoneTeam);
+        TeamFullProgressionResponse response = gameService.getTeamFullProgression("XXXXXX", idOfTheLoneTeam);
 
         assertNotNull(response);
-        assertEquals(7, response.completedMissions().size());
-        assertNotNull(response.teamProgression());
+        assertEquals(7, response.teamFullProgression().completedMissions().size());
+        assertNotNull(response.teamFullProgression().teamProgression());
     }
 
     @Test

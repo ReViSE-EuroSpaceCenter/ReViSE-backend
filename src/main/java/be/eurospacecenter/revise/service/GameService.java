@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.TeamMissionsResponse;
+import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
 import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
@@ -46,11 +46,11 @@ public class GameService {
         return new TeamsProgressionResponse(game.teamsProgression());
     }
 
-    public TeamMissionsResponse getTeamFullProgression(String lobbyCode, UUID clientId) {
+    public TeamFullProgressionResponse getTeamFullProgression(String lobbyCode, UUID clientId) {
         Game game = getGame(lobbyCode);
         TeamFullProgression fullProgression = game.getTeamFullProgression(clientId);
 
-        return new TeamMissionsResponse(fullProgression.completedMissions(), fullProgression.teamProgression());
+        return new TeamFullProgressionResponse(fullProgression);
     }
 
     public Game getGame(String lobbyCode) {
