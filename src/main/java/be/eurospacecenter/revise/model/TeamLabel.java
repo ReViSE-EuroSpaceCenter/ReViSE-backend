@@ -9,7 +9,7 @@ public enum TeamLabel {
 
     COOP, EXPE, GECO, AERO, MECA, MEDI;
 
-    private static final Set<TeamLabel> FOUR_TEAMS_MODE = EnumSet.of(COOP, EXPE, GECO, AERO);
+    private static final Set<TeamLabel> FOUR_TEAMS_MODE = EnumSet.of(AERO, EXPE, GECO, MECA);
 
     private static final Set<TeamLabel> SIX_TEAMS_MODE = EnumSet.allOf(TeamLabel.class);
 

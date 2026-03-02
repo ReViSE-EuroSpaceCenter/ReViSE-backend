@@ -77,7 +77,7 @@ class LobbyTest {
     @Test
     void shouldStartGameWith4Teams() {
         lobby4Teams.assignTeam(team1Id, "AERO");
-        lobby4Teams.assignTeam(team2Id, "COOP");
+        lobby4Teams.assignTeam(team2Id, "MECA");
         lobby4Teams.assignTeam(team3Id, "EXPE");
         lobby4Teams.assignTeam(team4Id, "GECO");
 
@@ -99,7 +99,7 @@ class LobbyTest {
     @Test
     void shouldNotStartGameWithWrongHostId() {
         lobby4Teams.assignTeam(team1Id, "AERO");
-        lobby4Teams.assignTeam(team2Id, "COOP");
+        lobby4Teams.assignTeam(team2Id, "MECA");
         lobby4Teams.assignTeam(team3Id, "EXPE");
         lobby4Teams.assignTeam(team4Id, "GECO");
 
@@ -167,7 +167,7 @@ class LobbyTest {
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () ->  lobby4Teams.assignTeam(team1Id, "COOP")
+                () ->  lobby4Teams.assignTeam(team1Id, "EXPE")
         );
 
         assertEquals(ErrorKeys.CLIENT_ALREADY_CHOSE_TEAM, ex.getMessage());

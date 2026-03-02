@@ -11,7 +11,7 @@ class TeamLabelTest {
 
     @Test
     void validLabel_fourTeamsMode() {
-        assertTrue(TeamLabel.isValidLabel("COOP", true));
+        assertTrue(TeamLabel.isValidLabel("MECA", true));
         assertTrue(TeamLabel.isValidLabel("EXPE", true));
         assertTrue(TeamLabel.isValidLabel("GECO", true));
         assertTrue(TeamLabel.isValidLabel("AERO", true));
@@ -19,7 +19,7 @@ class TeamLabelTest {
 
     @Test
     void invalidLabel_fourTeamsModeInit() {
-        assertFalse(TeamLabel.isValidLabel("MECA", true));
+        assertFalse(TeamLabel.isValidLabel("COOP", true));
         assertFalse(TeamLabel.isValidLabel("MEDI", true));
     }
 
@@ -44,7 +44,7 @@ class TeamLabelTest {
 
     @Test
     void validTeams_fourTeamsMode() {
-        List<String> labels = List.of("COOP", "EXPE", "GECO", "AERO");
+        List<String> labels = List.of("MECA", "EXPE", "GECO", "AERO");
 
         assertTrue(TeamLabel.isValidTeams(labels, true));
     }
@@ -78,6 +78,11 @@ class TeamLabelTest {
     }
 
     @Test
+    void blanknessInvalid() {
+        assertFalse(TeamLabel.isValidLabel("", false));
+    }
+
+    @Test
     void duplicateLabels() {
         List<String> labels = List.of("COOP", "COOP", "GECO", "AERO");
 
@@ -96,7 +101,7 @@ class TeamLabelTest {
         Set<TeamLabel> allowed = TeamLabel.getAllowedLabels(true);
 
         assertEquals(4, allowed.size());
-        assertTrue(allowed.containsAll(List.of(TeamLabel.COOP, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.AERO)));
+        assertTrue(allowed.containsAll(List.of(TeamLabel.MECA, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.AERO)));
     }
 
     @Test

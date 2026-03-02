@@ -1,5 +1,7 @@
 package be.eurospacecenter.revise.service;
 
+import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
+import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
@@ -36,6 +38,19 @@ public class GameService {
         String teamLabel = game.getTeamLabel(clientId);
         TeamProgression teamProgression = game.getTeamProgression(clientId);
         notifier.notifyTeamProgression(lobbyCode, teamLabel, teamProgression);
+    }
+
+
+    public TeamsProgressionResponse getTeamsProgression(String lobbyCode) {
+        Game game = getGame(lobbyCode);
+        return new TeamsProgressionResponse(game.teamsProgression());
+    }
+
+    public TeamFullProgressionResponse getTeamFullProgression(String lobbyCode, UUID clientId) {
+        Game game = getGame(lobbyCode);
+        TeamFullProgression fullProgression = game.getTeamFullProgression(clientId);
+
+        return new TeamFullProgressionResponse(fullProgression);
     }
 
     public Game getGame(String lobbyCode) {

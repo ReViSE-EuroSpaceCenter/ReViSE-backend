@@ -1,5 +1,8 @@
 package be.eurospacecenter.revise.model;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 public enum MissionType {
     CLASSIC_1,
     CLASSIC_2,
@@ -10,5 +13,11 @@ public enum MissionType {
     CLASSIC_7,
     CLASSIC_8,
     BONUS_1,
-    BONUS_2
+    BONUS_2;
+
+    private static final Set<MissionType> CLASSIC_MISSIONS = EnumSet.range(CLASSIC_1, CLASSIC_8);
+
+    public static Set<MissionType> getClassicMissions() {
+        return CLASSIC_MISSIONS;
+    }
 }

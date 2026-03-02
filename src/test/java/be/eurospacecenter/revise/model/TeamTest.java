@@ -72,6 +72,22 @@ class TeamTest {
         assertEquals(0, progression.classicMissionPercentage());
     }
 
+    @Test
+    void teamFullMissionProgressionsShouldBe7Missions() {
+        TeamFullProgression prog = team.getFullProgression();
+
+        assertEquals(7, prog.completedMissions().size());
+        assertFalse(prog.completedMissions().containsKey(MissionType.CLASSIC_8.name()));
+    }
+
+    @Test
+    void teamFullMissionProgressionsShouldBe8MissionsForMeca() {
+        TeamFullProgression prog = teamMeca.getFullProgression();
+
+        assertEquals(8, prog.completedMissions().size());
+        assertTrue(prog.completedMissions().containsKey(MissionType.CLASSIC_8.name()));
+    }
+
     private void testMissionForTeamLabel(Team team, MissionType mission) {
         if (shouldThrowException(team, mission)) {
             InvalidGameOperationException ex = assertThrows(InvalidGameOperationException.class,
