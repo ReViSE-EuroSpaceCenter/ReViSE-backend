@@ -35,7 +35,7 @@ class GameTest {
 
     @Test
     void completeTeamClassicMission() {
-        gameWithOneTeam.changeTeamMissionState(idOfTheLoneTeam, List.of(MissionType.CLASSIC_1));
+        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, List.of(MissionType.CLASSIC_1));
         TeamProgression progressionOfTheLoneTeam = gameWithOneTeam.getTeamProgression(idOfTheLoneTeam);
 
         assertEquals(1, progressionOfTheLoneTeam.classicMissionsCompleted());
@@ -45,7 +45,7 @@ class GameTest {
 
     @Test
     void changeTeamFirstBonusMissionState() {
-        gameWithOneTeam.changeTeamMissionState(idOfTheLoneTeam, List.of(MissionType.BONUS_1));
+        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, List.of(MissionType.BONUS_1));
         TeamProgression progressionOfTheLoneTeam = gameWithOneTeam.getTeamProgression(idOfTheLoneTeam);
 
         assertEquals(0, progressionOfTheLoneTeam.classicMissionsCompleted());
@@ -55,7 +55,7 @@ class GameTest {
 
     @Test
     void changeTeamSecondBonusMissionState() {
-        gameWithOneTeam.changeTeamMissionState(idOfTheLoneTeam, List.of(MissionType.BONUS_2));
+        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, List.of(MissionType.BONUS_2));
         TeamProgression progressionOfTheLoneTeam = gameWithOneTeam.getTeamProgression(idOfTheLoneTeam);
 
         assertEquals(0, progressionOfTheLoneTeam.classicMissionsCompleted());
@@ -70,7 +70,7 @@ class GameTest {
 
         NotFoundException ex = assertThrows(
                 NotFoundException.class,
-                () -> gameWithOneTeam.changeTeamMissionState(id, missions)
+                () -> gameWithOneTeam.changeTeamMissionsState(id, missions)
         );
         assertEquals(ErrorKeys.TEAM_NOT_FOUND, ex.getMessage());
     }

@@ -87,7 +87,7 @@ class GameServiceTest {
     void shouldCompleteTeamMission() {
         gameService.registerGame("XXXXXX", gameWithOneTeam);
 
-        gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_1));
+        gameService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_1));
 
         TeamProgression progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
 
@@ -97,7 +97,7 @@ class GameServiceTest {
     @Test
     void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
         List<MissionType> missions = List.of(MissionType.CLASSIC_1);
-        assertThrows(NotFoundException.class, () -> gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, missions));
+        assertThrows(NotFoundException.class, () -> gameService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, missions));
     }
 
     @Test
@@ -139,7 +139,7 @@ class GameServiceTest {
     void shouldUpdateMultipleMissionsForATeam() {
         gameService.registerGame("XXXXXX", gameWithOneTeam);
 
-        gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_1, MissionType.CLASSIC_2, MissionType.BONUS_1));
+        gameService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_1, MissionType.CLASSIC_2, MissionType.BONUS_1));
 
         TeamProgression progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
 
@@ -151,14 +151,14 @@ class GameServiceTest {
     void shouldUpdateMultipleMissionsForMissionsAlreadyCompleted() {
         gameService.registerGame("XXXXXX", gameWithOneTeam);
 
-        gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_1, MissionType.CLASSIC_2, MissionType.BONUS_1));
+        gameService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_1, MissionType.CLASSIC_2, MissionType.BONUS_1));
 
         TeamProgression progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
 
         assertEquals(2, progression.classicMissionsCompleted());
         assertTrue(progression.firstBonusMissionCompleted());
 
-        gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_2, MissionType.CLASSIC_3, MissionType.CLASSIC_1, MissionType.CLASSIC_4, MissionType.BONUS_1, MissionType.BONUS_2));
+        gameService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_2, MissionType.CLASSIC_3, MissionType.CLASSIC_1, MissionType.CLASSIC_4, MissionType.BONUS_1, MissionType.BONUS_2));
 
         progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
         assertEquals(2, progression.classicMissionsCompleted());

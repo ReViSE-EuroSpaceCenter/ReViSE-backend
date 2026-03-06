@@ -31,9 +31,9 @@ public class GameService {
         games.put(lobbyCode, game);
     }
 
-    public void changeTeamMissionState(String lobbyCode, UUID clientId, List<MissionType> updateMissions) {
+    public void changeTeamMissionsState(String lobbyCode, UUID clientId, List<MissionType> updateMissions) {
         Game game = getGame(lobbyCode);
-        game.changeTeamMissionState(clientId, updateMissions);
+        game.changeTeamMissionsState(clientId, updateMissions);
 
         String teamLabel = game.getTeamLabel(clientId);
         TeamProgression teamProgression = game.getTeamProgression(clientId);

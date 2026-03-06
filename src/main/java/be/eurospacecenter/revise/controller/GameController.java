@@ -56,6 +56,6 @@ public class GameController {
             @RequestBody @Valid
             TeamMissionStatusUpdateRequest request
     ) {
-        gameService.changeTeamMissionState(lobbyCode, request.clientId(), request.updateMissions());
+        gameService.changeTeamMissionsState(lobbyCode, request.clientId(), request.updateMissions());
     }
 }

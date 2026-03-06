@@ -21,7 +21,7 @@ public class Game {
         return teams.get(id).getLabel();
     }
 
-    public void changeTeamMissionState(UUID id, List<MissionType> missionType) {
+    public void changeTeamMissionsState(UUID id, List<MissionType> missionType) {
         Team team = getTeam(id);
         missionType.forEach(team::changeMissionState);
     }
