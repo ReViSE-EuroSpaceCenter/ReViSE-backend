@@ -4,7 +4,7 @@ import java.security.SecureRandom;
 
 public class LobbyCode {
 
-    private LobbyCode() {
+    LobbyCode() {
         throw new IllegalStateException("Utility class");
     }
 
