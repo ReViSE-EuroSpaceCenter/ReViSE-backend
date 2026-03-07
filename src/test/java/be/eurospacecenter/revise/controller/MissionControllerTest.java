@@ -4,7 +4,6 @@ import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.service.LobbyService;
-import be.eurospacecenter.revise.service.MissionService;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +20,7 @@ import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-class MissionManagerControllerTest {
+class MissionControllerTest {
 
     @Autowired
     private RestTestClient restTestClient;
