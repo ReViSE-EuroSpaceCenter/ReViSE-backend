@@ -6,7 +6,7 @@ public class LobbyCode {
 
     public static final String PATTERN = "^[A-Z]{6}$";
 
-    private LobbyCode() {
+    LobbyCode() {
         throw new IllegalStateException("Utility class");
     }
 

@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.model.mission;
 
 public record TeamProgression(
-        float classicMissionPercentage,
+        int classicMissionsCompleted,
         boolean firstBonusMissionCompleted,
         boolean secondBonusMissionCompleted
 ) {}
