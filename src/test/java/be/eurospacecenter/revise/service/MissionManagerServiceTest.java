@@ -5,69 +5,74 @@ import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
+import be.eurospacecenter.revise.model.lobby.Host;
+import be.eurospacecenter.revise.model.lobby.Team;
+import be.eurospacecenter.revise.model.mission.MissionType;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.mission.TeamProgression;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-class GameServiceTest {
+class MissionManagerServiceTest {
 
     @Autowired
-    private GameService gameService;
-    private Game gameWithOneTeam;
-    private Game gameWith4Teams;
-    private Game gameWith6Teams;
+    private MissionService missionService;
+    private GameInfo gameInfoWithOneLoneTeam;
+    private GameInfo gameInfoWith4Teams;
+    private GameInfo gameInfoWith6Teams;
     private UUID idOfTheLoneTeam;
 
     @BeforeEach
     void setUp() {
-        gameService.games.clear();
+        missionService.managers.clear();
         idOfTheLoneTeam = UUID.randomUUID();
 
-        GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()));
+        GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()), LocalDateTime.now());
         gameInfo.addTeam(new Team(TeamLabel.EXPE, idOfTheLoneTeam));
+        gameInfoWithOneLoneTeam = gameInfo;
 
-        gameWithOneTeam = new Game(gameInfo);
-
-        gameWith4Teams = new Game(createTeams("AERO", "MECA", "EXPE", "GECO"));
-        gameWith6Teams = new Game(createTeams("AERO", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
+        gameInfoWith4Teams = createTeams("AERO", "MECA", "EXPE", "GECO");
+        gameInfoWith6Teams = createTeams("AERO", "MECA", "EXPE", "GECO", "MEDI", "COOP");
     }
 
 
     @Test
     void shouldRegisterAGameWith4Teams() {
-        gameService.registerGame("XXXXXX", gameWith4Teams);
+        missionService.registerManager("XXXXXX", gameInfoWith4Teams);
 
-        assertEquals(gameWith4Teams, gameService.getGame("XXXXXX"));
+        assertEquals(gameInfoWith4Teams, missionService.getManager("XXXXXX").getGameInfo());
     }
 
     @Test
     void shouldRegisterAGameWith6Teams() {
-        gameService.registerGame("XXXXXX", gameWith6Teams);
+        missionService.registerManager("XXXXXX", gameInfoWith6Teams);
 
-        assertEquals(gameWith6Teams, gameService.getGame("XXXXXX"));
+        assertEquals(gameInfoWith6Teams, missionService.getManager("XXXXXX").getGameInfo());
     }
 
     @Test
     void shouldRegisterTwoGames() {
-        gameService.registerGame("XXXXXX", gameWith4Teams);
-        gameService.registerGame("YYYYYY", gameWith6Teams);
+        missionService.registerManager("XXXXXX", gameInfoWith4Teams);
+        missionService.registerManager("YYYYYY", gameInfoWith6Teams);
 
-        assertEquals(gameWith4Teams, gameService.getGame("XXXXXX"));
-        assertEquals(gameWith6Teams, gameService.getGame("YYYYYY"));
+        assertEquals(gameInfoWith4Teams, missionService.getManager("XXXXXX").getGameInfo());
+        assertEquals(gameInfoWith6Teams, missionService.getManager("YYYYYY").getGameInfo());
     }
 
     @Test
     void shouldFailToRegisterGameWithNullLobbyCode() {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> gameService.registerGame(null, gameWith4Teams)
+                () -> missionService.registerManager(null, gameInfoWith4Teams)
         );
         assertEquals(ErrorKeys.INVALID_LOBBY_CODE, ex.getMessage());
     }
@@ -75,37 +80,37 @@ class GameServiceTest {
     @Test
     void shouldFailToRegisterGameWithEmptyLobbyCode() {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> gameService.registerGame("", gameWith4Teams)
+                () -> missionService.registerManager("", gameInfoWith4Teams)
         );
         assertEquals(ErrorKeys.INVALID_LOBBY_CODE, ex.getMessage());
 
         NotFoundException ex2 = assertThrows(NotFoundException.class,
-                () -> gameService.getGame("")
+                () -> missionService.getManager("")
         );
-        assertEquals(ErrorKeys.GAME_NOT_FOUND, ex2.getMessage());
+        assertEquals(ErrorKeys.MISSION_MANAGER_NOT_FOUND, ex2.getMessage());
     }
 
     @Test
     void shouldCompleteTeamMission() {
-        gameService.registerGame("XXXXXX", gameWithOneTeam);
+        missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
 
-        gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1);
+        missionService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1);
 
-        TeamProgression progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
+        TeamProgression progression = missionService.getManager("XXXXXX").getTeamProgression(idOfTheLoneTeam);
 
         assertEquals(100f / 7, progression.classicMissionPercentage(), 0.001);
     }
 
     @Test
     void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
-        assertThrows(NotFoundException.class, () -> gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1));
+        assertThrows(NotFoundException.class, () -> missionService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1));
     }
 
     @Test
     void shouldGetTeamFullProgression() {
-        gameService.registerGame("XXXXXX", gameWithOneTeam);
+        missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
 
-        TeamFullProgressionResponse response = gameService.getTeamFullProgression("XXXXXX", idOfTheLoneTeam);
+        TeamFullProgressionResponse response = missionService.getTeamFullProgression("XXXXXX", idOfTheLoneTeam);
 
         assertNotNull(response);
         assertEquals(7, response.teamFullProgression().completedMissions().size());
@@ -114,9 +119,9 @@ class GameServiceTest {
 
     @Test
     void shouldGetFourTeamsProgression() {
-        gameService.registerGame("XXXXXX", gameWith4Teams);
+        missionService.registerManager("XXXXXX", gameInfoWith4Teams);
 
-        TeamsProgressionResponse response = gameService.getTeamsProgression("XXXXXX");
+        TeamsProgressionResponse response = missionService.getTeamsProgression("XXXXXX");
 
         assertNotNull(response);
         assertEquals(4, response.teamsProgression().size());
@@ -126,9 +131,9 @@ class GameServiceTest {
 
     @Test
     void shouldGetSixTeamsProgression() {
-        gameService.registerGame("XXXXXX", gameWith6Teams);
+        missionService.registerManager("XXXXXX", gameInfoWith6Teams);
 
-        TeamsProgressionResponse response = gameService.getTeamsProgression("XXXXXX");
+        TeamsProgressionResponse response = missionService.getTeamsProgression("XXXXXX");
 
         assertNotNull(response);
         assertEquals(6, response.teamsProgression().size());
@@ -137,7 +142,7 @@ class GameServiceTest {
     }
 
     private GameInfo createTeams(String... labels) {
-        GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()));
+        GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()), LocalDateTime.now());
 
         for (String label : labels) {
             Team team = new Team(TeamLabel.valueOf(label), UUID.randomUUID());

@@ -1,8 +1,8 @@
 package be.eurospacecenter.revise.helper;
 
-import be.eurospacecenter.revise.model.Host;
-import be.eurospacecenter.revise.model.Lobby;
-import be.eurospacecenter.revise.model.TeamLabel;
+import be.eurospacecenter.revise.model.lobby.Host;
+import be.eurospacecenter.revise.model.lobby.Lobby;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.service.LobbyService;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;

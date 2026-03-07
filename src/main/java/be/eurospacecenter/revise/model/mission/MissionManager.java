@@ -1,15 +1,24 @@
-package be.eurospacecenter.revise.model;
+package be.eurospacecenter.revise.model.mission;
+
+import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
+import be.eurospacecenter.revise.model.*;
+import be.eurospacecenter.revise.model.lobby.Team;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class Game {
+public class MissionManager {
 
     private final GameInfo gameInfo;
 
-    public Game(GameInfo gameInfo) {
+    public MissionManager(GameInfo gameInfo) {
         this.gameInfo = gameInfo;
+    }
+
+    public GameInfo getGameInfo() {
+        return gameInfo;
     }
 
     public String getTeamLabel(UUID id) {
@@ -39,5 +48,16 @@ public class Game {
     }
 
     public void endMission(UUID hostId) {
+        if (gameInfo.isNotHost(hostId)) {
+            throw new IllegalArgumentException(ErrorKeys.ACTION_RESERVED_TO_HOST);
+        }
+
+        Map<UUID, Team> teams = gameInfo.getTeams();
+        teams.forEach((id, team) -> {
+            if (!team.allClassicMissionsCompleted()) {
+                throw new InvalidMissionOperationException(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS);
+            }
+        });
+
     }
 }

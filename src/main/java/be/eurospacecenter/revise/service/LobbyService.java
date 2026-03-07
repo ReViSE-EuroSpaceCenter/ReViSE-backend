@@ -5,11 +5,9 @@ import be.eurospacecenter.revise.dto.response.LobbyInfoResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
-import be.eurospacecenter.revise.model.*;
+import be.eurospacecenter.revise.model.lobby.Host;
+import be.eurospacecenter.revise.model.lobby.Lobby;
 import be.eurospacecenter.revise.notification.LobbyNotifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -20,21 +18,26 @@ import java.util.concurrent.ConcurrentHashMap;
 import static be.eurospacecenter.revise.helper.LobbyCode.generateCode;
 
 @Service
-public class LobbyService {
-
-    private static final Logger logger = LoggerFactory.getLogger(LobbyService.class);
+public class LobbyService implements Cleanable {
 
     protected final Map<String, Lobby> lobbies = new ConcurrentHashMap<>();
     private final SecureRandom random = new SecureRandom();
-    private final GameService gameService;
+
+    private final MissionService missionService;
     private final LobbyNotifier notifier;
 
     public LobbyService(
-            GameService gameService,
+            MissionService missionService,
             LobbyNotifier notifier
     ) {
-        this.gameService = gameService;
+        this.missionService = missionService;
         this.notifier = notifier;
+    }
+
+    public LobbyInfoResponse getLobbyInfo(String lobbyCode) {
+        Lobby lobby = getLobby(lobbyCode);
+
+        return new LobbyInfoResponse(lobby.getFreeTeamLabels(), lobby.getAllTeamLabels());
     }
 
     public LobbyCreationResponse createLobby(int numberOfTeams) {
@@ -45,12 +48,6 @@ public class LobbyService {
         lobbies.put(lobbyCode, lobby);
 
         return new LobbyCreationResponse(lobbyCode, hostId.toString());
-    }
-
-    public LobbyInfoResponse getLobbyInfo(String lobbyCode) {
-        Lobby lobby = getLobby(lobbyCode);
-
-        return new LobbyInfoResponse(lobby.getFreeTeamLabels(), lobby.getAllTeamLabels());
     }
 
     public LobbyJoinedResponse joinLobby(String lobbyCode) {
@@ -77,35 +74,22 @@ public class LobbyService {
 
         lobby.startGame(hostId);
 
-        Game game = new Game(lobby.getGameInfo());
-        gameService.registerGame(lobbyCode, game);
+        missionService.registerManager(lobbyCode, lobby.getGameInfo());
 
         notifier.notifyGameStarted(lobbyCode);
     }
 
-    protected Lobby getLobby(String lobbyCode) {
+    private Lobby getLobby(String lobbyCode) {
         return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.LOBBY_NOT_FOUND));
     }
 
-    @Scheduled(cron = "0 0 */12 * * *")
-    protected void clearLobbies() {
-        List<String> toRemove = new ArrayList<>();
-
-        lobbies.forEach((code, lobby) -> {
-            if (LocalDateTime.now().isAfter(lobby.getExpiresAt())) {
-                toRemove.add(code);
-            }
-        });
-
-        toRemove.forEach(lobbies::remove);
-        gameService.clearGames(toRemove);
-
-        logger.info("Clearing {} games", toRemove.size());
-    }
-
-    // DO NOT USE, only for testing purposes
+    /** DO NOT USE, only for testing purposes */
     public void addLobby(String lobbyCode, Lobby lobby) {
         lobbies.put(lobbyCode, lobby);
     }
 
+    @Override
+    public void cleanUp(List<String> toRemove) {
+        toRemove.forEach(lobbies::remove);
+    }
 }

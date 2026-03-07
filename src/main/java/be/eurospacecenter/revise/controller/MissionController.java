@@ -5,7 +5,7 @@ import be.eurospacecenter.revise.dto.request.TeamMissionStatusUpdateRequest;
 import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
 import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
-import be.eurospacecenter.revise.service.GameService;
+import be.eurospacecenter.revise.service.MissionService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
@@ -17,12 +17,12 @@ import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/games")
-public class GameController {
-    private final GameService gameService;
+@RequestMapping("/api/missions")
+public class MissionController {
+    private final MissionService missionService;
 
-    public GameController(GameService gameService) {
-        this.gameService = gameService;
+    public MissionController(MissionService missionService) {
+        this.missionService = missionService;
     }
 
     @GetMapping("/{lobbyCode}")
@@ -31,23 +31,10 @@ public class GameController {
             @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode
     ) {
-        return gameService.getTeamsProgression(lobbyCode);
+        return missionService.getTeamsProgression(lobbyCode);
     }
 
-    @GetMapping("/{lobbyCode}/{clientId}/missions")
-    public TeamFullProgressionResponse getTeamMissions(
-            @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
-            String lobbyCode,
-
-            @PathVariable
-            @Valid
-            UUID clientId
-    ) {
-        return gameService.getTeamFullProgression(lobbyCode, clientId);
-    }
-
-    @PutMapping("/{lobbyCode}/missions")
+    @PutMapping("/{lobbyCode}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeTeamMissionState(
             @PathVariable
@@ -57,7 +44,7 @@ public class GameController {
             @RequestBody @Valid
             TeamMissionStatusUpdateRequest request
     ) {
-        gameService.changeTeamMissionState(lobbyCode, request.clientId(), request.missionNumber());
+        missionService.changeTeamMissionState(lobbyCode, request.clientId(), request.missionNumber());
     }
 
     @PostMapping("/{lobbyCode}/missions/end")
@@ -70,6 +57,19 @@ public class GameController {
             @RequestBody @Valid
             EndMissionRequest request
     ) {
-        gameService.endMission(lobbyCode, request.hostId());
+        missionService.endMission(lobbyCode, request.hostId());
+    }
+
+    @GetMapping("/{lobbyCode}/{clientId}")
+    public TeamFullProgressionResponse getTeamMissions(
+            @PathVariable
+            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
+            String lobbyCode,
+
+            @PathVariable
+            @Valid
+            UUID clientId
+    ) {
+        return missionService.getTeamFullProgression(lobbyCode, clientId);
     }
 }

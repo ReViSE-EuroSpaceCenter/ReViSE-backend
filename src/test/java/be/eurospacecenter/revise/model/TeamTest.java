@@ -1,7 +1,12 @@
 package be.eurospacecenter.revise.model;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
-import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
+import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
+import be.eurospacecenter.revise.model.lobby.Team;
+import be.eurospacecenter.revise.model.mission.MissionType;
+import be.eurospacecenter.revise.model.mission.TeamFullProgression;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.mission.TeamProgression;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -90,7 +95,7 @@ class TeamTest {
 
     private void testMissionForTeamLabel(Team team, MissionType mission) {
         if (shouldThrowException(team, mission)) {
-            InvalidGameOperationException ex = assertThrows(InvalidGameOperationException.class,
+            InvalidMissionOperationException ex = assertThrows(InvalidMissionOperationException.class,
                     () -> team.changeMissionState(mission)
             );
             assertEquals(ErrorKeys.ONLY_MECA_COMPLETE_CLASSIC_8, ex.getMessage());

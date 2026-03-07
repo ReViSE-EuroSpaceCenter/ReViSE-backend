@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.dto.request;
 
-import be.eurospacecenter.revise.model.MissionType;
+import be.eurospacecenter.revise.model.mission.MissionType;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package be.eurospacecenter.revise.model;
+package be.eurospacecenter.revise.model.mission;
 
 public record TeamProgression(
         float classicMissionPercentage,

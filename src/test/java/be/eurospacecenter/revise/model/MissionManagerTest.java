@@ -2,28 +2,35 @@ package be.eurospacecenter.revise.model;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
+import be.eurospacecenter.revise.model.lobby.Host;
+import be.eurospacecenter.revise.model.lobby.Team;
+import be.eurospacecenter.revise.model.mission.MissionManager;
+import be.eurospacecenter.revise.model.mission.MissionType;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.mission.TeamProgression;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class GameTest {
+class MissionManagerTest {
 
-    private Game gameWithOneTeam;
+    private MissionManager gameWithOneTeam;
     private UUID idOfTheLoneTeam;
 
     @BeforeEach
     void setUp() {
         idOfTheLoneTeam = UUID.randomUUID();
 
-        GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()));
+        GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()), LocalDateTime.now());
         gameInfo.addTeam(new Team(TeamLabel.EXPE, idOfTheLoneTeam));
 
-        gameWithOneTeam = new Game(gameInfo);
+        gameWithOneTeam = new MissionManager(gameInfo);
     }
 
     @Test

@@ -1,7 +1,8 @@
-package be.eurospacecenter.revise.model;
+package be.eurospacecenter.revise.model.lobby;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
+import be.eurospacecenter.revise.model.GameInfo;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -11,19 +12,15 @@ public class Lobby {
 
     private static final int TEAM_COUNT_FOUR = 4;
     private static final int TEAM_COUNT_SIX = 6;
-    private static final int LOBBY_TTL = 12;
 
     private final GameInfo gameInfo;
     private final boolean isFourTeamsMode;
-    private final LocalDateTime expiresAt;
 
     public Lobby(Host host, int numberOfTeams, LocalDateTime createdAt) {
         validateTeamCount(numberOfTeams);
 
-        this.gameInfo = new GameInfo(host);
+        this.gameInfo = new GameInfo(host, createdAt);
         this.isFourTeamsMode = numberOfTeams == TEAM_COUNT_FOUR;
-
-        this.expiresAt = createdAt.plusHours(LOBBY_TTL);
     }
 
     public GameInfo getGameInfo() {
@@ -35,9 +32,7 @@ public class Lobby {
     }
 
     public void assignTeam(UUID clientId, String teamLabel) {
-        if (gameInfo.isNotClient(clientId)) {
-            throw new NoAutoriseOperationException(ErrorKeys.CLIENT_NOT_IN_LOBBY);
-        }
+        ensureClient(clientId);
 
         Team team = gameInfo.getTeam(clientId);
 
@@ -61,9 +56,7 @@ public class Lobby {
     }
 
     public boolean startGame(UUID hostId) {
-        if (gameInfo.isNotHost(hostId)) {
-            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
-        }
+        ensureHost(hostId);
 
         Map<UUID, Team> teams = gameInfo.getTeams();
 
@@ -76,13 +69,17 @@ public class Lobby {
         return true;
     }
 
-    public LocalDateTime getExpiresAt() {
-        return this.expiresAt;
+    private void ensureHost(UUID hostId) {
+        if (gameInfo.isNotHost(hostId)) {
+            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
+        }
     }
 
-    /* ======================
-       ====== Helpers =======
-       ====================== */
+    private void ensureClient(UUID clientId) {
+        if (gameInfo.isNotClient(clientId)) {
+            throw new NoAutoriseOperationException(ErrorKeys.CLIENT_NOT_IN_LOBBY);
+        }
+    }
 
     private static void validateTeamCount(int teamCount) {
         if (teamCount != TEAM_COUNT_FOUR && teamCount != TEAM_COUNT_SIX) {

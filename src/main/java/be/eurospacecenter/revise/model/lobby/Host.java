@@ -1,4 +1,4 @@
-package be.eurospacecenter.revise.model;
+package be.eurospacecenter.revise.model.lobby;
 
 import java.util.UUID;
 

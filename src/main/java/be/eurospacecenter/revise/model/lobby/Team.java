@@ -1,7 +1,10 @@
-package be.eurospacecenter.revise.model;
+package be.eurospacecenter.revise.model.lobby;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
-import be.eurospacecenter.revise.exceptions.InvalidGameOperationException;
+import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
+import be.eurospacecenter.revise.model.mission.MissionType;
+import be.eurospacecenter.revise.model.mission.TeamFullProgression;
+import be.eurospacecenter.revise.model.mission.TeamProgression;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -75,9 +78,16 @@ public class Team {
         return new TeamFullProgression(missionStatusMap, baseProgression);
     }
 
+    public boolean allClassicMissionsCompleted() {
+        int totalMissions = label == TeamLabel.MECA ? 8 : 7;
+        int completedMissions = countCompletedMissions();
+
+        return completedMissions == totalMissions;
+    }
+
     private void ensureOnlyMecaCanCompleteClassic8(MissionType missionType) {
         if (missionType == MissionType.CLASSIC_8 && label != TeamLabel.MECA) {
-            throw new InvalidGameOperationException(ErrorKeys.ONLY_MECA_COMPLETE_CLASSIC_8);
+            throw new InvalidMissionOperationException(ErrorKeys.ONLY_MECA_COMPLETE_CLASSIC_8);
         }
     }
 
