@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.controller;
 
+import be.eurospacecenter.revise.dto.request.EndMissionRequest;
 import be.eurospacecenter.revise.dto.request.TeamMissionStatusUpdateRequest;
 import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
 import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
@@ -57,5 +58,18 @@ public class GameController {
             TeamMissionStatusUpdateRequest request
     ) {
         gameService.changeTeamMissionState(lobbyCode, request.clientId(), request.missionNumber());
+    }
+
+    @PostMapping("/{lobbyCode}/missions/end")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void endMission(
+            @PathVariable
+            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
+            String lobbyCode,
+
+            @RequestBody @Valid
+            EndMissionRequest request
+    ) {
+        gameService.endMission(lobbyCode, request.hostId());
     }
 }

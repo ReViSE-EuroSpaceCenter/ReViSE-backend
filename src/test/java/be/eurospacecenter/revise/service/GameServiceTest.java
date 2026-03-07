@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,7 +30,12 @@ class GameServiceTest {
     void setUp() {
         gameService.games.clear();
         idOfTheLoneTeam = UUID.randomUUID();
-        gameWithOneTeam = new Game(new ConcurrentHashMap<>(Map.of(idOfTheLoneTeam, new Team(TeamLabel.EXPE, idOfTheLoneTeam))));
+
+        GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()));
+        gameInfo.addTeam(new Team(TeamLabel.EXPE, idOfTheLoneTeam));
+
+        gameWithOneTeam = new Game(gameInfo);
+
         gameWith4Teams = new Game(createTeams("AERO", "MECA", "EXPE", "GECO"));
         gameWith6Teams = new Game(createTeams("AERO", "MECA", "EXPE", "GECO", "MEDI", "COOP"));
     }
@@ -133,12 +136,15 @@ class GameServiceTest {
         TeamLabel.getAllowedLabels(false).forEach(label -> assertTrue(response.teamsProgression().containsKey(label.name())));
     }
 
-    private Map<UUID, Team> createTeams(String... labels) {
-        Map<UUID, Team> teams = new ConcurrentHashMap<>();
+    private GameInfo createTeams(String... labels) {
+        GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()));
+
         for (String label : labels) {
             Team team = new Team(TeamLabel.valueOf(label), UUID.randomUUID());
-            teams.put(team.getClientID(), team);
+
+            gameInfo.addTeam(team);
         }
-        return teams;
+
+        return gameInfo;
     }
 }

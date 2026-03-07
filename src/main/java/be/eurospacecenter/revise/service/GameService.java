@@ -53,6 +53,12 @@ public class GameService {
         return new TeamFullProgressionResponse(fullProgression);
     }
 
+    public void endMission(String lobbyCode, UUID hostId) {
+        Game game = getGame(lobbyCode);
+        game.endMission(hostId);
+
+    }
+
     public Game getGame(String lobbyCode) {
         return Optional.ofNullable(games.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.GAME_NOT_FOUND));
     }

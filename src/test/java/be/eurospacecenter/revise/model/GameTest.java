@@ -6,9 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +19,11 @@ class GameTest {
     @BeforeEach
     void setUp() {
         idOfTheLoneTeam = UUID.randomUUID();
-        gameWithOneTeam = new Game(new ConcurrentHashMap<>(Map.of(idOfTheLoneTeam, new Team(TeamLabel.EXPE, idOfTheLoneTeam))));
+
+        GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()));
+        gameInfo.addTeam(new Team(TeamLabel.EXPE, idOfTheLoneTeam));
+
+        gameWithOneTeam = new Game(gameInfo);
     }
 
     @Test

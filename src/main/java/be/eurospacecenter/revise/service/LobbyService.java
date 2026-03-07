@@ -4,7 +4,6 @@ import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
 import be.eurospacecenter.revise.dto.response.LobbyInfoResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
-import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.notification.LobbyNotifier;
@@ -58,7 +57,8 @@ public class LobbyService {
         Lobby lobby = getLobby(lobbyCode);
         UUID clientId = UUID.randomUUID();
 
-        lobby.addTeam(new Team(clientId));
+        lobby.addTeam(clientId);
+
         notifier.notifyClientJoined(lobbyCode);
 
         return new LobbyJoinedResponse(clientId.toString(), lobby.getFreeTeamLabels(), lobby.getAllTeamLabels());
@@ -66,7 +66,6 @@ public class LobbyService {
 
     public void assignTeam(String lobbyCode, UUID clientId, String teamLabel) {
         Lobby lobby = getLobby(lobbyCode);
-        ensureClient(lobby, clientId);
 
         lobby.assignTeam(clientId, teamLabel);
 
@@ -75,11 +74,10 @@ public class LobbyService {
 
     public void startGame(String lobbyCode, UUID hostId) {
         Lobby lobby = getLobby(lobbyCode);
-        ensureHost(lobby, hostId);
 
         lobby.startGame(hostId);
 
-        Game game = new Game(lobby.getTeams());
+        Game game = new Game(lobby.getGameInfo());
         gameService.registerGame(lobbyCode, game);
 
         notifier.notifyGameStarted(lobbyCode);
@@ -87,18 +85,6 @@ public class LobbyService {
 
     protected Lobby getLobby(String lobbyCode) {
         return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.LOBBY_NOT_FOUND));
-    }
-
-    protected void ensureClient(Lobby lobby, UUID clientId) {
-        if (!lobby.isClient(clientId)) {
-            throw new NoAutoriseOperationException(ErrorKeys.CLIENT_NOT_IN_LOBBY);
-        }
-    }
-
-    protected void ensureHost(Lobby lobby, UUID hostId) {
-        if (lobby.isNotHost(hostId)) {
-            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
-        }
     }
 
     @Scheduled(cron = "0 0 */12 * * *")

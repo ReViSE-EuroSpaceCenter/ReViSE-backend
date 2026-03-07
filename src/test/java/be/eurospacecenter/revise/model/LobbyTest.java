@@ -2,7 +2,6 @@ package be.eurospacecenter.revise.model;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
-import be.eurospacecenter.revise.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,17 +29,17 @@ class LobbyTest {
 
     @BeforeEach
     void setUp() {
-        lobby4Teams.addTeam(new Team(team1Id));
-        lobby4Teams.addTeam(new Team(team2Id));
-        lobby4Teams.addTeam(new Team(team3Id));
-        lobby4Teams.addTeam(new Team(team4Id));
+        lobby4Teams.addTeam(team1Id);
+        lobby4Teams.addTeam(team2Id);
+        lobby4Teams.addTeam(team3Id);
+        lobby4Teams.addTeam(team4Id);
 
-        lobby6Teams.addTeam(new Team(team1Id));
-        lobby6Teams.addTeam(new Team(team2Id));
-        lobby6Teams.addTeam(new Team(team3Id));
-        lobby6Teams.addTeam(new Team(team4Id));
-        lobby6Teams.addTeam(new Team(team5Id));
-        lobby6Teams.addTeam(new Team(team6Id));
+        lobby6Teams.addTeam(team1Id);
+        lobby6Teams.addTeam(team2Id);
+        lobby6Teams.addTeam(team3Id);
+        lobby6Teams.addTeam(team4Id);
+        lobby6Teams.addTeam(team5Id);
+        lobby6Teams.addTeam(team6Id);
 
     }
 
@@ -141,12 +140,12 @@ class LobbyTest {
     void shouldNotAssignTeamWithUnknownClientId() {
         UUID wrongClientId = UUID.randomUUID();
 
-        NotFoundException ex = assertThrows(
-                NotFoundException.class,
+        NoAutoriseOperationException ex = assertThrows(
+                NoAutoriseOperationException.class,
                 () -> lobby4Teams.assignTeam(wrongClientId, "AERO")
         );
 
-        assertEquals(ErrorKeys.TEAM_NOT_FOUND, ex.getMessage());
+        assertEquals(ErrorKeys.CLIENT_NOT_IN_LOBBY, ex.getMessage());
     }
 
     @Test
