@@ -6,17 +6,13 @@ import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
-import be.eurospacecenter.revise.model.Host;
-import be.eurospacecenter.revise.model.Lobby;
-import be.eurospacecenter.revise.model.TeamLabel;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 
-import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -37,7 +33,7 @@ class LobbyServiceTest {
 
     @BeforeEach
     void setup() {
-        lobbyService.clearLobbies();
+        lobbyService.cleanUp(lobbyService.lobbies.keySet().stream().toList());
 
         LobbyCreationResponse res4 = lobbyService.createLobby(4);
         hostIdFor4 = UUID.fromString(res4.hostId());
@@ -247,98 +243,6 @@ class LobbyServiceTest {
                 () -> lobbyService.startGame(lobbyCodeFor6, unknowId)
         );
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
-    }
-
-    @Test
-    void ensureHostShouldSucceedForHost() {
-        Lobby lobby6 = lobbyService.getLobby(lobbyCodeFor6);
-        assertDoesNotThrow(() -> lobbyService.ensureHost(lobby6, hostIdFor6));
-    }
-
-    @Test
-    void ensureHostShouldFailForUnknownHost() {
-        Lobby lobby = lobbyService.getLobby(lobbyCodeFor6);
-        UUID unknowId = UUID.randomUUID();
-
-        assertNotEquals(unknowId, hostIdFor6);
-        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
-                () -> lobbyService.ensureHost(lobby, unknowId)
-        );
-        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
-    }
-
-    @Test
-    void ensureHostShouldFailForUnknownLobby() {
-        Lobby lobby6 = lobbyService.getLobby(lobbyCodeFor6);
-
-        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
-                () -> lobbyService.ensureHost(lobby6, hostIdFor4)
-        );
-        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
-    }
-
-    @Test
-    void ensureClientShouldSucceedForClient() {
-        Lobby lobby = lobbyService.getLobby(lobbyCodeFor6);
-        LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
-        UUID clientId = UUID.fromString(res.clientId());
-
-        assertDoesNotThrow(() -> lobbyService.ensureClient(lobby, clientId));
-    }
-
-    @Test
-    void ensureClientShouldFailForUnknownClient() {
-        Lobby lobby = lobbyService.getLobby(lobbyCodeFor6);
-        LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
-        UUID clientId = UUID.fromString(res.clientId());
-
-        UUID unknowId = UUID.randomUUID();
-
-        assertNotEquals(unknowId, clientId);
-        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
-                () -> lobbyService.ensureClient(lobby, unknowId)
-        );
-        assertEquals(ErrorKeys.CLIENT_NOT_IN_LOBBY, ex.getMessage());
-    }
-
-    @Test
-    void ensureClientShouldFailForDifferentLobby() {
-        Lobby lobby4 = lobbyService.getLobby(lobbyCodeFor4);
-        LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
-        UUID clientId = UUID.fromString(res.clientId());
-
-        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
-                () -> lobbyService.ensureClient(lobby4, clientId)
-        );
-        assertEquals(ErrorKeys.CLIENT_NOT_IN_LOBBY, ex.getMessage());
-    }
-
-    @Test
-    void shouldClearOnlyLobby12HoursOld() {
-        Map<String, Lobby> shouldBeThere = Map.of(
-                "1", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now()),
-                "2", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusSeconds(1)),
-                "3", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusMinutes(1)),
-                "4", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusMinutes(30)),
-                "5", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(1)),
-                "6", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(6)),
-                "7", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(11)));
-
-        Map<String, Lobby> shouldNotBeThere = Map.of(
-                "A", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(12)),
-                "B", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(24)),
-                "C", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(36)),
-                "D", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusDays(1)),
-                "E", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusDays(7)),
-                "F", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusMonths(1)));
-
-        shouldBeThere.forEach((k, v) -> lobbyService.addLobby(k, v));
-        shouldNotBeThere.forEach((k, v) -> lobbyService.addLobby(k, v));
-
-        lobbyService.clearLobbies();
-
-        shouldBeThere.forEach((k, v) -> assertTrue(lobbyService.lobbies.containsKey(k)));
-        shouldNotBeThere.forEach((k, v) -> assertFalse(lobbyService.lobbies.containsKey(k)));
     }
 
     @Test

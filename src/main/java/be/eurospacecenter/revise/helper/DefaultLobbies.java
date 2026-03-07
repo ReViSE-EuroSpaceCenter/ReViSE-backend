@@ -1,9 +1,8 @@
 package be.eurospacecenter.revise.helper;
 
-import be.eurospacecenter.revise.model.Host;
-import be.eurospacecenter.revise.model.Lobby;
-import be.eurospacecenter.revise.model.Team;
-import be.eurospacecenter.revise.model.TeamLabel;
+import be.eurospacecenter.revise.model.lobby.Host;
+import be.eurospacecenter.revise.model.lobby.Lobby;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.service.LobbyService;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
@@ -53,7 +52,7 @@ public class DefaultLobbies implements CommandLineRunner {
         lobbyService.addLobby(LOBBY_CODE_FOUR_TEAMS, lobby);
 
         for (int i = 0; i < FOUR_TEAMS; i++) {
-            lobby.addTeam(new Team(CLIENT_IDS.get(i)));
+            lobby.addTeam(CLIENT_IDS.get(i));
             lobby.assignTeam(CLIENT_IDS.get(i), TeamLabel.getAllowedLabels(true).stream().toList().get(i).toString());
         }
 
@@ -66,7 +65,7 @@ public class DefaultLobbies implements CommandLineRunner {
         lobbyService.addLobby(LOBBY_CODE_SIX_TEAMS, lobby);
 
         for (int i = 0; i < SIX_TEAMS; i++) {
-            lobby.addTeam(new Team(CLIENT_IDS.get(i)));
+            lobby.addTeam(CLIENT_IDS.get(i));
             lobby.assignTeam(CLIENT_IDS.get(i), TeamLabel.getAllowedLabels(false).stream().toList().get(i).toString());
         }
 

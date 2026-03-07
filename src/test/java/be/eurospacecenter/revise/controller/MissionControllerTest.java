@@ -2,7 +2,7 @@ package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
-import be.eurospacecenter.revise.model.TeamLabel;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.service.LobbyService;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Assertions;
@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-class GameControllerTest {
+class MissionControllerTest {
 
     @Autowired
     private RestTestClient restTestClient;
@@ -30,6 +30,7 @@ class GameControllerTest {
 
     private String lobbyCode;
     private UUID teamClientId;
+    private UUID hostId;
 
     @BeforeEach
     void setUp() {
@@ -49,11 +50,11 @@ class GameControllerTest {
         Assertions.assertNotNull(body);
 
         lobbyCode = JsonPath.read(body, "$.lobbyCode");
-        UUID hostId = UUID.fromString(JsonPath.read(body, "$.hostId"));
+        hostId = UUID.fromString(JsonPath.read(body, "$.hostId"));
 
         List<TeamLabel> labels = TeamLabel.getAllowedLabels(true).stream().toList();
 
-        for (int i = 0 ; i < 4 ; i++) {
+        for (int i = 0; i < 4; i++) {
             LobbyJoinedResponse response = lobbyService.joinLobby(lobbyCode);
             teamClientId = UUID.fromString(response.clientId());
             lobbyService.assignTeam(lobbyCode, teamClientId, labels.get(i).toString());
@@ -65,10 +66,10 @@ class GameControllerTest {
     @Test
     void changeMissionStateShouldSucceed() {
         restTestClient.put()
-                .uri("/api/games/" + lobbyCode + "/missions")
+                .uri("/api/missions/" + lobbyCode)
                 .body(Map.of(
-                    "clientId", teamClientId,
-                    "updateMissions", List.of("CLASSIC_1")
+                        "clientId", teamClientId,
+                        "updateMissions", List.of("CLASSIC_1")
                 ))
                 .exchange()
                 .expectStatus().isNoContent();
@@ -77,7 +78,7 @@ class GameControllerTest {
     @Test
     void changeMissionStateShouldFailWithInvalidLobbyCode() {
         restTestClient.put()
-                .uri("/api/games/INVALID/missions")
+                .uri("/api/missions/INVALID")
                 .body(Map.of(
                         "clientId", teamClientId,
                         "updateMissions", List.of("CLASSIC_1")
@@ -92,7 +93,7 @@ class GameControllerTest {
     @Test
     void changeMissionStateShouldFailWithInvalidUuid() {
         restTestClient.put()
-                .uri("/api/games/" + lobbyCode + "/missions")
+                .uri("/api/missions/" + lobbyCode)
                 .body(Map.of(
                         "clientId", "abc",
                         "updateMissions", List.of("CLASSIC_1")
@@ -107,7 +108,7 @@ class GameControllerTest {
     @Test
     void changeMissionStateShouldFailWithInvalidMission() {
         restTestClient.put()
-                .uri("/api/games/" + lobbyCode + "/missions")
+                .uri("/api/missions/" + lobbyCode)
                 .body(Map.of(
                         "clientId", teamClientId,
                         "updateMissions", List.of("INVALID_MISSION")
@@ -122,7 +123,7 @@ class GameControllerTest {
     @Test
     void getTeamMissionsShouldSucceed() {
         restTestClient.get()
-                .uri("/api/games/" + lobbyCode + "/" + teamClientId + "/missions")
+                .uri("/api/missions/" + lobbyCode + "/" + teamClientId)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -134,10 +135,52 @@ class GameControllerTest {
     @Test
     void getTeamsProgressionShouldSucceed() {
         restTestClient.get()
-                .uri("/api/games/" + lobbyCode)
+                .uri("/api/missions/" + lobbyCode)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.teamsProgression").exists();
+    }
+
+    @Test
+    void endMissionShouldNotSucceedWithInvalidLobbyCode() {
+        restTestClient.post()
+                .uri("/api/missions/INVALID/end")
+                .body(Map.of(
+                        "hostId", teamClientId
+                ))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+    }
+
+    @Test
+    void endMissionShouldNotSucceedWithUnkownHost() {
+        restTestClient.post()
+                .uri("/api/missions/" + lobbyCode + "/end")
+                .body(Map.of(
+                        "hostId", UUID.randomUUID()
+                ))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
+    }
+
+    @Test
+    void endMissionShouldNotSucceedWithUncompletedMissions() {
+        restTestClient.post()
+                .uri("/api/missions/" + lobbyCode + "/end")
+                .body(Map.of(
+                        "hostId",hostId
+                        ))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS);
     }
 }

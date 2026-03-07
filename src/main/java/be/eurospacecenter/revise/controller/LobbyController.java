@@ -7,6 +7,7 @@ import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
 import be.eurospacecenter.revise.dto.response.LobbyInfoResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.helper.LobbyCode;
 import be.eurospacecenter.revise.service.LobbyService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -37,7 +38,7 @@ public class LobbyController {
     @GetMapping("/{lobbyCode}")
     public LobbyInfoResponse getLobbyInfo(
             @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = "Code de lobby invalide")
+            @Pattern(regexp = LobbyCode.PATTERN, message = "Code de lobby invalide")
             String lobbyCode
     ) {
         return lobbyService.getLobbyInfo(lobbyCode);
@@ -46,7 +47,7 @@ public class LobbyController {
     @PostMapping("/{lobbyCode}/join")
     public LobbyJoinedResponse joinLobby(
             @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
+            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode
     ) {
         return lobbyService.joinLobby(lobbyCode);
@@ -56,7 +57,7 @@ public class LobbyController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void assignTeam(
             @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
+            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
 
             @RequestBody @Valid
@@ -73,7 +74,7 @@ public class LobbyController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void startLobby(
             @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
+            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
 
             @RequestBody @Valid

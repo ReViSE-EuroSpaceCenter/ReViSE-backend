@@ -4,6 +4,8 @@ import java.security.SecureRandom;
 
 public class LobbyCode {
 
+    public static final String PATTERN = "^[A-Z]{6}$";
+
     LobbyCode() {
         throw new IllegalStateException("Utility class");
     }

@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.exceptions;
 
-import be.eurospacecenter.revise.model.MissionType;
+import be.eurospacecenter.revise.model.mission.MissionType;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({IllegalArgumentException.class, InvalidGameOperationException.class, NotFoundException.class, NoAutoriseOperationException.class})
+    @ExceptionHandler({IllegalArgumentException.class, InvalidMissionOperationException.class, NotFoundException.class, NoAutoriseOperationException.class})
     public ProblemDetail handleGameExceptions(RuntimeException ex) {
 
         HttpStatus status = switch (ex) {

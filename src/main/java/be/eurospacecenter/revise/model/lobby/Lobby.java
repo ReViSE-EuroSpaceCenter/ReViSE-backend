@@ -1,45 +1,40 @@
-package be.eurospacecenter.revise.model;
+package be.eurospacecenter.revise.model.lobby;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
-import be.eurospacecenter.revise.exceptions.NotFoundException;
+import be.eurospacecenter.revise.model.GameInfo;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Lobby {
 
     private static final int TEAM_COUNT_FOUR = 4;
     private static final int TEAM_COUNT_SIX = 6;
-    private static final int LOBBY_TTL = 12;
 
-    private final Host host;
-    private final Map<UUID, Team> teams;
+    private final GameInfo gameInfo;
     private final boolean isFourTeamsMode;
-    private final LocalDateTime expiresAt;
 
     public Lobby(Host host, int numberOfTeams, LocalDateTime createdAt) {
         validateTeamCount(numberOfTeams);
 
-        this.host = Objects.requireNonNull(host);
-        this.teams = new ConcurrentHashMap<>();
+        this.gameInfo = new GameInfo(host, createdAt);
         this.isFourTeamsMode = numberOfTeams == TEAM_COUNT_FOUR;
-
-        this.expiresAt = createdAt.plusHours(LOBBY_TTL);
     }
 
-    public Map<UUID, Team> getTeams() {
-        return Collections.unmodifiableMap(teams);
+    public GameInfo getGameInfo() {
+        return gameInfo;
     }
 
-    public void addTeam(Team team) {
-        teams.put(team.getClientID(), team);
+    public void addTeam(UUID clientId) {
+        gameInfo.addTeam(new Team(clientId));
     }
 
     public void assignTeam(UUID clientId, String teamLabel) {
-        Team team = getTeam(clientId);
+        ensureClient(clientId);
+
+        Team team = gameInfo.getTeam(clientId);
 
         validateTeamLabel(teamLabel);
         ensureTeamNotAlreadyAssigned(team);
@@ -49,6 +44,8 @@ public class Lobby {
     }
 
     public List<String> getFreeTeamLabels() {
+        Map<UUID, Team> teams = gameInfo.getTeams();
+
         Set<String> takenLabels = teams.values().stream().filter(Team::hasLabel).map(Team::getLabel).collect(Collectors.toSet());
 
         return TeamLabel.getAllowedLabels(isFourTeamsMode).stream().map(Enum::name).filter(label -> !takenLabels.contains(label)).toList();
@@ -59,9 +56,9 @@ public class Lobby {
     }
 
     public boolean startGame(UUID hostId) {
-        if (isNotHost(hostId)) {
-            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
-        }
+        ensureHost(hostId);
+
+        Map<UUID, Team> teams = gameInfo.getTeams();
 
         List<String> teamLabels = teams.values().stream().filter(Team::hasLabel).map(Team::getLabel).toList();
 
@@ -72,30 +69,22 @@ public class Lobby {
         return true;
     }
 
-    public boolean isClient(UUID clientId) {
-        return teams.containsKey(clientId);
+    private void ensureHost(UUID hostId) {
+        if (gameInfo.isNotHost(hostId)) {
+            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
+        }
     }
 
-    public boolean isNotHost(UUID hostId) {
-        return !host.id().equals(hostId);
+    private void ensureClient(UUID clientId) {
+        if (gameInfo.isNotClient(clientId)) {
+            throw new NoAutoriseOperationException(ErrorKeys.CLIENT_NOT_IN_LOBBY);
+        }
     }
-
-    public LocalDateTime getExpiresAt() {
-        return this.expiresAt;
-    }
-
-    /* ======================
-       ====== Helpers =======
-       ====================== */
 
     private static void validateTeamCount(int teamCount) {
         if (teamCount != TEAM_COUNT_FOUR && teamCount != TEAM_COUNT_SIX) {
             throw new IllegalArgumentException(ErrorKeys.INVALID_NUMBER_OF_TEAMS);
         }
-    }
-
-    private Team getTeam(UUID id) {
-        return Optional.ofNullable(teams.get(id)).orElseThrow(() -> new NotFoundException(ErrorKeys.TEAM_NOT_FOUND));
     }
 
     private void validateTeamLabel(String teamLabel) {
@@ -111,6 +100,8 @@ public class Lobby {
     }
 
     private void ensureLabelNotTaken(String teamLabel) {
+        Map<UUID, Team> teams = gameInfo.getTeams();
+
         boolean alreadyTaken = teams.values().stream().anyMatch(team -> teamLabel.equals(team.getLabel()));
 
         if (alreadyTaken) {

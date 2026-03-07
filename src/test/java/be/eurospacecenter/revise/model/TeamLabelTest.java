@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.model;
 
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

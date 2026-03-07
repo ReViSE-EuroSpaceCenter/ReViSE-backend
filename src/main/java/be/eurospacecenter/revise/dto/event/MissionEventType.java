@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.dto.event;
 
-public enum GameEventType {
+public enum MissionEventType {
     TEAM_PROGRESSION,
+    MISSION_ENDED
 }
 
