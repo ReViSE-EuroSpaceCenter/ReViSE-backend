@@ -37,7 +37,7 @@ public class MissionController {
 
     @PutMapping("/{lobbyCode}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void changeTeamMissionState(
+    public void changeTeamMissionsState(
             @PathVariable
             @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
@@ -45,7 +45,7 @@ public class MissionController {
             @RequestBody @Valid
             TeamMissionStatusUpdateRequest request
     ) {
-        missionService.changeTeamMissionState(lobbyCode, request.clientId(), request.missionNumber());
+        missionService.changeTeamMissionsState(lobbyCode, request.clientId(), request.updateMissions());
     }
 
     @PostMapping("/{lobbyCode}/end")

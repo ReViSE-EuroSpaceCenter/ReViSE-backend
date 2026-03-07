@@ -5,6 +5,7 @@ import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.model.lobby.Team;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,9 +26,10 @@ public class MissionManager {
         return gameInfo.getTeam(id).getLabel();
     }
 
-    public void changeTeamMissionState(UUID id, MissionType missionType) {
+    public void changeTeamMissionsState(UUID id, List<MissionType> missions) {
         Team team = gameInfo.getTeam(id);
-        team.changeMissionState(missionType);
+
+        missions.forEach(team::changeMissionState);
     }
 
     public Map<String, TeamProgression> teamsProgression() {

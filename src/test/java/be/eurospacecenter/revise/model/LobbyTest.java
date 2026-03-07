@@ -176,18 +176,6 @@ class LobbyTest {
 
     @Test
     void shouldNotAssignInvalidTeamLabel() {
-        UUID clientId = team1Id;
-
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () ->  lobby4Teams.assignTeam(clientId, "INVALID_LABEL")
-        );
-
-        assertEquals(ErrorKeys.INVALID_TEAM_LABEL, ex.getMessage());
-    }
-
-    @Test
-    void shouldNotAssignInvalidTeamLabel() {
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
                 () ->  lobby4Teams.assignTeam(team1Id, "INVALID_LABEL")
