@@ -5,6 +5,7 @@ import be.eurospacecenter.revise.dto.request.TeamMissionStatusUpdateRequest;
 import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
 import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.helper.LobbyCode;
 import be.eurospacecenter.revise.service.MissionService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -28,7 +29,7 @@ public class MissionController {
     @GetMapping("/{lobbyCode}")
     public TeamsProgressionResponse getGameInfo(
             @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
+            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode
     ) {
         return missionService.getTeamsProgression(lobbyCode);
@@ -38,7 +39,7 @@ public class MissionController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeTeamMissionState(
             @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
+            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
 
             @RequestBody @Valid
@@ -51,7 +52,7 @@ public class MissionController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void endMission(
             @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
+            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
 
             @RequestBody @Valid
@@ -63,7 +64,7 @@ public class MissionController {
     @GetMapping("/{lobbyCode}/{clientId}")
     public TeamFullProgressionResponse getTeamMissions(
             @PathVariable
-            @Pattern(regexp = "^[A-Z]{6}$", message = ErrorKeys.INVALID_LOBBY_CODE)
+            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
 
             @PathVariable

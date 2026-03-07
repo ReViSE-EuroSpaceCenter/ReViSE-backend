@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -28,6 +29,14 @@ public class LauncherService implements Cleanable {
             throw new IllegalArgumentException(ErrorKeys.INVALID_LOBBY_CODE);
         }
         launchers.put(lobbyCode, new Launcher(gameInfo));
+    }
+
+    public void updateResources(String lobbyCode, UUID clientId, String resourceName) {
+        // To be adapted
+        Launcher launcher = getLauncher(lobbyCode);
+        launcher.updateResources(clientId, resourceName);
+
+        notifier.notifyResourceUpdated(lobbyCode, resourceName);
     }
 
     private Launcher getLauncher(String lobbyCode) {
