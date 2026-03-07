@@ -173,4 +173,14 @@ class LobbyTest {
 
         assertEquals(ErrorKeys.CLIENT_ALREADY_CHOSE_TEAM, ex.getMessage());
     }
+
+    @Test
+    void shouldNotAssignInvalidTeamLabel() {
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () ->  lobby4Teams.assignTeam(team1Id, "INVALID_LABEL")
+        );
+
+        assertEquals(ErrorKeys.INVALID_TEAM_LABEL, ex.getMessage());
+    }
 }

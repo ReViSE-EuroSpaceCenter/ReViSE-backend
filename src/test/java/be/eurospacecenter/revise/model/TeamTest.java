@@ -93,6 +93,31 @@ class TeamTest {
         assertTrue(prog.completedMissions().containsKey(MissionType.CLASSIC_8.name()));
     }
 
+    @Test
+    void allClassicMissionsCompleted() {
+        assertFalse(team.allClassicMissionsCompleted());
+
+        for (MissionType mission : MissionType.getClassicMissions()) {
+            if (mission == MissionType.CLASSIC_8) {
+                continue;
+            }
+            team.changeMissionState(mission);
+        }
+
+        assertTrue(team.allClassicMissionsCompleted());
+    }
+
+    @Test
+    void allClassicMissionsCompletedForMeca() {
+        assertFalse(teamMeca.allClassicMissionsCompleted());
+
+        for (MissionType mission : MissionType.getClassicMissions()) {
+            teamMeca.changeMissionState(mission);
+        }
+
+        assertTrue(teamMeca.allClassicMissionsCompleted());
+    }
+
     private void testMissionForTeamLabel(Team team, MissionType mission) {
         if (shouldThrowException(team, mission)) {
             InvalidMissionOperationException ex = assertThrows(InvalidMissionOperationException.class,

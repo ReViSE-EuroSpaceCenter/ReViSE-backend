@@ -48,7 +48,7 @@ public class MissionController {
         missionService.changeTeamMissionState(lobbyCode, request.clientId(), request.missionNumber());
     }
 
-    @PostMapping("/{lobbyCode}/missions/end")
+    @PostMapping("/{lobbyCode}/end")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void endMission(
             @PathVariable

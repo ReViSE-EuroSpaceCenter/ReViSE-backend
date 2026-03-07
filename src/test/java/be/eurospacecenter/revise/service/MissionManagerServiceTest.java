@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.service;
 import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
 import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.model.lobby.Host;
@@ -139,6 +140,55 @@ class MissionManagerServiceTest {
         assertEquals(6, response.teamsProgression().size());
 
         TeamLabel.getAllowedLabels(false).forEach(label -> assertTrue(response.teamsProgression().containsKey(label.name())));
+    }
+
+    @Test
+    void shouldAllowFinishingMission() {
+        missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
+
+        for (MissionType missionType : MissionType.getClassicMissions()) {
+            if (missionType == MissionType.CLASSIC_8) {
+                continue;
+            }
+
+            missionService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, missionType);
+        }
+
+        assertDoesNotThrow(() -> missionService.endMission("XXXXXX", gameInfoWithOneLoneTeam.getHostId()));
+    }
+
+    @Test
+    void shouldNotAllowNonHostToFinishMission() {
+        missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
+
+        UUID nonHostId = UUID.randomUUID();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> missionService.endMission("XXXXXX", nonHostId)
+        );
+        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
+    }
+
+    @Test
+    void shouldNotAllowToFinishMissionWhenAtLeastOneClassicMissionIsNotCompleted() {
+        missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
+
+        for (MissionType missionType : MissionType.getClassicMissions()) {
+            if (missionType == MissionType.CLASSIC_8) {
+                continue;
+            }
+
+            missionService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, missionType);
+        }
+
+        missionService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1);
+
+        UUID hostId = gameInfoWithOneLoneTeam.getHostId();
+
+        InvalidMissionOperationException ex = assertThrows(InvalidMissionOperationException.class,
+                () -> missionService.endMission("XXXXXX", hostId)
+        );
+        assertEquals(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS, ex.getMessage());
     }
 
     private GameInfo createTeams(String... labels) {

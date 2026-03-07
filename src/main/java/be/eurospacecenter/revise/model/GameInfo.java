@@ -49,4 +49,8 @@ public class GameInfo {
     public LocalDateTime getExpiresAt() {
         return this.expiresAt;
     }
+
+    public UUID getHostId() {
+        return host.id();
+    }
 }

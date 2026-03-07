@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.model;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.lobby.Team;
@@ -22,12 +23,14 @@ class MissionManagerTest {
 
     private MissionManager gameWithOneTeam;
     private UUID idOfTheLoneTeam;
+    private UUID hostId;
 
     @BeforeEach
     void setUp() {
         idOfTheLoneTeam = UUID.randomUUID();
+        hostId = UUID.randomUUID();
 
-        GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()), LocalDateTime.now());
+        GameInfo gameInfo = new GameInfo(new Host(hostId), LocalDateTime.now());
         gameInfo.addTeam(new Team(TeamLabel.EXPE, idOfTheLoneTeam));
 
         gameWithOneTeam = new MissionManager(gameInfo);
@@ -89,5 +92,67 @@ class MissionManagerTest {
                 () -> gameWithOneTeam.getTeamProgression(id)
         );
         assertEquals(ErrorKeys.TEAM_NOT_FOUND, ex.getMessage());
+    }
+
+    @Test
+    void shouldNotAllowNonHostToEndMission() {
+        UUID nonHostId = UUID.randomUUID();
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> gameWithOneTeam.endMission(nonHostId)
+        );
+        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
+    }
+
+    @Test
+    void shouldAllowHostToEndMissionWhenAllClassicMissionsCompleted() {
+        Team team = gameWithOneTeam.getGameInfo().getTeam(idOfTheLoneTeam);
+
+        for (MissionType mission : MissionType.getClassicMissions()) {
+            if (mission == MissionType.CLASSIC_8) {
+                continue;
+            }
+            team.changeMissionState(mission);
+        }
+
+        assertDoesNotThrow(() -> gameWithOneTeam.endMission(hostId));
+    }
+
+    @Test
+    void shouldAllowToEndMissionWhenAllClassicMissionsCompleted() {
+        UUID mecaTeamId = UUID.randomUUID();
+
+        GameInfo gameInfo = new GameInfo(new Host(hostId), LocalDateTime.now());
+        gameInfo.addTeam(new Team(TeamLabel.MECA, mecaTeamId));
+
+        MissionManager missionManager = new MissionManager(gameInfo);
+
+        Team team = missionManager.getGameInfo().getTeam(mecaTeamId);
+
+        for (MissionType mission : MissionType.getClassicMissions()) {
+            team.changeMissionState(mission);
+        }
+
+        assertDoesNotThrow(() -> missionManager.endMission(hostId));
+    }
+
+    @Test
+    void shouldNotAllowToEndMissionWhenAtLeastOneClassicMissionIsNotCompleted() {
+        Team team = gameWithOneTeam.getGameInfo().getTeam(idOfTheLoneTeam);
+
+        for (MissionType mission : MissionType.getClassicMissions()) {
+            if (mission == MissionType.CLASSIC_8) {
+                continue;
+            }
+            team.changeMissionState(mission);
+        }
+
+        team.changeMissionState(MissionType.CLASSIC_1);
+
+        InvalidMissionOperationException ex = assertThrows(
+                InvalidMissionOperationException.class,
+                () -> gameWithOneTeam.endMission(hostId)
+        );
+        assertEquals(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS, ex.getMessage());
     }
 }
