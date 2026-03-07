@@ -61,15 +61,15 @@ class TeamTest {
 
     @Test
     void changeMissionClassicStateTwice() {
-        assertEquals(0, progression.classicMissionPercentage());
+        assertEquals(0, progression.classicMissionsCompleted());
 
         team.changeMissionState(MissionType.CLASSIC_1);
         progression = team.getProgression();
-        assertEquals((float) 100 / 7, progression.classicMissionPercentage(), 0.001);
+        assertEquals(1, progression.classicMissionsCompleted(), 1);
 
         team.changeMissionState(MissionType.CLASSIC_1);
         progression = team.getProgression();
-        assertEquals(0, progression.classicMissionPercentage());
+        assertEquals(0, progression.classicMissionsCompleted());
     }
 
     @Test
@@ -88,11 +88,21 @@ class TeamTest {
         assertTrue(prog.completedMissions().containsKey(MissionType.CLASSIC_8.name()));
     }
 
+    @Test
+    void shouldHaveMultipleMissionsCompleted() {
+        team.changeMissionState(MissionType.CLASSIC_1);
+        team.changeMissionState(MissionType.CLASSIC_2);
+        team.changeMissionState(MissionType.BONUS_1);
+
+        progression = team.getProgression();
+        assertEquals(2, progression.classicMissionsCompleted());
+        assertTrue(progression.firstBonusMissionCompleted());
+        assertFalse(progression.secondBonusMissionCompleted());
+    }
+
     private void testMissionForTeamLabel(Team team, MissionType mission) {
         if (shouldThrowException(team, mission)) {
-            InvalidGameOperationException ex = assertThrows(InvalidGameOperationException.class,
-                    () -> team.changeMissionState(mission)
-            );
+            InvalidGameOperationException ex = assertThrows(InvalidGameOperationException.class, () -> team.changeMissionState(mission));
             assertEquals(ErrorKeys.ONLY_MECA_COMPLETE_CLASSIC_8, ex.getMessage());
 
             return;
@@ -104,14 +114,13 @@ class TeamTest {
     }
 
     private boolean shouldThrowException(Team team, MissionType mission) {
-        return mission == MissionType.CLASSIC_8
-                && !team.getLabel().equals(TeamLabel.MECA.toString());
+        return mission == MissionType.CLASSIC_8 && !team.getLabel().equals(TeamLabel.MECA.toString());
     }
 
     private void assertInitialProgressionState() {
         assertFalse(progression.firstBonusMissionCompleted());
         assertFalse(progression.secondBonusMissionCompleted());
-        assertEquals(0f, progression.classicMissionPercentage());
+        assertEquals(0, progression.classicMissionsCompleted());
     }
 
     private void assertProgressionAfterMissionChange(Team team, MissionType mission) {
@@ -122,17 +131,7 @@ class TeamTest {
         } else if (mission == MissionType.BONUS_2) {
             assertTrue(progression.secondBonusMissionCompleted());
         } else {
-            assertClassicMissionPercentage(team);
+            assertEquals(1, team.getProgression().classicMissionsCompleted());
         }
-    }
-
-    private void assertClassicMissionPercentage(Team team) {
-        boolean isMeca = team.getLabel().equals(TeamLabel.MECA.toString());
-        int classicCount = isMeca ? 8 : 7;
-        float expectedPercentage = 100f / classicCount;
-
-        assertEquals(expectedPercentage,
-                progression.classicMissionPercentage(),
-                0.001);
     }
 }

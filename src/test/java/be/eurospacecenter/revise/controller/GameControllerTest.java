@@ -68,7 +68,7 @@ class GameControllerTest {
                 .uri("/api/games/" + lobbyCode + "/missions")
                 .body(Map.of(
                     "clientId", teamClientId,
-                    "missionNumber", "CLASSIC_1"
+                    "updateMissions", List.of("CLASSIC_1")
                 ))
                 .exchange()
                 .expectStatus().isNoContent();
@@ -80,7 +80,7 @@ class GameControllerTest {
                 .uri("/api/games/INVALID/missions")
                 .body(Map.of(
                         "clientId", teamClientId,
-                        "missionNumber", "CLASSIC_1"
+                        "updateMissions", List.of("CLASSIC_1")
                 ))
                 .exchange()
                 .expectStatus().isBadRequest()
@@ -95,7 +95,7 @@ class GameControllerTest {
                 .uri("/api/games/" + lobbyCode + "/missions")
                 .body(Map.of(
                         "clientId", "abc",
-                        "missionNumber", "CLASSIC_1"
+                        "updateMissions", List.of("CLASSIC_1")
                 ))
                 .exchange()
                 .expectStatus().isBadRequest()
@@ -110,7 +110,7 @@ class GameControllerTest {
                 .uri("/api/games/" + lobbyCode + "/missions")
                 .body(Map.of(
                         "clientId", teamClientId,
-                        "missionNumber", "INVALID_MISSION"
+                        "updateMissions", List.of("INVALID_MISSION")
                 ))
                 .exchange()
                 .expectStatus().isBadRequest()

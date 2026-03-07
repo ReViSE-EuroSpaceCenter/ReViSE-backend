@@ -58,7 +58,7 @@ public class Team {
     }
 
     public TeamProgression getProgression() {
-        return new TeamProgression(getMissionCompletionPercentage(), firstBonusMissionCompleted, secondBonusMissionCompleted);
+        return new TeamProgression(countCompletedMissions(), firstBonusMissionCompleted, secondBonusMissionCompleted);
     }
 
     public TeamFullProgression getFullProgression() {
@@ -82,14 +82,10 @@ public class Team {
     }
 
     private int countCompletedMissions() {
-        return (int) java.util.stream.IntStream.range(0, missionsCompleted.length)
-                .filter(i -> missionsCompleted[i])
-                .count();
-    }
-
-    private float getMissionCompletionPercentage() {
-        int totalMissions = label == TeamLabel.MECA ? 8 : 7;
-        int completedMissions = countCompletedMissions();
-        return (float) completedMissions / totalMissions * 100;
+        int count = 0;
+        for (boolean completed : missionsCompleted) {
+            if (completed) count++;
+        }
+        return count;
     }
 }

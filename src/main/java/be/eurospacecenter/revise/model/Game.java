@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.model;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,9 +21,9 @@ public class Game {
         return teams.get(id).getLabel();
     }
 
-    public void changeTeamMissionState(UUID id, MissionType missionType) {
+    public void changeTeamMissionsState(UUID id, List<MissionType> missionType) {
         Team team = getTeam(id);
-        team.changeMissionState(missionType);
+        missionType.forEach(team::changeMissionState);
     }
 
     public Map<String, TeamProgression> teamsProgression() {

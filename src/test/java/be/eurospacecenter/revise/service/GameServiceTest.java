@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -86,16 +87,17 @@ class GameServiceTest {
     void shouldCompleteTeamMission() {
         gameService.registerGame("XXXXXX", gameWithOneTeam);
 
-        gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1);
+        gameService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_1));
 
         TeamProgression progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
 
-        assertEquals(100f / 7, progression.classicMissionPercentage(), 0.001);
+        assertEquals(1, progression.classicMissionsCompleted());
     }
 
     @Test
     void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
-        assertThrows(NotFoundException.class, () -> gameService.changeTeamMissionState("XXXXXX", idOfTheLoneTeam, MissionType.CLASSIC_1));
+        List<MissionType> missions = List.of(MissionType.CLASSIC_1);
+        assertThrows(NotFoundException.class, () -> gameService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, missions));
     }
 
     @Test
@@ -131,6 +133,37 @@ class GameServiceTest {
         assertEquals(6, response.teamsProgression().size());
 
         TeamLabel.getAllowedLabels(false).forEach(label -> assertTrue(response.teamsProgression().containsKey(label.name())));
+    }
+
+    @Test
+    void shouldUpdateMultipleMissionsForATeam() {
+        gameService.registerGame("XXXXXX", gameWithOneTeam);
+
+        gameService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_1, MissionType.CLASSIC_2, MissionType.BONUS_1));
+
+        TeamProgression progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
+
+        assertEquals(2, progression.classicMissionsCompleted());
+        assertTrue(progression.firstBonusMissionCompleted());
+    }
+
+    @Test
+    void shouldUpdateMultipleMissionsForMissionsAlreadyCompleted() {
+        gameService.registerGame("XXXXXX", gameWithOneTeam);
+
+        gameService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_1, MissionType.CLASSIC_2, MissionType.BONUS_1));
+
+        TeamProgression progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
+
+        assertEquals(2, progression.classicMissionsCompleted());
+        assertTrue(progression.firstBonusMissionCompleted());
+
+        gameService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_2, MissionType.CLASSIC_3, MissionType.CLASSIC_1, MissionType.CLASSIC_4, MissionType.BONUS_1, MissionType.BONUS_2));
+
+        progression = gameService.getGame("XXXXXX").getTeamProgression(idOfTheLoneTeam);
+        assertEquals(2, progression.classicMissionsCompleted());
+        assertFalse(progression.firstBonusMissionCompleted());
+        assertTrue(progression.secondBonusMissionCompleted());
     }
 
     private Map<UUID, Team> createTeams(String... labels) {
