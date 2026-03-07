@@ -5,6 +5,7 @@ import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.GameInfo;
 import be.eurospacecenter.revise.model.launcher.Launcher;
 
+import be.eurospacecenter.revise.model.launcher.ResourceType;
 import be.eurospacecenter.revise.notification.LauncherNotifier;
 import org.springframework.stereotype.Service;
 
@@ -31,12 +32,17 @@ public class LauncherService implements Cleanable {
         launchers.put(lobbyCode, new Launcher(gameInfo));
     }
 
-    public void updateResources(String lobbyCode, UUID clientId, String resourceName) {
-        // To be adapted
+    public void updateResources(String lobbyCode, UUID clientId, Map<ResourceType, Integer> resources) {
         Launcher launcher = getLauncher(lobbyCode);
-        launcher.updateResources(clientId, resourceName);
+        launcher.updateResources(clientId, resources);
 
-        notifier.notifyResourceUpdated(lobbyCode, resourceName);
+        String teamLabel = launcher.getTeamLabel(clientId);
+        notifier.notifyResourcesUpdated(lobbyCode, teamLabel);
+    }
+
+    public int getGeneralScore(String lobbyCode, UUID hostId) {
+        Launcher launcher = getLauncher(lobbyCode);
+        return launcher.getGeneralScore(hostId);
     }
 
     private Launcher getLauncher(String lobbyCode) {

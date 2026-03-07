@@ -1,6 +1,8 @@
 package be.eurospacecenter.revise.controller;
 
+import be.eurospacecenter.revise.dto.request.ScoreRequest;
 import be.eurospacecenter.revise.dto.request.UpdateResourceRequest;
+import be.eurospacecenter.revise.dto.response.ScoreResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.helper.LobbyCode;
 import be.eurospacecenter.revise.service.LauncherService;
@@ -28,6 +30,19 @@ public class LauncherController {
             @RequestBody
             UpdateResourceRequest request
     ) {
-        launcherService.updateResources(lobbyCode, request.clientId(), request.resourceName());
+        launcherService.updateResources(lobbyCode, request.clientId(), request.resources());
+    }
+
+    @PostMapping("/{lobbyCode}/score")
+    public ScoreResponse calculateScore(
+            @PathVariable
+            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
+            String lobbyCode,
+
+            @RequestBody
+            ScoreRequest request
+    ) {
+        int score = launcherService.getGeneralScore(lobbyCode, request.hostId());
+        return new ScoreResponse(score);
     }
 }

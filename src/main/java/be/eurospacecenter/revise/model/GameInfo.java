@@ -53,4 +53,10 @@ public class GameInfo {
     public UUID getHostId() {
         return host.id();
     }
+
+    public int getTotalScore() {
+        return teams.values().stream()
+                .mapToInt(Team::score)
+                .sum();
+    }
 }

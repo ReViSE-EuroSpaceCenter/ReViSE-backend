@@ -4,6 +4,7 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.model.GameInfo;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class Launcher {
@@ -13,10 +14,24 @@ public class Launcher {
         this.gameInfo = gameInfo;
     }
 
-    public void updateResources(UUID clientId, String resourceName) {
-        ensureClient(clientId);
+    public String getTeamLabel(UUID id) {
+        return gameInfo.getTeam(id).getLabel();
+    }
 
-        throw new UnsupportedOperationException("Resource updates are not implemented yet." + resourceName);
+    public void updateResources(UUID clientId, Map<ResourceType, Integer> resources) {
+        ensureClient(clientId);
+        gameInfo.getTeam(clientId).removeResources(resources);
+    }
+
+    public int getGeneralScore(UUID hostId) {
+        ensureHost(hostId);
+        return gameInfo.getTotalScore();
+    }
+
+    private void ensureHost(UUID hostId) {
+        if (gameInfo.isNotHost(hostId)) {
+            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
+        }
     }
 
     private void ensureClient(UUID clientId) {

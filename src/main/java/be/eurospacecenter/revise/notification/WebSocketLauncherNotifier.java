@@ -19,9 +19,9 @@ public class WebSocketLauncherNotifier implements LauncherNotifier {
     }
 
     @Override
-    public void notifyResourceUpdated(String lobbyCode, String resourceName) {
+    public void notifyResourcesUpdated(String lobbyCode, String teamLabel) {
         logger.info("Sending RESOURCE_UPDATED event for launcher: {}", lobbyCode);
-        LauncherEvent event = new LauncherEvent(LauncherEventType.RESOURCE_UPDATED, resourceName);
+        LauncherEvent event = new LauncherEvent(LauncherEventType.RESOURCE_UPDATED, teamLabel);
 
         messagingTemplate.convertAndSend(LAUNCHER_TOPIC_PREFIX + lobbyCode, event);
         logger.info("RESOURCE_UPDATED event sent successfully");

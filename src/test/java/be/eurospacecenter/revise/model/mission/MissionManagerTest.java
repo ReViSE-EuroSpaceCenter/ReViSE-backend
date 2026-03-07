@@ -1,14 +1,12 @@
-package be.eurospacecenter.revise.model;
+package be.eurospacecenter.revise.model.mission;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
+import be.eurospacecenter.revise.model.GameInfo;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.lobby.Team;
-import be.eurospacecenter.revise.model.mission.MissionManager;
-import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
-import be.eurospacecenter.revise.model.mission.TeamProgression;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
