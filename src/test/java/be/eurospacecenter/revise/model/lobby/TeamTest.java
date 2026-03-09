@@ -1,7 +1,9 @@
 package be.eurospacecenter.revise.model.lobby;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.exceptions.InvalidLauncherOperationException;
 import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
+import be.eurospacecenter.revise.model.launcher.ResourceType;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.model.mission.TeamFullProgression;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
@@ -11,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -126,6 +129,32 @@ class TeamTest {
         assertEquals(2, progression.classicMissionsCompleted());
         assertTrue(progression.firstBonusMissionCompleted());
         assertFalse(progression.secondBonusMissionCompleted());
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(ResourceType.class)
+    void removeResourceOverLimitOnce(ResourceType resourceType) {
+        Map<ResourceType, Integer> resourcesToRemove = Map.of(resourceType, resourceType.getMax()+1);
+        InvalidLauncherOperationException ex = assertThrows(
+                InvalidLauncherOperationException.class,
+                () -> team.removeResources(resourcesToRemove)
+        );
+
+        assertEquals(ErrorKeys.INSUFFICIENT_RESOURCES, ex.getMessage());
+    }
+
+    @ParameterizedTest
+    @EnumSource(ResourceType.class)
+    void removeResourceOverLimitTwice(ResourceType resourceType) {
+        team.removeResources(Map.of(resourceType, resourceType.getMax()));
+        Map<ResourceType, Integer> resourcesToRemove = Map.of(resourceType, 1);
+        InvalidLauncherOperationException ex = assertThrows(
+                InvalidLauncherOperationException.class,
+                () -> team.removeResources(resourcesToRemove)
+        );
+
+        assertEquals(ErrorKeys.INSUFFICIENT_RESOURCES, ex.getMessage());
     }
 
     private void testMissionForTeamLabel(Team team, MissionType mission) {

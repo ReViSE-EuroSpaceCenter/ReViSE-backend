@@ -11,6 +11,7 @@ public final class ErrorKeys {
     public static final String INVALID_LOBBY_CODE = "invalidLobbyCode";
     public static final String INVALID_MISSION_TYPE = "invalidMissionType";
     public static final String INVALID_NUMBER_OF_TEAMS = "invalidNumberOfTeams";
+    public static final String INVALID_RESOURCE_TYPE = "invalidResourceType";
     public static final String INVALID_TEAM_LABEL = "invalidTeamLabel";
     public static final String INVALID_TEAM_LABELS = "invalidTeamLabels";
     public static final String INVALID_UUID = "invalidUuid";
