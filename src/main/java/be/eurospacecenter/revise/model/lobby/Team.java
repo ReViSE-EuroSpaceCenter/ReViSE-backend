@@ -61,7 +61,7 @@ public class Team {
     }
 
     public TeamProgression getProgression() {
-        return new TeamProgression(countCompletedMissions(), firstBonusMissionCompleted, secondBonusMissionCompleted);
+        return new TeamProgression(label.toString(), countCompletedMissions(), firstBonusMissionCompleted, secondBonusMissionCompleted);
     }
 
     public TeamFullProgression getFullProgression() {

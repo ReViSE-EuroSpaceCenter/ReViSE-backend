@@ -77,7 +77,7 @@ class MissionManagerTest {
 
     @Test
     void changeTeamMissionsShouldSucceedForHost() {
-        TeamProgression progression = gameWithOneTeam.changeTeamMissionsStateByHost(hostId, "EXPE", List.of(MissionType.CLASSIC_1, MissionType.BONUS_1, MissionType.BONUS_2));
+        TeamProgression progression = gameWithOneTeam.changeTeamMissionsState(hostId, "EXPE", List.of(MissionType.CLASSIC_1, MissionType.BONUS_1, MissionType.BONUS_2));
 
         assertEquals(1, progression.classicMissionsCompleted());
         assertTrue(progression.firstBonusMissionCompleted());
@@ -91,7 +91,7 @@ class MissionManagerTest {
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () -> gameWithOneTeam.changeTeamMissionsStateByHost(unknownHostId, "EXPE", missions)
+                () -> gameWithOneTeam.changeTeamMissionsState(unknownHostId, "EXPE", missions)
         );
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
@@ -103,7 +103,7 @@ class MissionManagerTest {
 
         NotFoundException ex = assertThrows(
                 NotFoundException.class,
-                () -> gameWithOneTeam.changeTeamMissionsStateByHost(hostId, unknownTeamLabel, missions)
+                () -> gameWithOneTeam.changeTeamMissionsState(hostId, unknownTeamLabel, missions)
         );
         assertEquals(ErrorKeys.TEAM_NOT_FOUND, ex.getMessage());
     }
