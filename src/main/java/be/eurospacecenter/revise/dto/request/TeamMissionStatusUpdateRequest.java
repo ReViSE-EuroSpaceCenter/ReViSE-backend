@@ -10,9 +10,10 @@ import java.util.UUID;
 public record TeamMissionStatusUpdateRequest(
 
         @NotNull
-        UUID clientId,
+        UUID id,
 
         @NotNull
-        List<MissionType> updateMissions
+        List<MissionType> updateMissions,
 
+        String teamLabel
 ) {}

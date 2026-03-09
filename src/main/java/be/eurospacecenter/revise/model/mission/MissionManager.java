@@ -26,10 +26,23 @@ public class MissionManager {
         return gameInfo.getTeam(id).getLabel();
     }
 
-    public void changeTeamMissionsState(UUID id, List<MissionType> missions) {
-        Team team = gameInfo.getTeam(id);
+    public TeamProgression changeTeamMissionsState(UUID clientId, List<MissionType> missions) {
+        Team team = gameInfo.getTeam(clientId);
 
         missions.forEach(team::changeMissionState);
+
+        return team.getProgression();
+    }
+
+    public TeamProgression changeTeamMissionsStateByHost(UUID hostId, String teamLabel, List<MissionType> missionType) {
+        if (gameInfo.isNotHost(hostId)) {
+            throw new IllegalArgumentException(ErrorKeys.ACTION_RESERVED_TO_HOST);
+        }
+
+        Team team = gameInfo.getTeamByLabel(teamLabel);
+        missionType.forEach(team::changeMissionState);
+
+        return team.getProgression();
     }
 
     public Map<String, TeamProgression> teamsProgression() {
@@ -62,4 +75,5 @@ public class MissionManager {
         });
 
     }
+
 }

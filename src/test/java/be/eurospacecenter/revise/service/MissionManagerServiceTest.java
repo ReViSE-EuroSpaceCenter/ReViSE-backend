@@ -96,7 +96,7 @@ class MissionManagerServiceTest {
     void shouldCompleteTeamMission() {
         missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
 
-        missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_1));
+        missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, List.of(MissionType.CLASSIC_1));
 
         TeamProgression progression = missionService.getManager("XXXXXX").getTeamProgression(idOfTheLoneTeam);
 
@@ -106,7 +106,25 @@ class MissionManagerServiceTest {
     @Test
     void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
         List<MissionType> missions = List.of(MissionType.CLASSIC_1);
-        assertThrows(NotFoundException.class, () -> missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, missions));
+        assertThrows(NotFoundException.class, () -> missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, missions));
+    }
+
+    @Test
+    void shouldSucceedToCompleteMissionForHost() {
+        UUID hostId = gameInfoWith4Teams.getHostId();
+
+        missionService.registerManager("XXXXXX", gameInfoWith4Teams);
+
+        assertDoesNotThrow(() -> missionService.changeTeamMissionsState("XXXXXX", hostId, "EXPE", List.of(MissionType.CLASSIC_1)));
+    }
+
+    @Test
+    void shouldNotSucceedToCompleteMissionForUnknownHost() {
+        missionService.registerManager("XXXXXX", gameInfoWith4Teams);
+        UUID randomHostId = UUID.randomUUID();
+        List<MissionType> missions = List.of(MissionType.CLASSIC_1);
+
+        assertThrows(IllegalArgumentException.class,() -> missionService.changeTeamMissionsState("XXXXXX", randomHostId, "EXPE", missions));
     }
 
     @Test
@@ -153,7 +171,7 @@ class MissionManagerServiceTest {
                 continue;
             }
 
-            missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(missionType));
+            missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, List.of(missionType));
         }
 
         assertDoesNotThrow(() -> missionService.endMission("XXXXXX", gameInfoWithOneLoneTeam.getHostId()));
@@ -180,10 +198,10 @@ class MissionManagerServiceTest {
                 continue;
             }
 
-            missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(missionType));
+            missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, List.of(missionType));
         }
 
-        missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, List.of(MissionType.CLASSIC_1));
+        missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, List.of(MissionType.CLASSIC_1));
 
         UUID hostId = gameInfoWithOneLoneTeam.getHostId();
 

@@ -37,12 +37,16 @@ public class MissionService implements Cleanable {
         managers.put(lobbyCode, new MissionManager(gameInfo));
     }
 
-    public void changeTeamMissionsState(String lobbyCode, UUID clientId, List<MissionType> missionType) {
+    public void changeTeamMissionsState(String lobbyCode, UUID id, String teamLabel, List<MissionType> missionType) {
         MissionManager manager = getManager(lobbyCode);
-        manager.changeTeamMissionsState(clientId, missionType);
+        TeamProgression teamProgression;
 
-        String teamLabel = manager.getTeamLabel(clientId);
-        TeamProgression teamProgression = manager.getTeamProgression(clientId);
+        if (teamLabel != null) {
+            teamProgression = manager.changeTeamMissionsStateByHost(id, teamLabel, missionType);
+        } else {
+            teamProgression = manager.changeTeamMissionsState(id, missionType);
+            teamLabel = manager.getTeamLabel(id);
+        }
 
         notifier.notifyTeamProgression(lobbyCode, teamLabel, teamProgression);
     }
