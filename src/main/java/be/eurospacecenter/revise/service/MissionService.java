@@ -42,7 +42,7 @@ public class MissionService implements Cleanable {
 
         TeamProgression teamProgression = manager.changeTeamMissionsState(id, teamLabel, missionType);
 
-        notifier.notifyTeamProgression(lobbyCode, teamProgression.teamLabel(), teamProgression);
+        notifier.notifyTeamProgression(lobbyCode, teamProgression);
     }
 
 
