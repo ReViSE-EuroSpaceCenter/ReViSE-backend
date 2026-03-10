@@ -29,6 +29,7 @@
     <properties>
         <java.version>21</java.version>
         <sonar.organization>revise-eurospacecenter</sonar.organization>
+        <tools.jackson.core>3.10.0</tools.jackson.core>
     </properties>
     <dependencies>
         <dependency>
