@@ -138,7 +138,7 @@ class TeamTest {
         Map<ResourceType, Integer> resourcesToRemove = Map.of(resourceType, resourceType.getMax()+1);
         InvalidLauncherOperationException ex = assertThrows(
                 InvalidLauncherOperationException.class,
-                () -> team.removeResources(resourcesToRemove)
+                () -> team.updateResources(resourcesToRemove)
         );
 
         assertEquals(ErrorKeys.INSUFFICIENT_RESOURCES, ex.getMessage());
@@ -147,11 +147,11 @@ class TeamTest {
     @ParameterizedTest
     @EnumSource(ResourceType.class)
     void removeResourceOverLimitTwice(ResourceType resourceType) {
-        team.removeResources(Map.of(resourceType, resourceType.getMax()));
+        team.updateResources(Map.of(resourceType, resourceType.getMax()));
         Map<ResourceType, Integer> resourcesToRemove = Map.of(resourceType, 1);
         InvalidLauncherOperationException ex = assertThrows(
                 InvalidLauncherOperationException.class,
-                () -> team.removeResources(resourcesToRemove)
+                () -> team.updateResources(resourcesToRemove)
         );
 
         assertEquals(ErrorKeys.INSUFFICIENT_RESOURCES, ex.getMessage());

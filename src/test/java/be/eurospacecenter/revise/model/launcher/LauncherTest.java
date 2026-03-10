@@ -43,48 +43,70 @@ class LauncherTest {
     }
 
     @Test
-    void getTeamLabel() {
-        assertEquals(TeamLabel.EXPE.name(), gameWithTwoTeam.getTeamLabel(idOfTheFirstTeam));
-        assertEquals(TeamLabel.MECA.name(), gameWithTwoTeam.getTeamLabel(idOfTheSecondTeam));
-    }
-
-    @Test
     void updateResourcesWithEnergy() {
-        gameWithTwoTeam.updateResources(idOfTheFirstTeam, Map.of(ResourceType.ENERGY, 3));
+        TeamResources teamResources = gameWithTwoTeam.updateResources(idOfTheFirstTeam, Map.of(ResourceType.ENERGY, 3));
+        assertEquals(TeamLabel.EXPE, teamResources.teamLabel());
+        assertEquals(ResourceType.ENERGY.getMax()-3, teamResources.resources().get(ResourceType.ENERGY));
+        assertEquals(ResourceType.HUMAN.getMax(), teamResources.resources().get(ResourceType.HUMAN));
+        assertEquals(ResourceType.CLOCK.getMax(), teamResources.resources().get(ResourceType.CLOCK));
         assertEquals(49, gameWithTwoTeam.getGeneralScore(hostId));
     }
 
     @Test
     void updateResourcesWithHuman() {
-        gameWithTwoTeam.updateResources(idOfTheFirstTeam, Map.of(ResourceType.HUMAN, 2));
+        TeamResources teamResources = gameWithTwoTeam.updateResources(idOfTheFirstTeam, Map.of(ResourceType.HUMAN, 2));
+        assertEquals(TeamLabel.EXPE, teamResources.teamLabel());
+        assertEquals(ResourceType.ENERGY.getMax(), teamResources.resources().get(ResourceType.ENERGY));
+        assertEquals(ResourceType.HUMAN.getMax()-2, teamResources.resources().get(ResourceType.HUMAN));
+        assertEquals(ResourceType.CLOCK.getMax(), teamResources.resources().get(ResourceType.CLOCK));
         assertEquals(48, gameWithTwoTeam.getGeneralScore(hostId));
     }
 
     @Test
     void updateResourcesWithClock() {
-        gameWithTwoTeam.updateResources(idOfTheFirstTeam, Map.of(ResourceType.CLOCK, 1));
+        TeamResources teamResources = gameWithTwoTeam.updateResources(idOfTheFirstTeam, Map.of(ResourceType.CLOCK, 1));
+        assertEquals(TeamLabel.EXPE, teamResources.teamLabel());
+        assertEquals(ResourceType.ENERGY.getMax(), teamResources.resources().get(ResourceType.ENERGY));
+        assertEquals(ResourceType.HUMAN.getMax(), teamResources.resources().get(ResourceType.HUMAN));
+        assertEquals(ResourceType.CLOCK.getMax()-1, teamResources.resources().get(ResourceType.CLOCK));
         assertEquals(49, gameWithTwoTeam.getGeneralScore(hostId));
     }
 
     @Test
     void updateResourcesWithAll() {
-        gameWithTwoTeam.updateResources(idOfTheFirstTeam, Map.of(
+        TeamResources teamResources = gameWithTwoTeam.updateResources(idOfTheFirstTeam, Map.of(
                 ResourceType.ENERGY, 4,
                 ResourceType.HUMAN, 1,
                 ResourceType.CLOCK, 3
         ));
+
+        assertEquals(TeamLabel.EXPE, teamResources.teamLabel());
+        assertEquals(ResourceType.ENERGY.getMax()-4, teamResources.resources().get(ResourceType.ENERGY));
+        assertEquals(ResourceType.HUMAN.getMax()-1, teamResources.resources().get(ResourceType.HUMAN));
+        assertEquals(ResourceType.CLOCK.getMax()-3, teamResources.resources().get(ResourceType.CLOCK));
         assertEquals(45, gameWithTwoTeam.getGeneralScore(hostId));
     }
 
     @Test
     void updateResourcesWithMultipleTeam() {
-        gameWithTwoTeam.updateResources(idOfTheFirstTeam, Map.of(
+        TeamResources firstTeamResources = gameWithTwoTeam.updateResources(idOfTheFirstTeam, Map.of(
                 ResourceType.CLOCK, 3
         ));
-        gameWithTwoTeam.updateResources(idOfTheSecondTeam, Map.of(
+        TeamResources secondTeamResources = gameWithTwoTeam.updateResources(idOfTheSecondTeam, Map.of(
                 ResourceType.ENERGY, 4,
                 ResourceType.HUMAN, 2
         ));
+
+        assertEquals(TeamLabel.EXPE, firstTeamResources.teamLabel());
+        assertEquals(ResourceType.ENERGY.getMax(), firstTeamResources.resources().get(ResourceType.ENERGY));
+        assertEquals(ResourceType.HUMAN.getMax(), firstTeamResources.resources().get(ResourceType.HUMAN));
+        assertEquals(ResourceType.CLOCK.getMax()-3, firstTeamResources.resources().get(ResourceType.CLOCK));
+
+        assertEquals(TeamLabel.MECA, secondTeamResources.teamLabel());
+        assertEquals(ResourceType.ENERGY.getMax()-4, secondTeamResources.resources().get(ResourceType.ENERGY));
+        assertEquals(ResourceType.HUMAN.getMax()-2, secondTeamResources.resources().get(ResourceType.HUMAN));
+        assertEquals(ResourceType.CLOCK.getMax(), secondTeamResources.resources().get(ResourceType.CLOCK));
+
         assertEquals(44, gameWithTwoTeam.getGeneralScore(hostId));
     }
 

@@ -7,6 +7,7 @@ import be.eurospacecenter.revise.model.GameInfo;
 import be.eurospacecenter.revise.model.launcher.Launcher;
 
 import be.eurospacecenter.revise.model.launcher.ResourceType;
+import be.eurospacecenter.revise.model.launcher.TeamResources;
 import be.eurospacecenter.revise.notification.LauncherNotifier;
 import org.springframework.stereotype.Service;
 
@@ -35,10 +36,9 @@ public class LauncherService implements Cleanable {
 
     public void updateResources(String lobbyCode, UUID clientId, Map<ResourceType, Integer> resources) {
         Launcher launcher = getLauncher(lobbyCode);
-        launcher.updateResources(clientId, resources);
+        TeamResources teamResources = launcher.updateResources(clientId, resources);
 
-        String teamLabel = launcher.getTeamLabel(clientId);
-        notifier.notifyResourcesUpdated(lobbyCode, teamLabel);
+        notifier.notifyResourcesUpdated(lobbyCode, teamResources);
     }
 
     public ScoreResponse getGeneralScore(String lobbyCode, UUID hostId) {

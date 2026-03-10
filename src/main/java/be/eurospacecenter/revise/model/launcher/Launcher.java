@@ -14,13 +14,9 @@ public class Launcher {
         this.gameInfo = gameInfo;
     }
 
-    public String getTeamLabel(UUID id) {
-        return gameInfo.getTeam(id).getLabel();
-    }
-
-    public void updateResources(UUID clientId, Map<ResourceType, Integer> resources) {
+    public TeamResources updateResources(UUID clientId, Map<ResourceType, Integer> resources) {
         ensureClient(clientId);
-        gameInfo.getTeam(clientId).removeResources(resources);
+        return gameInfo.getTeam(clientId).updateResources(resources);
     }
 
     public int getGeneralScore(UUID hostId) {

@@ -4,6 +4,7 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidLauncherOperationException;
 import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
 import be.eurospacecenter.revise.model.launcher.ResourceType;
+import be.eurospacecenter.revise.model.launcher.TeamResources;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.model.mission.TeamFullProgression;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
@@ -94,7 +95,12 @@ public class Team {
         return completedMissions == totalMissions;
     }
 
-    public void removeResources(Map<ResourceType, Integer> toRemove) {
+    public TeamResources updateResources(Map<ResourceType, Integer> toRemove) {
+        removeResources(toRemove);
+        return new TeamResources(label, resources);
+    }
+
+    private void removeResources(Map<ResourceType, Integer> toRemove) {
         checkSufficientResources(toRemove);
         toRemove.forEach((type, amount) ->
                 resources.merge(type, -amount, Integer::sum)
