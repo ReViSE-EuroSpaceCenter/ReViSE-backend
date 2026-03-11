@@ -7,6 +7,7 @@ import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.helper.LobbyCode;
 import be.eurospacecenter.revise.service.MissionService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,7 @@ public class MissionController {
     }
 
     @PutMapping("/{lobbyCode}")
+    @Operation(description = "This endpoint allows both the host and the students to change the completion of a mission. **FOR THE HOST** `id=hostId` and `teamLabel` is the label of the team for which you want to change the mission completion. **FOR THE STUDENTS** `id=clientId` and `teamLabel` is ignored (can be empty or null).")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeTeamMissionsState(
             @PathVariable
