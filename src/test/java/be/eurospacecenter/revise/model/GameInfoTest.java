@@ -2,7 +2,6 @@ package be.eurospacecenter.revise.model;
 
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.lobby.Host;
-import be.eurospacecenter.revise.model.lobby.Team;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import org.junit.jupiter.api.Test;
 

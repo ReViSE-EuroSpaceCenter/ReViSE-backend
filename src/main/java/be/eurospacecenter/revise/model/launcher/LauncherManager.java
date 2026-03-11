@@ -7,10 +7,10 @@ import be.eurospacecenter.revise.model.GameInfo;
 import java.util.Map;
 import java.util.UUID;
 
-public class Launcher {
+public class LauncherManager {
     private final GameInfo gameInfo;
 
-    public Launcher(GameInfo gameInfo) {
+    public LauncherManager(GameInfo gameInfo) {
         this.gameInfo = gameInfo;
     }
 

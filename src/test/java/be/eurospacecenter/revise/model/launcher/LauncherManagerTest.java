@@ -4,7 +4,7 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.model.GameInfo;
 import be.eurospacecenter.revise.model.lobby.Host;
-import be.eurospacecenter.revise.model.lobby.Team;
+import be.eurospacecenter.revise.model.Team;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,9 +17,9 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class LauncherTest {
+class LauncherManagerTest {
 
-    private Launcher gameWithTwoTeam;
+    private LauncherManager gameWithTwoTeam;
     private UUID idOfTheFirstTeam;
     private UUID idOfTheSecondTeam;
     private UUID hostId;
@@ -34,7 +34,7 @@ class LauncherTest {
         gameInfo.addTeam(new Team(TeamLabel.EXPE, idOfTheFirstTeam));
         gameInfo.addTeam(new Team(TeamLabel.MECA, idOfTheSecondTeam));
 
-        gameWithTwoTeam = new Launcher(gameInfo);
+        gameWithTwoTeam = new LauncherManager(gameInfo);
     }
 
     @Test

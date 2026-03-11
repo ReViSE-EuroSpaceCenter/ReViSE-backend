@@ -4,7 +4,7 @@ import be.eurospacecenter.revise.dto.response.ScoreResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.GameInfo;
-import be.eurospacecenter.revise.model.launcher.Launcher;
+import be.eurospacecenter.revise.model.launcher.LauncherManager;
 
 import be.eurospacecenter.revise.model.launcher.ResourceType;
 import be.eurospacecenter.revise.model.launcher.TeamResources;
@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class LauncherService implements Cleanable {
 
-    protected final Map<String, Launcher> launchers = new ConcurrentHashMap<>();
+    protected final Map<String, LauncherManager> launchers = new ConcurrentHashMap<>();
     private final LauncherNotifier notifier;
 
     public LauncherService(LauncherNotifier notifier) {
@@ -31,23 +31,23 @@ public class LauncherService implements Cleanable {
         if (lobbyCode == null || lobbyCode.isEmpty()) {
             throw new IllegalArgumentException(ErrorKeys.INVALID_LOBBY_CODE);
         }
-        launchers.put(lobbyCode, new Launcher(gameInfo));
+        launchers.put(lobbyCode, new LauncherManager(gameInfo));
     }
 
     public void updateResources(String lobbyCode, UUID clientId, Map<ResourceType, Integer> resources) {
-        Launcher launcher = getLauncher(lobbyCode);
-        TeamResources teamResources = launcher.updateResources(clientId, resources);
+        LauncherManager launcherManager = getLauncher(lobbyCode);
+        TeamResources teamResources = launcherManager.updateResources(clientId, resources);
 
         notifier.notifyResourcesUpdated(lobbyCode, teamResources);
     }
 
     public ScoreResponse getGeneralScore(String lobbyCode, UUID hostId) {
-        Launcher launcher = getLauncher(lobbyCode);
-        int score = launcher.getGeneralScore(hostId);
+        LauncherManager launcherManager = getLauncher(lobbyCode);
+        int score = launcherManager.getGeneralScore(hostId);
         return new ScoreResponse(score);
     }
 
-    private Launcher getLauncher(String lobbyCode) {
+    private LauncherManager getLauncher(String lobbyCode) {
         return Optional.ofNullable(launchers.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.LAUNCHER_NOT_FOUND));
     }
 

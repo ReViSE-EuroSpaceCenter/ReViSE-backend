@@ -143,7 +143,7 @@ class MissionControllerTest {
                         "updateMissions", List.of("CLASSIC_1")
                 ))
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isForbidden();
     }
 
     @Test
@@ -193,7 +193,7 @@ class MissionControllerTest {
                         "hostId", UUID.randomUUID()
                 ))
                 .exchange()
-                .expectStatus().isBadRequest()
+                .expectStatus().isForbidden()
                 .expectBody()
                 .jsonPath("$.detail")
                 .isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);

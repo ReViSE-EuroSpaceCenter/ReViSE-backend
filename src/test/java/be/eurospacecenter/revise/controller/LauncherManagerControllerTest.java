@@ -19,7 +19,7 @@ import java.util.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-class LauncherControllerTest {
+class LauncherManagerControllerTest {
 
     @Autowired
     private RestTestClient restTestClient;

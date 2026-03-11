@@ -2,10 +2,11 @@ package be.eurospacecenter.revise.model.mission;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
+import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.GameInfo;
 import be.eurospacecenter.revise.model.lobby.Host;
-import be.eurospacecenter.revise.model.lobby.Team;
+import be.eurospacecenter.revise.model.Team;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -87,8 +88,8 @@ class MissionManagerTest {
         UUID unknownHostId = UUID.randomUUID();
         List<MissionType> missions = List.of(MissionType.CLASSIC_1);
 
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        NoAutoriseOperationException ex = assertThrows(
+                NoAutoriseOperationException.class,
                 () -> gameWithOneTeam.changeTeamMissionsState(unknownHostId, "EXPE", missions)
         );
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
@@ -131,8 +132,8 @@ class MissionManagerTest {
     @Test
     void shouldNotAllowNonHostToEndMission() {
         UUID nonHostId = UUID.randomUUID();
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        NoAutoriseOperationException ex = assertThrows(
+                NoAutoriseOperationException.class,
                 () -> gameWithOneTeam.endMission(nonHostId)
         );
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
@@ -146,7 +147,7 @@ class MissionManagerTest {
             if (mission == MissionType.CLASSIC_8) {
                 continue;
             }
-            team.changeMissionState(mission);
+            team.updateMission(mission);
         }
 
         assertDoesNotThrow(() -> gameWithOneTeam.endMission(hostId));
@@ -164,7 +165,7 @@ class MissionManagerTest {
         Team team = missionManager.getGameInfo().getTeam(mecaTeamId);
 
         for (MissionType mission : MissionType.getClassicMissions()) {
-            team.changeMissionState(mission);
+            team.updateMission(mission);
         }
 
         assertDoesNotThrow(() -> missionManager.endMission(hostId));
@@ -178,10 +179,10 @@ class MissionManagerTest {
             if (mission == MissionType.CLASSIC_8) {
                 continue;
             }
-            team.changeMissionState(mission);
+            team.updateMission(mission);
         }
 
-        team.changeMissionState(MissionType.CLASSIC_1);
+        team.updateMission(MissionType.CLASSIC_1);
 
         InvalidMissionOperationException ex = assertThrows(
                 InvalidMissionOperationException.class,
