@@ -149,7 +149,10 @@ class MissionControllerTest {
     @Test
     void getTeamMissionsShouldSucceed() {
         restTestClient.get()
-                .uri("/api/missions/" + lobbyCode + "/" + teamClientId)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/missions/{lobbyCode}")
+                        .queryParam("clientId", teamClientId)
+                        .build(lobbyCode))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()

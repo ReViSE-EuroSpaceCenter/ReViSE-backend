@@ -75,7 +75,7 @@ class LauncherControllerTest {
                 missionsToComplete.removeLast();
             }
 
-            missionService.changeTeamMissionsState(lobbyCode, teamId, missionsToComplete);
+            missionService.changeTeamMissionsState(lobbyCode, teamId, null, missionsToComplete);
         }
 
         missionService.endMission(lobbyCode, hostId);
@@ -140,11 +140,11 @@ class LauncherControllerTest {
 
     @Test
     void getScoreShouldSucceed() {
-        restTestClient.post()
-                .uri("/api/launchers/" + lobbyCode + "/score")
-                .body(Map.of(
-                        "hostId", hostId.toString()
-                ))
+        restTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/launchers/{lobbyCode}/score")
+                        .queryParam("hostId", hostId.toString())
+                        .build(lobbyCode))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -154,11 +154,11 @@ class LauncherControllerTest {
 
     @Test
     void getScoreShouldFailWithInvalidLobbyCode() {
-        restTestClient.post()
-                .uri("/api/launchers/INVALID/score")
-                .body(Map.of(
-                        "hostId", hostId.toString()
-                ))
+        restTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/launchers/{lobbyCode}/score")
+                        .queryParam("hostId", hostId.toString())
+                        .build("INVALID"))
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
@@ -168,11 +168,11 @@ class LauncherControllerTest {
 
     @Test
     void getScoreShouldFailWithInvalidUuid() {
-        restTestClient.post()
-                .uri("/api/launchers/" + lobbyCode + "/score")
-                .body(Map.of(
-                        "hostId", UUID.randomUUID().toString()
-                ))
+        restTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/launchers/{lobbyCode}/score")
+                        .queryParam("hostId", UUID.randomUUID().toString())
+                        .build(lobbyCode))
                 .exchange()
                 .expectStatus().isForbidden()
                 .expectBody()

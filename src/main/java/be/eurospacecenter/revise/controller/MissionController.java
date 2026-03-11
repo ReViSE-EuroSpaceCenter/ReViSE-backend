@@ -61,13 +61,13 @@ public class MissionController {
         missionService.endMission(lobbyCode, request.hostId());
     }
 
-    @GetMapping("/{lobbyCode}/{clientId}")
+    @GetMapping(value = "/{lobbyCode}", params = "clientId")
     public TeamFullProgressionResponse getTeamMissions(
             @PathVariable
             @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
 
-            @PathVariable
+            @RequestParam
             @Valid
             UUID clientId
     ) {
