@@ -36,10 +36,21 @@ class LobbyControllerTest {
     }
 
     @Test
-    void lobbyShouldReturnHostId() {
+    void lobbyShouldReturnHostIdFor4() {
         restTestClient.post()
                 .uri("/api/lobbies")
                 .body(Map.of("numberOfTeams", 4))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.hostId").exists();
+    }
+
+    @Test
+    void lobbyShouldReturnHostIdFor6() {
+        restTestClient.post()
+                .uri("/api/lobbies")
+                .body(Map.of("numberOfTeams", 6))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()

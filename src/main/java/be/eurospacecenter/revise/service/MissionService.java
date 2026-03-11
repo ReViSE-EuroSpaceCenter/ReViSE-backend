@@ -38,15 +38,16 @@ public class MissionService implements Cleanable {
         MissionManager manager = getManager(lobbyCode);
 
         TeamProgression teamProgression = manager.changeTeamMissionsState(id, teamLabel, missionType);
+        boolean allTeamsMissionsCompleted = manager.isAllTeamsMissionsCompleted();
 
-        notifier.notifyTeamProgression(lobbyCode, teamProgression);
+        notifier.notifyTeamProgression(lobbyCode, teamProgression, allTeamsMissionsCompleted);
     }
 
 
     public TeamsProgressionResponse getTeamsProgression(String lobbyCode) {
         MissionManager manager = getManager(lobbyCode);
 
-        return new TeamsProgressionResponse(manager.teamsProgression(), manager.allTeamsCompleted());
+        return new TeamsProgressionResponse(manager.getTeamsProgression(), manager.isAllTeamsMissionsCompleted());
     }
 
     public TeamFullProgressionResponse getTeamFullProgression(String lobbyCode, UUID clientId) {
@@ -58,7 +59,7 @@ public class MissionService implements Cleanable {
 
     public void endMission(String lobbyCode, UUID hostId) {
         MissionManager manager = getManager(lobbyCode);
-        manager.endMission(hostId);
+        manager.validateEndOfMission(hostId);
 
         launcherService.registerLauncher(lobbyCode, manager.getGameInfo());
 

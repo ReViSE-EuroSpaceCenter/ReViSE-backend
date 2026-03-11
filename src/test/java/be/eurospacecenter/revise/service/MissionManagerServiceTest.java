@@ -147,7 +147,7 @@ class MissionManagerServiceTest {
     }
 
     @Test
-    void shouldGetFourTeamsProgression() {
+    void shouldGetFourGetTeamsProgression() {
         missionService.registerManager("XXXXXX", gameInfoWith4Teams);
 
         TeamsProgressionResponse response = missionService.getTeamsProgression("XXXXXX");
@@ -159,7 +159,7 @@ class MissionManagerServiceTest {
     }
 
     @Test
-    void shouldGetSixTeamsProgression() {
+    void shouldGetSixGetTeamsProgression() {
         missionService.registerManager("XXXXXX", gameInfoWith6Teams);
 
         TeamsProgressionResponse response = missionService.getTeamsProgression("XXXXXX");

@@ -130,31 +130,24 @@ class MissionManagerTest {
     }
 
     @Test
-    void shouldNotAllowNonHostToEndMission() {
+    void shouldNotAllowNonHostToValidateEndOfMission() {
         UUID nonHostId = UUID.randomUUID();
         NoAutoriseOperationException ex = assertThrows(
                 NoAutoriseOperationException.class,
-                () -> gameWithOneTeam.endMission(nonHostId)
+                () -> gameWithOneTeam.validateEndOfMission(nonHostId)
         );
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
 
     @Test
-    void shouldAllowHostToEndMissionWhenAllClassicMissionsCompleted() {
-        Team team = gameWithOneTeam.getGameInfo().getTeam(idOfTheLoneTeam);
+    void shouldAllowHostToValidateEndOfMissionWhenAllClassicMissionsCompleted() {
+        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, MissionType.getClassicMissions().stream().toList().subList(0, 7));
 
-        for (MissionType mission : MissionType.getClassicMissions()) {
-            if (mission == MissionType.CLASSIC_8) {
-                continue;
-            }
-            team.updateMission(mission);
-        }
-
-        assertDoesNotThrow(() -> gameWithOneTeam.endMission(hostId));
+        assertDoesNotThrow(() -> gameWithOneTeam.validateEndOfMission(hostId));
     }
 
     @Test
-    void shouldAllowToEndMissionWhenAllClassicMissionsCompleted() {
+    void shouldAllowToValidateEndOfMissionWhenAllClassicMissionsCompleted() {
         UUID mecaTeamId = UUID.randomUUID();
 
         GameInfo gameInfo = new GameInfo(new Host(hostId), LocalDateTime.now());
@@ -162,17 +155,13 @@ class MissionManagerTest {
 
         MissionManager missionManager = new MissionManager(gameInfo);
 
-        Team team = missionManager.getGameInfo().getTeam(mecaTeamId);
+        missionManager.changeTeamMissionsState(mecaTeamId, MissionType.getClassicMissions().stream().toList());
 
-        for (MissionType mission : MissionType.getClassicMissions()) {
-            team.updateMission(mission);
-        }
-
-        assertDoesNotThrow(() -> missionManager.endMission(hostId));
+        assertDoesNotThrow(() -> missionManager.validateEndOfMission(hostId));
     }
 
     @Test
-    void shouldNotAllowToEndMissionWhenAtLeastOneClassicMissionIsNotCompleted() {
+    void shouldNotAllowToValidateEndOfMissionWhenAtLeastOneClassicMissionIsNotCompleted() {
         Team team = gameWithOneTeam.getGameInfo().getTeam(idOfTheLoneTeam);
 
         for (MissionType mission : MissionType.getClassicMissions()) {
@@ -186,7 +175,7 @@ class MissionManagerTest {
 
         InvalidMissionOperationException ex = assertThrows(
                 InvalidMissionOperationException.class,
-                () -> gameWithOneTeam.endMission(hostId)
+                () -> gameWithOneTeam.validateEndOfMission(hostId)
         );
         assertEquals(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS, ex.getMessage());
     }

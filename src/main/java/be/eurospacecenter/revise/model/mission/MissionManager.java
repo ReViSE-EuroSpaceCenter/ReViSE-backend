@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class MissionManager {
 
     private final GameInfo gameInfo;
+    private boolean allTeamsMissionsCompleted = false;
 
     public MissionManager(GameInfo gameInfo) {
         this.gameInfo = gameInfo;
@@ -21,6 +22,10 @@ public class MissionManager {
 
     public GameInfo getGameInfo() {
         return gameInfo;
+    }
+
+    public boolean isAllTeamsMissionsCompleted() {
+        return allTeamsMissionsCompleted;
     }
 
     public TeamProgression changeTeamMissionsState(UUID id, String teamLabel, List<MissionType> missions) {
@@ -35,6 +40,8 @@ public class MissionManager {
         Team team = gameInfo.getTeamByLabel(teamLabel);
         missions.forEach(team::updateMission);
 
+        updateAllTeamsMissionsCompletion(team);
+
         return team.getProgression();
     }
 
@@ -42,17 +49,9 @@ public class MissionManager {
         Team team = gameInfo.getTeam(clientId);
         missions.forEach(team::updateMission);
 
+        updateAllTeamsMissionsCompletion(team);
+
         return team.getProgression();
-    }
-
-    public Map<String, TeamProgression> teamsProgression() {
-        Map<UUID, Team> teams = gameInfo.getTeams();
-
-        return teams.values().stream().collect(Collectors.toMap(Team::getLabel, Team::getProgression));
-    }
-
-    public boolean allTeamsCompleted() {
-        return gameInfo.getTeams().values().stream().allMatch(Team::allClassicMissionsCompleted);
     }
 
     public TeamProgression getTeamProgression(UUID id) {
@@ -62,21 +61,30 @@ public class MissionManager {
 
     public TeamFullProgression getTeamFullProgression(UUID id) {
         Team team = gameInfo.getTeam(id);
-
         return team.getFullProgression();
     }
 
-    public void endMission(UUID hostId) {
+    public Map<String, TeamProgression> getTeamsProgression() {
+        Map<UUID, Team> teams = gameInfo.getTeams();
+
+        return teams.values().stream().collect(Collectors.toMap(Team::getLabel, Team::getProgression));
+    }
+
+    public void validateEndOfMission(UUID hostId) {
         if (gameInfo.isNotHost(hostId)) {
             throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
         }
 
-        Map<UUID, Team> teams = gameInfo.getTeams();
-        teams.forEach((id, team) -> {
-            if (!team.allClassicMissionsCompleted()) {
-                throw new InvalidMissionOperationException(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS);
-            }
-        });
+        if (!allTeamsMissionsCompleted) {
+            throw new InvalidMissionOperationException(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS);
+        }
+    }
 
+    private boolean areAllTeamsMissionsCompleted() {
+        return gameInfo.getTeams().values().stream().allMatch(Team::allClassicMissionsCompleted);
+    }
+
+    private void updateAllTeamsMissionsCompletion(Team team) {
+        allTeamsMissionsCompleted = team.allClassicMissionsCompleted() && areAllTeamsMissionsCompleted();
     }
 }
