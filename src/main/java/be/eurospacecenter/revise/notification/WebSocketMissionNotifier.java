@@ -22,8 +22,8 @@ public class WebSocketMissionNotifier implements MissionNotifier {
     }
 
     @Override
-    public void notifyTeamProgression(String lobbyCode, String teamLabel, TeamProgression teamProgression) {
-        logger.info("Sending TEAM_PROGRESSION event for game: {} with team: {} and progression: {}", lobbyCode, teamLabel, teamProgression);
+    public void notifyTeamProgression(String lobbyCode, TeamProgression teamProgression) {
+        logger.info("Sending TEAM_PROGRESSION event for game: {} with team: {} and progression: {}", lobbyCode, teamProgression.teamLabel(), teamProgression);
         MissionEvent event = new MissionEvent(MissionEventType.TEAM_PROGRESSION, new TeamProgressionResponse(teamProgression));
 
         messagingTemplate.convertAndSend(GAME_TOPIC_PREFIX + lobbyCode, event);

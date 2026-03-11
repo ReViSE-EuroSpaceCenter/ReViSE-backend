@@ -74,6 +74,39 @@ class MissionManagerTest {
     }
 
     @Test
+    void changeTeamMissionsShouldSucceedForHost() {
+        TeamProgression progression = gameWithOneTeam.changeTeamMissionsState(hostId, "EXPE", List.of(MissionType.CLASSIC_1, MissionType.BONUS_1, MissionType.BONUS_2));
+
+        assertEquals(1, progression.classicMissionsCompleted());
+        assertTrue(progression.firstBonusMissionCompleted());
+        assertTrue(progression.secondBonusMissionCompleted());
+    }
+
+    @Test
+    void changeTeamMissionsShouldNotSucceedForUnknownHost() {
+        UUID unknownHostId = UUID.randomUUID();
+        List<MissionType> missions = List.of(MissionType.CLASSIC_1);
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> gameWithOneTeam.changeTeamMissionsState(unknownHostId, "EXPE", missions)
+        );
+        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
+    }
+
+    @Test
+    void changeTeamMissionsShouldNotSucceedForUnknownTeamLabel() {
+        String unknownTeamLabel = "UNKNOWN_TEAM";
+        List<MissionType> missions = List.of(MissionType.CLASSIC_1);
+
+        NotFoundException ex = assertThrows(
+                NotFoundException.class,
+                () -> gameWithOneTeam.changeTeamMissionsState(hostId, unknownTeamLabel, missions)
+        );
+        assertEquals(ErrorKeys.TEAM_NOT_FOUND, ex.getMessage());
+    }
+
+    @Test
     void completeTeamMissionWithInvalidTeam() {
         UUID id = UUID.randomUUID();
         List<MissionType> missions = List.of(MissionType.CLASSIC_1);

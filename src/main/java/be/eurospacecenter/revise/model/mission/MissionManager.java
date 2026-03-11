@@ -22,14 +22,26 @@ public class MissionManager {
         return gameInfo;
     }
 
-    public String getTeamLabel(UUID id) {
-        return gameInfo.getTeam(id).getLabel();
+    public TeamProgression changeTeamMissionsState(UUID id, String teamLabel, List<MissionType> missions) {
+        if (teamLabel == null) {
+            return changeTeamMissionsState(id, missions);
+        }
+
+        if (gameInfo.isNotHost(id)) {
+            throw new IllegalArgumentException(ErrorKeys.ACTION_RESERVED_TO_HOST);
+        }
+
+        Team team = gameInfo.getTeamByLabel(teamLabel);
+        missions.forEach(team::changeMissionState);
+
+        return team.getProgression();
     }
 
-    public void changeTeamMissionsState(UUID id, List<MissionType> missions) {
-        Team team = gameInfo.getTeam(id);
-
+    public TeamProgression changeTeamMissionsState(UUID clientId, List<MissionType> missions) {
+        Team team = gameInfo.getTeam(clientId);
         missions.forEach(team::changeMissionState);
+
+        return team.getProgression();
     }
 
     public Map<String, TeamProgression> teamsProgression() {
@@ -62,4 +74,5 @@ public class MissionManager {
         });
 
     }
+
 }

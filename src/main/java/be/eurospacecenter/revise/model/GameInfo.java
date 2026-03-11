@@ -30,12 +30,16 @@ public class GameInfo {
         teams.put(team.getClientID(), team);
     }
 
-    public Map<UUID, Team> getTeams() {
-        return Map.copyOf(teams);
-    }
-
     public Team getTeam(UUID clientId) {
         return Optional.ofNullable(teams.get(clientId)).orElseThrow(() -> new NotFoundException(ErrorKeys.TEAM_NOT_FOUND));
+    }
+
+    public Team getTeamByLabel(String teamLabel) {
+        return teams.values().stream().filter(team -> team.getLabel().equals(teamLabel)).findFirst().orElseThrow(() -> new NotFoundException(ErrorKeys.TEAM_NOT_FOUND));
+    }
+
+    public Map<UUID, Team> getTeams() {
+        return Map.copyOf(teams);
     }
 
     public boolean isNotHost(UUID hostId) {

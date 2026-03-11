@@ -68,7 +68,7 @@ class MissionControllerTest {
         restTestClient.put()
                 .uri("/api/missions/" + lobbyCode)
                 .body(Map.of(
-                        "clientId", teamClientId,
+                        "id", teamClientId,
                         "updateMissions", List.of("CLASSIC_1")
                 ))
                 .exchange()
@@ -80,7 +80,7 @@ class MissionControllerTest {
         restTestClient.put()
                 .uri("/api/missions/INVALID")
                 .body(Map.of(
-                        "clientId", teamClientId,
+                        "id", teamClientId,
                         "updateMissions", List.of("CLASSIC_1")
                 ))
                 .exchange()
@@ -95,7 +95,7 @@ class MissionControllerTest {
         restTestClient.put()
                 .uri("/api/missions/" + lobbyCode)
                 .body(Map.of(
-                        "clientId", "abc",
+                        "id", "abc",
                         "updateMissions", List.of("CLASSIC_1")
                 ))
                 .exchange()
@@ -118,6 +118,32 @@ class MissionControllerTest {
                 .expectBody()
                 .jsonPath("$.detail")
                 .isEqualTo(ErrorKeys.INVALID_MISSION_TYPE);
+    }
+
+    @Test
+    void changeMissionStateShouldSucceedForHost() {
+        restTestClient.put()
+                .uri("/api/missions/" + lobbyCode)
+                .body(Map.of(
+                        "id", hostId,
+                        "teamLabel", "EXPE",
+                        "updateMissions", List.of("CLASSIC_1")
+                ))
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    void changeMissionStateShouldNotSucceedForUnknownHost() {
+        restTestClient.put()
+                .uri("/api/missions/" + lobbyCode)
+                .body(Map.of(
+                        "id", UUID.randomUUID(),
+                        "teamLabel", "EXPE",
+                        "updateMissions", List.of("CLASSIC_1")
+                ))
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @Test
