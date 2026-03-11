@@ -4,3 +4,5 @@
 
 ## Documentation
 The Swagger documentation of the API is available at: http://localhost:8080/swagger-ui/index.html
+
+**To use the Swagger,** the `dev` profile must be active.
