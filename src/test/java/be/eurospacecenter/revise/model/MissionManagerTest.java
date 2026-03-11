@@ -141,15 +141,27 @@ class MissionManagerTest {
     }
 
     @Test
-    void shouldAllowHostToEndMissionWhenAllClassicMissionsCompleted() {
+    void allMissionsAreCompleted() {
+        finishMissionForLonelyTeam();
+
         Team team = gameWithOneTeam.getGameInfo().getTeam(idOfTheLoneTeam);
 
-        for (MissionType mission : MissionType.getClassicMissions()) {
-            if (mission == MissionType.CLASSIC_8) {
-                continue;
-            }
-            team.changeMissionState(mission);
-        }
+        assertTrue(team.allClassicMissionsCompleted());
+    }
+
+    @Test
+    void allMissionsAreNotCompleted() {
+        finishMissionForLonelyTeam();
+
+        Team team = gameWithOneTeam.getGameInfo().getTeam(idOfTheLoneTeam);
+        team.changeMissionState(MissionType.CLASSIC_1);
+
+        assertFalse(team.allClassicMissionsCompleted());
+    }
+
+    @Test
+    void shouldAllowHostToEndMissionWhenAllClassicMissionsCompleted() {
+        finishMissionForLonelyTeam();
 
         assertDoesNotThrow(() -> gameWithOneTeam.endMission(hostId));
     }
@@ -174,6 +186,19 @@ class MissionManagerTest {
 
     @Test
     void shouldNotAllowToEndMissionWhenAtLeastOneClassicMissionIsNotCompleted() {
+        finishMissionForLonelyTeam();
+
+        Team team = gameWithOneTeam.getGameInfo().getTeam(idOfTheLoneTeam);
+        team.changeMissionState(MissionType.CLASSIC_1);
+
+        InvalidMissionOperationException ex = assertThrows(
+                InvalidMissionOperationException.class,
+                () -> gameWithOneTeam.endMission(hostId)
+        );
+        assertEquals(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS, ex.getMessage());
+    }
+
+    public void finishMissionForLonelyTeam() {
         Team team = gameWithOneTeam.getGameInfo().getTeam(idOfTheLoneTeam);
 
         for (MissionType mission : MissionType.getClassicMissions()) {
@@ -182,13 +207,5 @@ class MissionManagerTest {
             }
             team.changeMissionState(mission);
         }
-
-        team.changeMissionState(MissionType.CLASSIC_1);
-
-        InvalidMissionOperationException ex = assertThrows(
-                InvalidMissionOperationException.class,
-                () -> gameWithOneTeam.endMission(hostId)
-        );
-        assertEquals(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS, ex.getMessage());
     }
 }

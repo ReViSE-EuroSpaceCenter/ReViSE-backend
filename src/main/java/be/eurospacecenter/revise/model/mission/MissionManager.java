@@ -50,6 +50,10 @@ public class MissionManager {
         return teams.values().stream().collect(Collectors.toMap(Team::getLabel, Team::getProgression));
     }
 
+    public boolean allTeamsCompleted() {
+        return gameInfo.getTeams().values().stream().allMatch(Team::allClassicMissionsCompleted);
+    }
+
     public TeamProgression getTeamProgression(UUID id) {
         Team team = gameInfo.getTeam(id);
         return team.getProgression();
@@ -74,5 +78,4 @@ public class MissionManager {
         });
 
     }
-
 }
