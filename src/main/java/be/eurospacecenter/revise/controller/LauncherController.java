@@ -38,7 +38,7 @@ public class LauncherController {
     }
 
     @GetMapping(value = "/{lobbyCode}/score", params = "hostId")
-    public ScoreResponse calculateScore(
+    public ScoreResponse getGeneralScore(
             @PathVariable
             @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
