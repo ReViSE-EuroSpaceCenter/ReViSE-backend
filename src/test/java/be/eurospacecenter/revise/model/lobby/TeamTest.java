@@ -1,11 +1,12 @@
-package be.eurospacecenter.revise.model;
+package be.eurospacecenter.revise.model.lobby;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.exceptions.InvalidLauncherOperationException;
 import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
-import be.eurospacecenter.revise.model.lobby.Team;
+import be.eurospacecenter.revise.model.Team;
+import be.eurospacecenter.revise.model.launcher.ResourceType;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.model.mission.TeamFullProgression;
-import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,11 +57,11 @@ class TeamTest {
     void changeMissionBonusStateTwice() {
         assertFalse(progression.firstBonusMissionCompleted());
 
-        team.changeMissionState(MissionType.BONUS_1);
+        team.updateMission(MissionType.BONUS_1);
         progression = team.getProgression();
         assertTrue(progression.firstBonusMissionCompleted());
 
-        team.changeMissionState(MissionType.BONUS_1);
+        team.updateMission(MissionType.BONUS_1);
         progression = team.getProgression();
         assertFalse(progression.firstBonusMissionCompleted());
     }
@@ -68,11 +70,11 @@ class TeamTest {
     void changeMissionClassicStateTwice() {
         assertEquals(0, progression.classicMissionsCompleted());
 
-        team.changeMissionState(MissionType.CLASSIC_1);
+        team.updateMission(MissionType.CLASSIC_1);
         progression = team.getProgression();
         assertEquals(1, progression.classicMissionsCompleted(), 1);
 
-        team.changeMissionState(MissionType.CLASSIC_1);
+        team.updateMission(MissionType.CLASSIC_1);
         progression = team.getProgression();
         assertEquals(0, progression.classicMissionsCompleted());
     }
@@ -101,7 +103,7 @@ class TeamTest {
             if (mission == MissionType.CLASSIC_8) {
                 continue;
             }
-            team.changeMissionState(mission);
+            team.updateMission(mission);
         }
 
         assertTrue(team.allClassicMissionsCompleted());
@@ -112,7 +114,7 @@ class TeamTest {
         assertFalse(teamMeca.allClassicMissionsCompleted());
 
         for (MissionType mission : MissionType.getClassicMissions()) {
-            teamMeca.changeMissionState(mission);
+            teamMeca.updateMission(mission);
         }
 
         assertTrue(teamMeca.allClassicMissionsCompleted());
@@ -120,9 +122,9 @@ class TeamTest {
 
     @Test
     void shouldHaveMultipleMissionsCompleted() {
-        team.changeMissionState(MissionType.CLASSIC_1);
-        team.changeMissionState(MissionType.CLASSIC_2);
-        team.changeMissionState(MissionType.BONUS_1);
+        team.updateMission(MissionType.CLASSIC_1);
+        team.updateMission(MissionType.CLASSIC_2);
+        team.updateMission(MissionType.BONUS_1);
 
         progression = team.getProgression();
         assertEquals(2, progression.classicMissionsCompleted());
@@ -130,16 +132,42 @@ class TeamTest {
         assertFalse(progression.secondBonusMissionCompleted());
     }
 
+
+    @ParameterizedTest
+    @EnumSource(ResourceType.class)
+    void removeResourceOverLimitOnce(ResourceType resourceType) {
+        Map<ResourceType, Integer> resourcesToRemove = Map.of(resourceType, resourceType.getMax()+1);
+        InvalidLauncherOperationException ex = assertThrows(
+                InvalidLauncherOperationException.class,
+                () -> team.updateResources(resourcesToRemove)
+        );
+
+        assertEquals(ErrorKeys.INSUFFICIENT_RESOURCES, ex.getMessage());
+    }
+
+    @ParameterizedTest
+    @EnumSource(ResourceType.class)
+    void removeResourceOverLimitTwice(ResourceType resourceType) {
+        team.updateResources(Map.of(resourceType, resourceType.getMax()));
+        Map<ResourceType, Integer> resourcesToRemove = Map.of(resourceType, 1);
+        InvalidLauncherOperationException ex = assertThrows(
+                InvalidLauncherOperationException.class,
+                () -> team.updateResources(resourcesToRemove)
+        );
+
+        assertEquals(ErrorKeys.INSUFFICIENT_RESOURCES, ex.getMessage());
+    }
+
     private void testMissionForTeamLabel(Team team, MissionType mission) {
         if (shouldThrowException(team, mission)) {
-            InvalidMissionOperationException ex = assertThrows(InvalidMissionOperationException.class, () -> team.changeMissionState(mission));
+            InvalidMissionOperationException ex = assertThrows(InvalidMissionOperationException.class, () -> team.updateMission(mission));
             assertEquals(ErrorKeys.ONLY_MECA_COMPLETE_CLASSIC_8, ex.getMessage());
 
             return;
         }
 
         assertInitialProgressionState();
-        team.changeMissionState(mission);
+        team.updateMission(mission);
         assertProgressionAfterMissionChange(team, mission);
     }
 

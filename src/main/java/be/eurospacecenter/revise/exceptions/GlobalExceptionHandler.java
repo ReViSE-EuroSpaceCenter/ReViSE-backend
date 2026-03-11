@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.exceptions;
 
+import be.eurospacecenter.revise.model.launcher.ResourceType;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -90,6 +91,7 @@ public class GlobalExceptionHandler {
 
     private static final Map<Class<?>, String> TYPE_ERROR_MAP = Map.of(
             UUID.class, ErrorKeys.INVALID_UUID,
-            MissionType.class, ErrorKeys.INVALID_MISSION_TYPE
+            MissionType.class, ErrorKeys.INVALID_MISSION_TYPE,
+            ResourceType.class, ErrorKeys.INVALID_RESOURCE_TYPE
     );
 }

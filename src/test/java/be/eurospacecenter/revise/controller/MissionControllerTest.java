@@ -143,13 +143,16 @@ class MissionControllerTest {
                         "updateMissions", List.of("CLASSIC_1")
                 ))
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isForbidden();
     }
 
     @Test
     void getTeamMissionsShouldSucceed() {
         restTestClient.get()
-                .uri("/api/missions/" + lobbyCode + "/" + teamClientId)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/missions/{lobbyCode}")
+                        .queryParam("clientId", teamClientId)
+                        .build(lobbyCode))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -190,7 +193,7 @@ class MissionControllerTest {
                         "hostId", UUID.randomUUID()
                 ))
                 .exchange()
-                .expectStatus().isBadRequest()
+                .expectStatus().isForbidden()
                 .expectBody()
                 .jsonPath("$.detail")
                 .isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);

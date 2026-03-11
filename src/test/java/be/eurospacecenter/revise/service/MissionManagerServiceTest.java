@@ -4,10 +4,11 @@ import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
 import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
+import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.model.lobby.Host;
-import be.eurospacecenter.revise.model.lobby.Team;
+import be.eurospacecenter.revise.model.Team;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
@@ -106,7 +107,11 @@ class MissionManagerServiceTest {
     @Test
     void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
         List<MissionType> missions = List.of(MissionType.CLASSIC_1);
-        assertThrows(NotFoundException.class, () -> missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, missions));
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, missions)
+        );
+        assertEquals(ErrorKeys.MISSION_MANAGER_NOT_FOUND, ex.getMessage());
+
     }
 
     @Test
@@ -124,7 +129,10 @@ class MissionManagerServiceTest {
         UUID randomHostId = UUID.randomUUID();
         List<MissionType> missions = List.of(MissionType.CLASSIC_1);
 
-        assertThrows(IllegalArgumentException.class,() -> missionService.changeTeamMissionsState("XXXXXX", randomHostId, "EXPE", missions));
+        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
+                () -> missionService.changeTeamMissionsState("XXXXXX", randomHostId, "EXPE", missions)
+        );
+        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
 
     @Test
@@ -183,7 +191,7 @@ class MissionManagerServiceTest {
 
         UUID nonHostId = UUID.randomUUID();
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
                 () -> missionService.endMission("XXXXXX", nonHostId)
         );
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
