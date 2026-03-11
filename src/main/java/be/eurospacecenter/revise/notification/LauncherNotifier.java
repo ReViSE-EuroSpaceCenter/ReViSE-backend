@@ -1,5 +1,7 @@
 package be.eurospacecenter.revise.notification;
 
+import be.eurospacecenter.revise.model.launcher.TeamResources;
+
 public interface LauncherNotifier {
-    void notifyResourceUpdated(String lobbyCode, String resourceName);
+    void notifyResourcesUpdated(String lobbyCode, TeamResources teamResources);
 }

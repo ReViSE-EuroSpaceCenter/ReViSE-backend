@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.model.lobby;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.model.GameInfo;
+import be.eurospacecenter.revise.model.Team;
 
 import java.time.LocalDateTime;
 import java.util.*;

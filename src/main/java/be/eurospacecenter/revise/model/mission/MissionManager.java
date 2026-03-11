@@ -2,8 +2,9 @@ package be.eurospacecenter.revise.model.mission;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
+import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.model.*;
-import be.eurospacecenter.revise.model.lobby.Team;
+import be.eurospacecenter.revise.model.Team;
 
 import java.util.List;
 import java.util.Map;
@@ -28,18 +29,18 @@ public class MissionManager {
         }
 
         if (gameInfo.isNotHost(id)) {
-            throw new IllegalArgumentException(ErrorKeys.ACTION_RESERVED_TO_HOST);
+            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
         }
 
         Team team = gameInfo.getTeamByLabel(teamLabel);
-        missions.forEach(team::changeMissionState);
+        missions.forEach(team::updateMission);
 
         return team.getProgression();
     }
 
     public TeamProgression changeTeamMissionsState(UUID clientId, List<MissionType> missions) {
         Team team = gameInfo.getTeam(clientId);
-        missions.forEach(team::changeMissionState);
+        missions.forEach(team::updateMission);
 
         return team.getProgression();
     }
@@ -67,7 +68,7 @@ public class MissionManager {
 
     public void endMission(UUID hostId) {
         if (gameInfo.isNotHost(hostId)) {
-            throw new IllegalArgumentException(ErrorKeys.ACTION_RESERVED_TO_HOST);
+            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
         }
 
         Map<UUID, Team> teams = gameInfo.getTeams();
