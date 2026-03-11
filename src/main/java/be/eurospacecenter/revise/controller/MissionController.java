@@ -45,7 +45,7 @@ public class MissionController {
             @RequestBody @Valid
             TeamMissionStatusUpdateRequest request
     ) {
-        missionService.changeTeamMissionsState(lobbyCode, request.clientId(), request.updateMissions());
+        missionService.changeTeamMissionsState(lobbyCode, request.id(), request.teamLabel(), request.updateMissions());
     }
 
     @PostMapping("/{lobbyCode}/end")
