@@ -19,7 +19,7 @@ class GameInfoTest {
         Team team = new Team(TeamLabel.EXPE, UUID.randomUUID());
         gameInfo.addTeam(team);
 
-        assertEquals(team, gameInfo.getTeamByLabel(TeamLabel.EXPE.toString()));
+        assertEquals(team, gameInfo.getTeamByLabel(TeamLabel.EXPE));
     }
 
     @Test
@@ -32,15 +32,13 @@ class GameInfoTest {
             gameInfo.addTeam(team);
         });
 
-        teams.forEach(t -> assertDoesNotThrow(() -> gameInfo.getTeamByLabel(t.toString())));
+        teams.forEach(t -> assertDoesNotThrow(() -> gameInfo.getTeamByLabel(t)));
     }
 
     @Test
     void foundTeamByLabelShouldThrowExceptionIfTeamNotFound() {
         GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()), LocalDateTime.now());
-        String label = TeamLabel.EXPE.toString();
-
-        assertThrows(NotFoundException.class, () -> gameInfo.getTeamByLabel(label));
+        assertThrows(NotFoundException.class, () -> gameInfo.getTeamByLabel(TeamLabel.EXPE));
     }
 
 }

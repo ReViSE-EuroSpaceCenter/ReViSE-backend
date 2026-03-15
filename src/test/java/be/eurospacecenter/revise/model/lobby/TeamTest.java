@@ -39,7 +39,7 @@ class TeamTest {
 
     @Test
     void teamCreation() {
-        assertEquals("AERO", team.getLabel());
+        assertEquals(TeamLabel.AERO, team.getLabel());
         assertEquals(id, team.getClientID());
         assertInitialProgressionState();
     }
@@ -172,7 +172,7 @@ class TeamTest {
     }
 
     private boolean shouldThrowException(Team team, MissionType mission) {
-        return mission == MissionType.CLASSIC_8 && !team.getLabel().equals(TeamLabel.MECA.toString());
+        return mission == MissionType.CLASSIC_8 && !team.getLabel().equals(TeamLabel.MECA);
     }
 
     private void assertInitialProgressionState() {

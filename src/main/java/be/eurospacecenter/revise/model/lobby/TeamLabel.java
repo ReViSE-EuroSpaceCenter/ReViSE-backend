@@ -1,8 +1,6 @@
 package be.eurospacecenter.revise.model.lobby;
 
 import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 public enum TeamLabel {
@@ -13,29 +11,21 @@ public enum TeamLabel {
 
     private static final Set<TeamLabel> SIX_TEAMS_MODE = EnumSet.allOf(TeamLabel.class);
 
-    public static boolean isValidLabel(String label, boolean isFourTeamsMode) {
-        if (label == null || label.isBlank()) {
+    public static boolean isValidLabel(TeamLabel label, boolean isFourTeamsMode) {
+        if (label == null) {
             return false;
         }
 
-        return from(label).map(teamLabel -> getAllowedLabels(isFourTeamsMode).contains(teamLabel)).orElse(false);
+        return getAllowedLabels(isFourTeamsMode).contains(label);
     }
 
-    public static boolean isValidTeams(List<String> labels, boolean isFourTeamsMode) {
+    public static boolean isValidTeams(Set<TeamLabel> labels, boolean isFourTeamsMode) {
         Set<TeamLabel> allowed = getAllowedLabels(isFourTeamsMode);
 
-        return labels.size() == allowed.size() && allowed.stream().allMatch(label -> labels.contains(label.name()));
+        return labels.size() == allowed.size() && labels.containsAll(allowed);
     }
 
     public static Set<TeamLabel> getAllowedLabels(boolean isFourTeamsMode) {
         return isFourTeamsMode ? FOUR_TEAMS_MODE : SIX_TEAMS_MODE;
-    }
-
-    private static Optional<TeamLabel> from(String label) {
-        try {
-            return Optional.of(TeamLabel.valueOf(label));
-        } catch (IllegalArgumentException e) {
-            return Optional.empty();
-        }
     }
 }

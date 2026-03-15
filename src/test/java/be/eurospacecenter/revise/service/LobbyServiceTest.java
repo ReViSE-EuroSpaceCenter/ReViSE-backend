@@ -99,7 +99,8 @@ class LobbyServiceTest {
             assertEquals(4, res.allTeams().size());
             assertEquals(i, res.availableTeams().size());
 
-            lobbyService.assignTeam(lobbyCodeFor4, clientId, res.availableTeams().get(i - 1));
+            var team = res.availableTeams().iterator().next();
+            lobbyService.assignTeam(lobbyCodeFor4, clientId, team);
         }
     }
 
@@ -113,7 +114,8 @@ class LobbyServiceTest {
             assertEquals(6, res.allTeams().size());
             assertEquals(i, res.availableTeams().size());
 
-            lobbyService.assignTeam(lobbyCodeFor6, clientId, res.availableTeams().get(i - 1));
+            var team = res.availableTeams().iterator().next();
+            lobbyService.assignTeam(lobbyCodeFor6, clientId, team);
         }
     }
 
@@ -129,10 +131,9 @@ class LobbyServiceTest {
     void teamLabelAlreadyAssignShouldFailFor4() {
         Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(true);
 
-        teamLabelSet.forEach(l -> {
+        teamLabelSet.forEach(label -> {
             LobbyJoinedResponse firstTeam = lobbyService.joinLobby(lobbyCodeFor4);
             UUID firstId = UUID.fromString(firstTeam.clientId());
-            String label = l.toString();
 
             lobbyService.assignTeam(lobbyCodeFor4, firstId, label);
 
@@ -150,11 +151,9 @@ class LobbyServiceTest {
     void teamLabelAlreadyAssignShouldFailFor6() {
         Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(false);
 
-        teamLabelSet.forEach(l -> {
+        teamLabelSet.forEach(label -> {
             LobbyJoinedResponse firstTeam = lobbyService.joinLobby(lobbyCodeFor6);
             UUID firstId = UUID.fromString(firstTeam.clientId());
-
-            String label = l.toString();
 
             lobbyService.assignTeam(lobbyCodeFor6, firstId, label);
 
@@ -173,10 +172,9 @@ class LobbyServiceTest {
     void teamAssignTwiceShouldFailFor4() {
         Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(true);
 
-        teamLabelSet.forEach(l -> {
+        teamLabelSet.forEach(label -> {
             LobbyJoinedResponse firstTeam = lobbyService.joinLobby(lobbyCodeFor4);
             UUID firstId = UUID.fromString(firstTeam.clientId());
-            String label = l.toString();
 
             lobbyService.assignTeam(lobbyCodeFor4, firstId, label);
 
@@ -191,11 +189,11 @@ class LobbyServiceTest {
     void startingLobbyShouldSucceedFor4() {
         Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(true);
 
-        teamLabelSet.forEach(l -> {
+        teamLabelSet.forEach(label -> {
             LobbyJoinedResponse team = lobbyService.joinLobby(lobbyCodeFor4);
             UUID teamId = UUID.fromString(team.clientId());
 
-            lobbyService.assignTeam(lobbyCodeFor4, teamId, l.toString());
+            lobbyService.assignTeam(lobbyCodeFor4, teamId, label);
         });
 
         assertDoesNotThrow(() -> lobbyService.startGame(lobbyCodeFor4, hostIdFor4));
@@ -205,11 +203,11 @@ class LobbyServiceTest {
     void startingLobbyShouldSucceedFor6() {
         Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(false);
 
-        teamLabelSet.forEach(l -> {
+        teamLabelSet.forEach(label -> {
             LobbyJoinedResponse team = lobbyService.joinLobby(lobbyCodeFor6);
             UUID teamId = UUID.fromString(team.clientId());
 
-            lobbyService.assignTeam(lobbyCodeFor6, teamId, l.toString());
+            lobbyService.assignTeam(lobbyCodeFor6, teamId, label);
         });
 
         assertDoesNotThrow(() -> lobbyService.startGame(lobbyCodeFor6, hostIdFor6));
@@ -281,7 +279,8 @@ class LobbyServiceTest {
             assertEquals(4, res.allTeams().size());
             assertEquals(i, res.availableTeams().size());
 
-            lobbyService.assignTeam(lobbyCodeFor4, clientId, res.availableTeams().get(i - 1));
+            var team = res.availableTeams().iterator().next();
+            lobbyService.assignTeam(lobbyCodeFor4, clientId, team);
         }
     }
 
@@ -297,7 +296,8 @@ class LobbyServiceTest {
             assertEquals(6, res.allTeams().size());
             assertEquals(i, res.availableTeams().size());
 
-            lobbyService.assignTeam(lobbyCodeFor6, clientId, res.availableTeams().get(i - 1));
+            var team = res.availableTeams().iterator().next();
+            lobbyService.assignTeam(lobbyCodeFor6, clientId, team);
         }
     }
 }

@@ -32,7 +32,7 @@ public class Lobby {
         gameInfo.addTeam(new Team(clientId));
     }
 
-    public void assignTeam(UUID clientId, String teamLabel) {
+    public void assignTeam(UUID clientId, TeamLabel teamLabel) {
         ensureClient(clientId);
 
         Team team = gameInfo.getTeam(clientId);
@@ -41,19 +41,19 @@ public class Lobby {
         ensureTeamNotAlreadyAssigned(team);
         ensureLabelNotTaken(teamLabel);
 
-        team.setLabel(TeamLabel.valueOf(teamLabel));
+        team.setLabel(teamLabel);
     }
 
-    public List<String> getFreeTeamLabels() {
+    public Set<TeamLabel> getFreeTeamLabels() {
         Map<UUID, Team> teams = gameInfo.getTeams();
 
-        Set<String> takenLabels = teams.values().stream().filter(Team::hasLabel).map(Team::getLabel).collect(Collectors.toSet());
+        Set<TeamLabel> takenLabels = teams.values().stream().filter(Team::hasLabel).map(Team::getLabel).collect(Collectors.toSet());
 
-        return TeamLabel.getAllowedLabels(isFourTeamsMode).stream().map(Enum::name).filter(label -> !takenLabels.contains(label)).toList();
+        return TeamLabel.getAllowedLabels(isFourTeamsMode).stream().filter(label -> !takenLabels.contains(label)).collect(Collectors.toSet());
     }
 
-    public List<String> getAllTeamLabels() {
-        return TeamLabel.getAllowedLabels(isFourTeamsMode).stream().map(Enum::name).toList();
+    public Set<TeamLabel> getAllTeamLabels() {
+        return TeamLabel.getAllowedLabels(isFourTeamsMode);
     }
 
     public boolean startGame(UUID hostId) {
@@ -61,7 +61,7 @@ public class Lobby {
 
         Map<UUID, Team> teams = gameInfo.getTeams();
 
-        List<String> teamLabels = teams.values().stream().filter(Team::hasLabel).map(Team::getLabel).toList();
+        Set<TeamLabel> teamLabels = teams.values().stream().filter(Team::hasLabel).map(Team::getLabel).collect(Collectors.toSet());
 
         if (!TeamLabel.isValidTeams(teamLabels, isFourTeamsMode)) {
             throw new IllegalArgumentException(ErrorKeys.INVALID_TEAM_LABELS);
@@ -88,7 +88,7 @@ public class Lobby {
         }
     }
 
-    private void validateTeamLabel(String teamLabel) {
+    private void validateTeamLabel(TeamLabel teamLabel) {
         if (!TeamLabel.isValidLabel(teamLabel, isFourTeamsMode)) {
             throw new IllegalArgumentException(ErrorKeys.INVALID_TEAM_LABEL);
         }
@@ -100,7 +100,7 @@ public class Lobby {
         }
     }
 
-    private void ensureLabelNotTaken(String teamLabel) {
+    private void ensureLabelNotTaken(TeamLabel teamLabel) {
         Map<UUID, Team> teams = gameInfo.getTeams();
 
         boolean alreadyTaken = teams.values().stream().anyMatch(team -> teamLabel.equals(team.getLabel()));

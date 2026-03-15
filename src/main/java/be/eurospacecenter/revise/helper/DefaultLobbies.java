@@ -53,7 +53,7 @@ public class DefaultLobbies implements CommandLineRunner {
 
         for (int i = 0; i < FOUR_TEAMS; i++) {
             lobby.addTeam(CLIENT_IDS.get(i));
-            lobby.assignTeam(CLIENT_IDS.get(i), TeamLabel.getAllowedLabels(true).stream().toList().get(i).toString());
+            lobby.assignTeam(CLIENT_IDS.get(i), TeamLabel.getAllowedLabels(true).stream().toList().get(i));
         }
 
         lobbyService.startGame(LOBBY_CODE_FOUR_TEAMS, FOUR_TEAMS_HOST_ID);
@@ -66,7 +66,7 @@ public class DefaultLobbies implements CommandLineRunner {
 
         for (int i = 0; i < SIX_TEAMS; i++) {
             lobby.addTeam(CLIENT_IDS.get(i));
-            lobby.assignTeam(CLIENT_IDS.get(i), TeamLabel.getAllowedLabels(false).stream().toList().get(i).toString());
+            lobby.assignTeam(CLIENT_IDS.get(i), TeamLabel.getAllowedLabels(false).stream().toList().get(i));
         }
 
         lobbyService.startGame(LOBBY_CODE_SIX_TEAMS, SIX_TEAMS_HOST_ID);

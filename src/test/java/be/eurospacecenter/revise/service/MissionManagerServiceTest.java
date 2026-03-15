@@ -19,7 +19,7 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTe
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -97,7 +97,7 @@ class MissionManagerServiceTest {
     void shouldCompleteTeamMission() {
         missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
 
-        missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, List.of(MissionType.CLASSIC_1));
+        missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, Set.of(MissionType.CLASSIC_1));
 
         TeamProgression progression = missionService.getManager("XXXXXX").getTeamProgression(idOfTheLoneTeam);
 
@@ -106,7 +106,7 @@ class MissionManagerServiceTest {
 
     @Test
     void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
-        List<MissionType> missions = List.of(MissionType.CLASSIC_1);
+        Set<MissionType> missions = Set.of(MissionType.CLASSIC_1);
         NotFoundException ex = assertThrows(NotFoundException.class,
                 () -> missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, missions)
         );
@@ -120,17 +120,17 @@ class MissionManagerServiceTest {
 
         missionService.registerManager("XXXXXX", gameInfoWith4Teams);
 
-        assertDoesNotThrow(() -> missionService.changeTeamMissionsState("XXXXXX", hostId, "EXPE", List.of(MissionType.CLASSIC_1)));
+        assertDoesNotThrow(() -> missionService.changeTeamMissionsState("XXXXXX", hostId, TeamLabel.EXPE, Set.of(MissionType.CLASSIC_1)));
     }
 
     @Test
     void shouldNotSucceedToCompleteMissionForUnknownHost() {
         missionService.registerManager("XXXXXX", gameInfoWith4Teams);
         UUID randomHostId = UUID.randomUUID();
-        List<MissionType> missions = List.of(MissionType.CLASSIC_1);
+        Set<MissionType> missions = Set.of(MissionType.CLASSIC_1);
 
         NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
-                () -> missionService.changeTeamMissionsState("XXXXXX", randomHostId, "EXPE", missions)
+                () -> missionService.changeTeamMissionsState("XXXXXX", randomHostId, TeamLabel.EXPE, missions)
         );
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
@@ -155,7 +155,7 @@ class MissionManagerServiceTest {
         assertNotNull(response);
         assertEquals(4, response.teamsProgression().size());
 
-        TeamLabel.getAllowedLabels(true).forEach(label -> assertTrue(response.teamsProgression().containsKey(label.name())));
+        TeamLabel.getAllowedLabels(true).forEach(label -> assertTrue(response.teamsProgression().containsKey(label)));
     }
 
     @Test
@@ -167,7 +167,7 @@ class MissionManagerServiceTest {
         assertNotNull(response);
         assertEquals(6, response.teamsProgression().size());
 
-        TeamLabel.getAllowedLabels(false).forEach(label -> assertTrue(response.teamsProgression().containsKey(label.name())));
+        TeamLabel.getAllowedLabels(false).forEach(label -> assertTrue(response.teamsProgression().containsKey(label)));
     }
 
     @Test
@@ -179,7 +179,7 @@ class MissionManagerServiceTest {
                 continue;
             }
 
-            missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, List.of(missionType));
+            missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, Set.of(missionType));
         }
 
         assertDoesNotThrow(() -> missionService.endMission("XXXXXX", gameInfoWithOneLoneTeam.getHostId()));
@@ -206,10 +206,10 @@ class MissionManagerServiceTest {
                 continue;
             }
 
-            missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, List.of(missionType));
+            missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, Set.of(missionType));
         }
 
-        missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, List.of(MissionType.CLASSIC_1));
+        missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, Set.of(MissionType.CLASSIC_1));
 
         UUID hostId = gameInfoWithOneLoneTeam.getHostId();
 

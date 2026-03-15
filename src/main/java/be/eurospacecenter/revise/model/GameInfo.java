@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.model;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.lobby.Host;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class GameInfo {
         return Optional.ofNullable(teams.get(clientId)).orElseThrow(() -> new NotFoundException(ErrorKeys.TEAM_NOT_FOUND));
     }
 
-    public Team getTeamByLabel(String teamLabel) {
+    public Team getTeamByLabel(TeamLabel teamLabel) {
         return teams.values().stream().filter(team -> team.getLabel().equals(teamLabel)).findFirst().orElseThrow(() -> new NotFoundException(ErrorKeys.TEAM_NOT_FOUND));
     }
 

@@ -57,7 +57,7 @@ class MissionControllerTest {
         for (int i = 0; i < 4; i++) {
             LobbyJoinedResponse response = lobbyService.joinLobby(lobbyCode);
             teamClientId = UUID.fromString(response.clientId());
-            lobbyService.assignTeam(lobbyCode, teamClientId, labels.get(i).toString());
+            lobbyService.assignTeam(lobbyCode, teamClientId, labels.get(i));
         }
 
         lobbyService.startGame(lobbyCode, hostId);
