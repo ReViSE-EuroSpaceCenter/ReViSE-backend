@@ -54,12 +54,12 @@ class LauncherManagerControllerTest {
         lobbyCode = JsonPath.read(body, "$.lobbyCode");
         hostId = UUID.fromString(JsonPath.read(body, "$.hostId"));
 
-        List<TeamLabel> labels = TeamLabel.getAllowedLabels(true).stream().toList();
+        Set<TeamLabel> labels = TeamLabel.getAllowedLabels(true);
 
-        for (int i = 0; i < 4; i++) {
+        for (TeamLabel label : labels) {
             LobbyJoinedResponse response = lobbyService.joinLobby(lobbyCode);
-            teams.put(UUID.fromString(response.clientId()), labels.get(i));
-            lobbyService.assignTeam(lobbyCode, UUID.fromString(response.clientId()), labels.get(i));
+            teams.put(UUID.fromString(response.clientId()), label);
+            lobbyService.assignTeam(lobbyCode, UUID.fromString(response.clientId()), label);
         }
 
         lobbyService.startGame(lobbyCode, hostId);

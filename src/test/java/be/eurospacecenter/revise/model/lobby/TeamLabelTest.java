@@ -2,7 +2,6 @@ package be.eurospacecenter.revise.model.lobby;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -76,7 +75,7 @@ class TeamLabelTest {
         Set<TeamLabel> allowed = TeamLabel.getAllowedLabels(true);
 
         assertEquals(4, allowed.size());
-        assertTrue(allowed.containsAll(List.of(TeamLabel.MECA, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.AERO)));
+        assertTrue(allowed.containsAll(Set.of(TeamLabel.MECA, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.AERO)));
     }
 
     @Test
@@ -84,7 +83,7 @@ class TeamLabelTest {
         Set<TeamLabel> allowed = TeamLabel.getAllowedLabels(false);
 
         assertEquals(6, allowed.size());
-        assertTrue(allowed.containsAll(List.of(TeamLabel.values())));
+        assertTrue(allowed.containsAll(Set.of(TeamLabel.values())));
     }
 
 }

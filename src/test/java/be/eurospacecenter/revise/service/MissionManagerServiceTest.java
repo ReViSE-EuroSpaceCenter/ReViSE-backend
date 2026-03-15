@@ -44,8 +44,8 @@ class MissionManagerServiceTest {
         gameInfo.addTeam(new Team(TeamLabel.EXPE, idOfTheLoneTeam));
         gameInfoWithOneLoneTeam = gameInfo;
 
-        gameInfoWith4Teams = createTeams("AERO", "MECA", "EXPE", "GECO");
-        gameInfoWith6Teams = createTeams("AERO", "MECA", "EXPE", "GECO", "MEDI", "COOP");
+        gameInfoWith4Teams = createTeams(TeamLabel.AERO, TeamLabel.MECA, TeamLabel.EXPE, TeamLabel.GECO);
+        gameInfoWith6Teams = createTeams(TeamLabel.AERO, TeamLabel.MECA, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.MEDI, TeamLabel.COOP);
     }
 
 
@@ -219,11 +219,11 @@ class MissionManagerServiceTest {
         assertEquals(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS, ex.getMessage());
     }
 
-    private GameInfo createTeams(String... labels) {
+    private GameInfo createTeams(TeamLabel... labels) {
         GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()), LocalDateTime.now());
 
-        for (String label : labels) {
-            Team team = new Team(TeamLabel.valueOf(label), UUID.randomUUID());
+        for (TeamLabel label : labels) {
+            Team team = new Team(label, UUID.randomUUID());
 
             gameInfo.addTeam(team);
         }

@@ -13,8 +13,8 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTe
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -52,12 +52,12 @@ class MissionControllerTest {
         lobbyCode = JsonPath.read(body, "$.lobbyCode");
         hostId = UUID.fromString(JsonPath.read(body, "$.hostId"));
 
-        List<TeamLabel> labels = TeamLabel.getAllowedLabels(true).stream().toList();
+        Set<TeamLabel> labels = TeamLabel.getAllowedLabels(true);
 
-        for (int i = 0; i < 4; i++) {
+        for (TeamLabel label : labels) {
             LobbyJoinedResponse response = lobbyService.joinLobby(lobbyCode);
             teamClientId = UUID.fromString(response.clientId());
-            lobbyService.assignTeam(lobbyCode, teamClientId, labels.get(i));
+            lobbyService.assignTeam(lobbyCode, teamClientId, label);
         }
 
         lobbyService.startGame(lobbyCode, hostId);
@@ -69,7 +69,7 @@ class MissionControllerTest {
                 .uri("/api/missions/" + lobbyCode)
                 .body(Map.of(
                         "id", teamClientId,
-                        "updateMissions", List.of("CLASSIC_1")
+                        "updateMissions", Set.of("CLASSIC_1")
                 ))
                 .exchange()
                 .expectStatus().isNoContent();
@@ -81,7 +81,7 @@ class MissionControllerTest {
                 .uri("/api/missions/INVALID")
                 .body(Map.of(
                         "id", teamClientId,
-                        "updateMissions", List.of("CLASSIC_1")
+                        "updateMissions", Set.of("CLASSIC_1")
                 ))
                 .exchange()
                 .expectStatus().isBadRequest()
@@ -96,7 +96,7 @@ class MissionControllerTest {
                 .uri("/api/missions/" + lobbyCode)
                 .body(Map.of(
                         "id", "abc",
-                        "updateMissions", List.of("CLASSIC_1")
+                        "updateMissions", Set.of("CLASSIC_1")
                 ))
                 .exchange()
                 .expectStatus().isBadRequest()
@@ -111,7 +111,7 @@ class MissionControllerTest {
                 .uri("/api/missions/" + lobbyCode)
                 .body(Map.of(
                         "clientId", teamClientId,
-                        "updateMissions", List.of("INVALID_MISSION")
+                        "updateMissions", Set.of("INVALID_MISSION")
                 ))
                 .exchange()
                 .expectStatus().isBadRequest()
@@ -127,7 +127,7 @@ class MissionControllerTest {
                 .body(Map.of(
                         "id", hostId,
                         "teamLabel", "EXPE",
-                        "updateMissions", List.of("CLASSIC_1")
+                        "updateMissions", Set.of("CLASSIC_1")
                 ))
                 .exchange()
                 .expectStatus().isNoContent();
@@ -140,7 +140,7 @@ class MissionControllerTest {
                 .body(Map.of(
                         "id", UUID.randomUUID(),
                         "teamLabel", "EXPE",
-                        "updateMissions", List.of("CLASSIC_1")
+                        "updateMissions", Set.of("CLASSIC_1")
                 ))
                 .exchange()
                 .expectStatus().isForbidden();
