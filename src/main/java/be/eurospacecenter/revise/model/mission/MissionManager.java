@@ -64,10 +64,10 @@ public class MissionManager {
         return team.getFullProgression();
     }
 
-    public Map<String, TeamProgression> getTeamsProgression() {
+    public Map<String, TeamFullProgression> getTeamsFullProgression() {
         Map<UUID, Team> teams = gameInfo.getTeams();
 
-        return teams.values().stream().collect(Collectors.toMap(Team::getLabel, Team::getProgression));
+        return teams.values().stream().collect(Collectors.toMap(Team::getLabel, Team::getFullProgression));
     }
 
     public void validateEndOfMission(UUID hostId) {

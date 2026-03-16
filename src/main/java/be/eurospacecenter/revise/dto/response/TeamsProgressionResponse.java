@@ -1,8 +1,8 @@
 package be.eurospacecenter.revise.dto.response;
 
-import be.eurospacecenter.revise.model.mission.TeamProgression;
+import be.eurospacecenter.revise.model.mission.TeamFullProgression;
 
 import java.util.Map;
 
-public record TeamsProgressionResponse(Map<String, TeamProgression> teamsProgression, boolean allTeamsCompleted) {
+public record TeamsProgressionResponse(Map<String, TeamFullProgression> teamsFullProgression, boolean allTeamsCompleted) {
 }
