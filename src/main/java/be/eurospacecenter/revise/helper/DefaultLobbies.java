@@ -49,15 +49,15 @@ public class DefaultLobbies implements CommandLineRunner {
 
     @Override
     public void run(String @NonNull ... args) {
-        setupLobby(LOBBY_CODE_FOUR_TEAMS, FOUR_TEAMS_HOST_ID, FOUR_TEAMS, true);
-        setupLobby(LOBBY_CODE_SIX_TEAMS, SIX_TEAMS_HOST_ID, SIX_TEAMS, false);
+        setupLobby(LOBBY_CODE_FOUR_TEAMS, FOUR_TEAMS_HOST_ID, FOUR_TEAMS);
+        setupLobby(LOBBY_CODE_SIX_TEAMS, SIX_TEAMS_HOST_ID, SIX_TEAMS);
     }
 
-    private void setupLobby(String lobbyCode, UUID hostId, int teamCount, boolean allowedFourTeamsLabels) {
+    private void setupLobby(String lobbyCode, UUID hostId, int teamCount) {
         Lobby lobby = new Lobby(new Host(hostId), teamCount, LocalDateTime.now().plusYears(10));
         lobbyService.addLobby(lobbyCode, lobby);
 
-        List<TeamLabel> allowedLabels = new ArrayList<>(TeamLabel.getAllowedLabels(allowedFourTeamsLabels));
+        List<TeamLabel> allowedLabels = new ArrayList<>(TeamLabel.getAllowedLabels(teamCount == FOUR_TEAMS));
 
         for (int i = 0; i < teamCount; i++) {
             UUID clientId = CLIENT_IDS.get(i);
@@ -73,8 +73,9 @@ public class DefaultLobbies implements CommandLineRunner {
 
         for (int i = 0; i < teamCount; i++) {
             UUID clientId = CLIENT_IDS.get(i);
+            String label = missionManager.getGameInfo().getTeams().get(clientId).getLabel();
 
-            if (i == 3) { // Meca
+            if (label.equals(TeamLabel.MECA.toString())) {
                 missionManager.changeTeamMissionsState(clientId, classicMissions);
             } else {
                 missionManager.changeTeamMissionsState(clientId, firstSevenMissions);
