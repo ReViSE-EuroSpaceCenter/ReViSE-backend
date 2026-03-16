@@ -8,6 +8,7 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.helper.LobbyCode;
 import be.eurospacecenter.revise.service.MissionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,27 @@ public class MissionController {
             @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode
     ) {
-        return missionService.getTeamsProgression(lobbyCode);
+        return missionService.getTeamsFullProgression(lobbyCode);
+    }
+
+    @GetMapping(value = "/{lobbyCode}", params = "clientId")
+    public TeamFullProgressionResponse getTeamMissions(
+            @PathVariable
+            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
+            String lobbyCode,
+
+            @RequestParam(required = false)
+            @Parameter(
+                    name = "clientId",
+                    description = """
+                            Optional client identifier.
+                            If provided, returns the full progression of the client's team.
+                            If omitted, returns the global progression of each team.
+                            """
+            )
+            UUID clientId
+    ) {
+        return missionService.getTeamFullProgression(lobbyCode, clientId);
     }
 
     @PutMapping("/{lobbyCode}")
@@ -61,18 +82,5 @@ public class MissionController {
             EndMissionRequest request
     ) {
         missionService.endMission(lobbyCode, request.hostId());
-    }
-
-    @GetMapping(value = "/{lobbyCode}", params = "clientId")
-    public TeamFullProgressionResponse getTeamMissions(
-            @PathVariable
-            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
-            String lobbyCode,
-
-            @RequestParam
-            @Valid
-            UUID clientId
-    ) {
-        return missionService.getTeamFullProgression(lobbyCode, clientId);
     }
 }

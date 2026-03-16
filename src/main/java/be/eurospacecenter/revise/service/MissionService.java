@@ -45,10 +45,10 @@ public class MissionService implements Cleanable {
     }
 
 
-    public TeamsProgressionResponse getTeamsProgression(String lobbyCode) {
+    public TeamsProgressionResponse getTeamsFullProgression(String lobbyCode) {
         MissionManager manager = getManager(lobbyCode);
 
-        return new TeamsProgressionResponse(manager.getTeamsProgression(), manager.isAllTeamsMissionsCompleted());
+        return new TeamsProgressionResponse(manager.getTeamsFullProgression(), manager.isAllTeamsMissionsCompleted());
     }
 
     public TeamFullProgressionResponse getTeamFullProgression(String lobbyCode, UUID clientId) {
