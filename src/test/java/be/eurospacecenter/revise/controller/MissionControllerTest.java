@@ -168,7 +168,7 @@ class MissionControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.teamsProgression").exists();
+                .jsonPath("$.teamsFullProgression").exists();
     }
 
     @Test

@@ -147,27 +147,27 @@ class MissionManagerServiceTest {
     }
 
     @Test
-    void shouldGetFourGetTeamsProgression() {
+    void shouldGetFourGetTeamsFullProgression() {
         missionService.registerManager("XXXXXX", gameInfoWith4Teams);
 
-        TeamsProgressionResponse response = missionService.getTeamsProgression("XXXXXX");
+        TeamsProgressionResponse response = missionService.getTeamsFullProgression("XXXXXX");
 
         assertNotNull(response);
-        assertEquals(4, response.teamsProgression().size());
+        assertEquals(4, response.teamsFullProgression().size());
 
-        TeamLabel.getAllowedLabels(true).forEach(label -> assertTrue(response.teamsProgression().containsKey(label.name())));
+        TeamLabel.getAllowedLabels(true).forEach(label -> assertTrue(response.teamsFullProgression().containsKey(label.name())));
     }
 
     @Test
-    void shouldGetSixGetTeamsProgression() {
+    void shouldGetSixGetTeamsFullProgression() {
         missionService.registerManager("XXXXXX", gameInfoWith6Teams);
 
-        TeamsProgressionResponse response = missionService.getTeamsProgression("XXXXXX");
+        TeamsProgressionResponse response = missionService.getTeamsFullProgression("XXXXXX");
 
         assertNotNull(response);
-        assertEquals(6, response.teamsProgression().size());
+        assertEquals(6, response.teamsFullProgression().size());
 
-        TeamLabel.getAllowedLabels(false).forEach(label -> assertTrue(response.teamsProgression().containsKey(label.name())));
+        TeamLabel.getAllowedLabels(false).forEach(label -> assertTrue(response.teamsFullProgression().containsKey(label.name())));
     }
 
     @Test
