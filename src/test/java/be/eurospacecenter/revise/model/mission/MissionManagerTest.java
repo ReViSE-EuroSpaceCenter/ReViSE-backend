@@ -12,9 +12,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,7 +47,7 @@ class MissionManagerTest {
 
     @Test
     void completeTeamClassicMission() {
-        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, List.of(MissionType.CLASSIC_1));
+        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, Set.of(MissionType.CLASSIC_1));
         TeamProgression progressionOfTheLoneTeam = gameWithOneTeam.getTeamProgression(idOfTheLoneTeam);
 
         assertEquals(1, progressionOfTheLoneTeam.classicMissionsCompleted());
@@ -56,7 +57,7 @@ class MissionManagerTest {
 
     @Test
     void changeTeamFirstBonusMissionState() {
-        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, List.of(MissionType.BONUS_1));
+        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, Set.of(MissionType.BONUS_1));
         TeamProgression progressionOfTheLoneTeam = gameWithOneTeam.getTeamProgression(idOfTheLoneTeam);
 
         assertEquals(0, progressionOfTheLoneTeam.classicMissionsCompleted());
@@ -66,7 +67,7 @@ class MissionManagerTest {
 
     @Test
     void changeTeamSecondBonusMissionState() {
-        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, List.of(MissionType.BONUS_2));
+        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, Set.of(MissionType.BONUS_2));
         TeamProgression progressionOfTheLoneTeam = gameWithOneTeam.getTeamProgression(idOfTheLoneTeam);
 
         assertEquals(0, progressionOfTheLoneTeam.classicMissionsCompleted());
@@ -76,7 +77,7 @@ class MissionManagerTest {
 
     @Test
     void changeTeamMissionsShouldSucceedForHost() {
-        TeamProgression progression = gameWithOneTeam.changeTeamMissionsState(hostId, "EXPE", List.of(MissionType.CLASSIC_1, MissionType.BONUS_1, MissionType.BONUS_2));
+        TeamProgression progression = gameWithOneTeam.changeTeamMissionsState(hostId, TeamLabel.EXPE, Set.of(MissionType.CLASSIC_1, MissionType.BONUS_1, MissionType.BONUS_2));
 
         assertEquals(1, progression.classicMissionsCompleted());
         assertTrue(progression.firstBonusMissionCompleted());
@@ -86,31 +87,19 @@ class MissionManagerTest {
     @Test
     void changeTeamMissionsShouldNotSucceedForUnknownHost() {
         UUID unknownHostId = UUID.randomUUID();
-        List<MissionType> missions = List.of(MissionType.CLASSIC_1);
+        Set<MissionType> missions = Set.of(MissionType.CLASSIC_1);
 
         NoAutoriseOperationException ex = assertThrows(
                 NoAutoriseOperationException.class,
-                () -> gameWithOneTeam.changeTeamMissionsState(unknownHostId, "EXPE", missions)
+                () -> gameWithOneTeam.changeTeamMissionsState(unknownHostId, TeamLabel.EXPE, missions)
         );
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
 
     @Test
-    void changeTeamMissionsShouldNotSucceedForUnknownTeamLabel() {
-        String unknownTeamLabel = "UNKNOWN_TEAM";
-        List<MissionType> missions = List.of(MissionType.CLASSIC_1);
-
-        NotFoundException ex = assertThrows(
-                NotFoundException.class,
-                () -> gameWithOneTeam.changeTeamMissionsState(hostId, unknownTeamLabel, missions)
-        );
-        assertEquals(ErrorKeys.TEAM_NOT_FOUND, ex.getMessage());
-    }
-
-    @Test
     void completeTeamMissionWithInvalidTeam() {
         UUID id = UUID.randomUUID();
-        List<MissionType> missions = List.of(MissionType.CLASSIC_1);
+        Set<MissionType> missions = Set.of(MissionType.CLASSIC_1);
 
         NotFoundException ex = assertThrows(
                 NotFoundException.class,
@@ -141,7 +130,7 @@ class MissionManagerTest {
 
     @Test
     void shouldAllowHostToValidateEndOfMissionWhenAllClassicMissionsCompleted() {
-        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, MissionType.getClassicMissions().stream().toList().subList(0, 7));
+        gameWithOneTeam.changeTeamMissionsState(idOfTheLoneTeam, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
 
         assertDoesNotThrow(() -> gameWithOneTeam.validateEndOfMission(hostId));
     }
@@ -155,7 +144,7 @@ class MissionManagerTest {
 
         MissionManager missionManager = new MissionManager(gameInfo);
 
-        missionManager.changeTeamMissionsState(mecaTeamId, MissionType.getClassicMissions().stream().toList());
+        missionManager.changeTeamMissionsState(mecaTeamId, MissionType.getClassicMissions());
 
         assertDoesNotThrow(() -> missionManager.validateEndOfMission(hostId));
     }
@@ -182,77 +171,77 @@ class MissionManagerTest {
 
     @Test
     void allMissionsCompletedShouldReturnTrueWhenAllClassicMissionsAreCompleted() {
-        GameInfo gameInfo = createTeams("AERO", "EXPE", "GECO", "MECA");
+        GameInfo gameInfo = createTeams(TeamLabel.AERO, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.MECA);
         MissionManager missionManager = new MissionManager(gameInfo);
 
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "AERO", MissionType.getClassicMissions().stream().toList().subList(0, 7));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "EXPE", MissionType.getClassicMissions().stream().toList().subList(0, 7));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "GECO", MissionType.getClassicMissions().stream().toList().subList(0, 7));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "MECA", MissionType.getClassicMissions().stream().toList());
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.AERO, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.EXPE, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.GECO, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, MissionType.getClassicMissions());
 
         assertTrue(missionManager.isAllTeamsMissionsCompleted());
     }
 
     @Test
     void allMissionsCompletedShouldReturnFalseWhenAllOtherClassicMissionsAreCompleted() {
-        GameInfo gameInfo = createTeams("AERO", "EXPE", "GECO", "MECA");
+        GameInfo gameInfo = createTeams(TeamLabel.AERO, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.MECA);
         MissionManager missionManager = new MissionManager(gameInfo);
 
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "AERO", MissionType.getClassicMissions().stream().toList().subList(0, 7));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "EXPE", MissionType.getClassicMissions().stream().toList().subList(0, 7));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "GECO", MissionType.getClassicMissions().stream().toList().subList(0, 7));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.AERO, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.EXPE, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.GECO, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
 
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "MECA", List.of(MissionType.CLASSIC_1));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, Set.of(MissionType.CLASSIC_1));
 
         assertFalse(missionManager.isAllTeamsMissionsCompleted());
     }
 
     @Test
     void allMissionsCompletedShouldReturnFalseWhenAllNotOtherClassicMissionsAreCompleted() {
-        GameInfo gameInfo = createTeams("AERO", "EXPE", "GECO", "MECA");
+        GameInfo gameInfo = createTeams(TeamLabel.AERO, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.MECA);
         MissionManager missionManager = new MissionManager(gameInfo);
 
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "AERO", MissionType.getClassicMissions().stream().toList().subList(0, 7));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.AERO, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
 
         assertFalse(missionManager.isAllTeamsMissionsCompleted());
     }
 
     @Test
     void allMissionsCompletedShouldReturnFalseWhenAllOnIsIncomplete() {
-        GameInfo gameInfo = createTeams("AERO", "EXPE", "GECO", "MECA");
+        GameInfo gameInfo = createTeams(TeamLabel.AERO, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.MECA);
         MissionManager missionManager = new MissionManager(gameInfo);
 
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "AERO", MissionType.getClassicMissions().stream().toList().subList(0, 7));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "EXPE", MissionType.getClassicMissions().stream().toList().subList(0, 7));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "GECO", MissionType.getClassicMissions().stream().toList().subList(0, 7));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "MECA", MissionType.getClassicMissions().stream().toList());
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.AERO, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.EXPE, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.GECO, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, MissionType.getClassicMissions());
 
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "MECA", List.of(MissionType.CLASSIC_1));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, Set.of(MissionType.CLASSIC_1));
 
         assertFalse(missionManager.isAllTeamsMissionsCompleted());
     }
 
     @Test
     void allMissionsCompletedShouldReturnFalseWhenOnceIsOnAndOff() {
-        GameInfo gameInfo = createTeams("AERO", "EXPE", "GECO", "MECA");
+        GameInfo gameInfo = createTeams(TeamLabel.AERO, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.MECA);
         MissionManager missionManager = new MissionManager(gameInfo);
 
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "AERO", MissionType.getClassicMissions().stream().toList().subList(0, 7));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "EXPE", MissionType.getClassicMissions().stream().toList().subList(0, 7));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "GECO", MissionType.getClassicMissions().stream().toList().subList(0, 7));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "MECA", MissionType.getClassicMissions().stream().toList());
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.AERO, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.EXPE, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.GECO, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, MissionType.getClassicMissions());
 
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "MECA", List.of(MissionType.CLASSIC_1));
-        missionManager.changeTeamMissionsState(gameInfo.getHostId(), "MECA", List.of(MissionType.CLASSIC_1));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, Set.of(MissionType.CLASSIC_1));
+        missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, Set.of(MissionType.CLASSIC_1));
 
         assertTrue(missionManager.isAllTeamsMissionsCompleted());
     }
 
-    private GameInfo createTeams(String... labels) {
+    private GameInfo createTeams(TeamLabel... labels) {
         GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()), LocalDateTime.now());
 
-        for (String label : labels) {
-            Team team = new Team(TeamLabel.valueOf(label), UUID.randomUUID());
+        for (TeamLabel label : labels) {
+            Team team = new Team(label, UUID.randomUUID());
 
             gameInfo.addTeam(team);
         }

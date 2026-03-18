@@ -13,8 +13,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -30,7 +31,7 @@ public class DefaultLobbies implements CommandLineRunner {
     private static final int FOUR_TEAMS = 4;
     private static final int SIX_TEAMS = 6;
 
-    private static final List<UUID> CLIENT_IDS = List.of(
+    private static final Set<UUID> CLIENT_IDS = Set.of(
             UUID.fromString("12345678-1234-1234-1234-0000000000c1"),
             UUID.fromString("12345678-1234-1234-1234-0000000000c2"),
             UUID.fromString("12345678-1234-1234-1234-0000000000c3"),
@@ -57,25 +58,38 @@ public class DefaultLobbies implements CommandLineRunner {
         Lobby lobby = new Lobby(new Host(hostId), teamCount, LocalDateTime.now().plusYears(10));
         lobbyService.addLobby(lobbyCode, lobby);
 
-        List<TeamLabel> allowedLabels = new ArrayList<>(TeamLabel.getAllowedLabels(teamCount == FOUR_TEAMS));
+        Set<TeamLabel> allowedLabels = TeamLabel.getAllowedLabels(teamCount == FOUR_TEAMS);
+
+        Iterator<UUID> clientIterator = CLIENT_IDS.iterator();
+        Iterator<TeamLabel> labelIterator = allowedLabels.iterator();
 
         for (int i = 0; i < teamCount; i++) {
-            UUID clientId = CLIENT_IDS.get(i);
+            UUID clientId = clientIterator.next();
+            TeamLabel label = labelIterator.next();
+
             lobby.addTeam(clientId);
-            lobby.assignTeam(clientId, allowedLabels.get(i).toString());
+            lobby.assignTeam(clientId, label);
         }
 
         lobbyService.startGame(lobbyCode, hostId);
 
         MissionManager missionManager = missionService.getManager(lobbyCode);
-        List<MissionType> classicMissions = new ArrayList<>(MissionType.getClassicMissions());
-        List<MissionType> firstSevenMissions = classicMissions.subList(0, Math.min(7, classicMissions.size()));
+
+        Set<MissionType> classicMissions = MissionType.getClassicMissions();
+        Set<MissionType> firstSevenMissions = new LinkedHashSet<>();
+
+        Iterator<MissionType> missionIterator = classicMissions.iterator();
+        for (int i = 0; i < 7 && missionIterator.hasNext(); i++) {
+            firstSevenMissions.add(missionIterator.next());
+        }
+
+        clientIterator = CLIENT_IDS.iterator();
 
         for (int i = 0; i < teamCount; i++) {
-            UUID clientId = CLIENT_IDS.get(i);
-            String label = missionManager.getGameInfo().getTeams().get(clientId).getLabel();
+            UUID clientId = clientIterator.next();
+            TeamLabel label = missionManager.getGameInfo().getTeams().get(clientId).getLabel();
 
-            if (label.equals(TeamLabel.MECA.toString())) {
+            if (label == TeamLabel.MECA) {
                 missionManager.changeTeamMissionsState(clientId, classicMissions);
             } else {
                 missionManager.changeTeamMissionsState(clientId, firstSevenMissions);

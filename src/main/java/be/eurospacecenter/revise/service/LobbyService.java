@@ -7,6 +7,7 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.lobby.Lobby;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.notification.LobbyNotifier;
 import org.springframework.stereotype.Service;
 
@@ -61,7 +62,7 @@ public class LobbyService implements Cleanable {
         return new LobbyJoinedResponse(clientId.toString(), lobby.getFreeTeamLabels(), lobby.getAllTeamLabels());
     }
 
-    public void assignTeam(String lobbyCode, UUID clientId, String teamLabel) {
+    public void assignTeam(String lobbyCode, UUID clientId, TeamLabel teamLabel) {
         Lobby lobby = getLobby(lobbyCode);
 
         lobby.assignTeam(clientId, teamLabel);

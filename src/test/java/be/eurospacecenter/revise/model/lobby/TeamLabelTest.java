@@ -2,7 +2,6 @@ package be.eurospacecenter.revise.model.lobby;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,29 +10,23 @@ class TeamLabelTest {
 
     @Test
     void validLabel_fourTeamsMode() {
-        assertTrue(TeamLabel.isValidLabel("MECA", true));
-        assertTrue(TeamLabel.isValidLabel("EXPE", true));
-        assertTrue(TeamLabel.isValidLabel("GECO", true));
-        assertTrue(TeamLabel.isValidLabel("AERO", true));
+        assertTrue(TeamLabel.isValidLabel(TeamLabel.MECA, true));
+        assertTrue(TeamLabel.isValidLabel(TeamLabel.EXPE, true));
+        assertTrue(TeamLabel.isValidLabel(TeamLabel.GECO, true));
+        assertTrue(TeamLabel.isValidLabel(TeamLabel.AERO, true));
     }
 
     @Test
     void invalidLabel_fourTeamsModeInit() {
-        assertFalse(TeamLabel.isValidLabel("COOP", true));
-        assertFalse(TeamLabel.isValidLabel("MEDI", true));
+        assertFalse(TeamLabel.isValidLabel(TeamLabel.COOP, true));
+        assertFalse(TeamLabel.isValidLabel(TeamLabel.MEDI, true));
     }
 
     @Test
     void validLabel_sixTeamsMode() {
         for (TeamLabel label : TeamLabel.values()) {
-            assertTrue(TeamLabel.isValidLabel(label.name(), false));
+            assertTrue(TeamLabel.isValidLabel(label, false));
         }
-    }
-
-    @Test
-    void unknownLabel() {
-        assertFalse(TeamLabel.isValidLabel("UNKNOWN", true));
-        assertFalse(TeamLabel.isValidLabel("UNKNOWN", false));
     }
 
     @Test
@@ -44,56 +37,37 @@ class TeamLabelTest {
 
     @Test
     void validTeams_fourTeamsMode() {
-        List<String> labels = List.of("MECA", "EXPE", "GECO", "AERO");
+        Set<TeamLabel> labels = Set.of(TeamLabel.MECA, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.AERO);
 
         assertTrue(TeamLabel.isValidTeams(labels, true));
     }
 
     @Test
     void missingLabel_fourTeamsMode() {
-        List<String> labels = List.of("COOP", "EXPE", "GECO");
+        Set<TeamLabel> labels = Set.of(TeamLabel.COOP, TeamLabel.EXPE, TeamLabel.GECO);
 
         assertFalse(TeamLabel.isValidTeams(labels, true));
     }
 
     @Test
     void extraLabel_fourTeamsMode() {
-        List<String> labels = List.of("COOP", "EXPE", "GECO", "AERO", "MECA");
+        Set<TeamLabel> labels = Set.of(TeamLabel.COOP, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.AERO, TeamLabel.MECA);
 
         assertFalse(TeamLabel.isValidTeams(labels, true));
     }
 
     @Test
     void invalidLabel_fourTeamsMode() {
-        List<String> labels = List.of("COOP", "EXPE", "GECO", "MECA");
+        Set<TeamLabel> labels = Set.of(TeamLabel.COOP, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.MECA);
 
         assertFalse(TeamLabel.isValidTeams(labels, true));
     }
 
     @Test
     void validTeams_sixTeamsMode() {
-        List<String> labels = List.of("COOP", "EXPE", "GECO", "AERO", "MECA", "MEDI");
+        Set<TeamLabel> labels = Set.of(TeamLabel.COOP, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.AERO, TeamLabel.MECA, TeamLabel.MEDI);
 
         assertTrue(TeamLabel.isValidTeams(labels, false));
-    }
-
-    @Test
-    void blanknessInvalid() {
-        assertFalse(TeamLabel.isValidLabel("", false));
-    }
-
-    @Test
-    void duplicateLabels() {
-        List<String> labels = List.of("COOP", "COOP", "GECO", "AERO");
-
-        assertFalse(TeamLabel.isValidTeams(labels, true));
-    }
-
-    @Test
-    void unknownLabelForTeam() {
-        List<String> labels = List.of("COOP", "EXPE", "UNKNOWN", "AERO");
-
-        assertFalse(TeamLabel.isValidTeams(labels, true));
     }
 
     @Test
@@ -101,7 +75,7 @@ class TeamLabelTest {
         Set<TeamLabel> allowed = TeamLabel.getAllowedLabels(true);
 
         assertEquals(4, allowed.size());
-        assertTrue(allowed.containsAll(List.of(TeamLabel.MECA, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.AERO)));
+        assertTrue(allowed.containsAll(Set.of(TeamLabel.MECA, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.AERO)));
     }
 
     @Test
@@ -109,7 +83,7 @@ class TeamLabelTest {
         Set<TeamLabel> allowed = TeamLabel.getAllowedLabels(false);
 
         assertEquals(6, allowed.size());
-        assertTrue(allowed.containsAll(List.of(TeamLabel.values())));
+        assertTrue(allowed.containsAll(Set.of(TeamLabel.values())));
     }
 
 }

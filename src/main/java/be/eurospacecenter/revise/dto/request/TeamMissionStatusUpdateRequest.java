@@ -1,9 +1,10 @@
 package be.eurospacecenter.revise.dto.request;
 
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -13,7 +14,7 @@ public record TeamMissionStatusUpdateRequest(
         UUID id,
 
         @NotNull
-        List<MissionType> updateMissions,
+        Set<MissionType> updateMissions,
 
-        String teamLabel
+        TeamLabel teamLabel
 ) {}

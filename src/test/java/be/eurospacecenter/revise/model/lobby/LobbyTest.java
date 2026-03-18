@@ -75,32 +75,32 @@ class LobbyTest {
 
     @Test
     void shouldStartGameWith4Teams() {
-        lobby4Teams.assignTeam(team1Id, "AERO");
-        lobby4Teams.assignTeam(team2Id, "MECA");
-        lobby4Teams.assignTeam(team3Id, "EXPE");
-        lobby4Teams.assignTeam(team4Id, "GECO");
+        lobby4Teams.assignTeam(team1Id, TeamLabel.AERO);
+        lobby4Teams.assignTeam(team2Id, TeamLabel.MECA);
+        lobby4Teams.assignTeam(team3Id, TeamLabel.EXPE);
+        lobby4Teams.assignTeam(team4Id, TeamLabel.GECO);
 
         assertTrue(lobby4Teams.startGame(host.id()));
     }
 
     @Test
     void shouldStartGameWith6Teams() {
-        lobby6Teams.assignTeam(team1Id, "AERO");
-        lobby6Teams.assignTeam(team2Id, "MECA");
-        lobby6Teams.assignTeam(team3Id, "EXPE");
-        lobby6Teams.assignTeam(team4Id, "GECO");
-        lobby6Teams.assignTeam(team5Id, "MEDI");
-        lobby6Teams.assignTeam(team6Id, "COOP");
+        lobby6Teams.assignTeam(team1Id, TeamLabel.AERO);
+        lobby6Teams.assignTeam(team2Id, TeamLabel.MECA);
+        lobby6Teams.assignTeam(team3Id, TeamLabel.EXPE);
+        lobby6Teams.assignTeam(team4Id, TeamLabel.GECO);
+        lobby6Teams.assignTeam(team5Id, TeamLabel.MEDI);
+        lobby6Teams.assignTeam(team6Id, TeamLabel.COOP);
 
         assertTrue(lobby6Teams.startGame(host.id()));
     }
 
     @Test
     void shouldNotStartGameWithWrongHostId() {
-        lobby4Teams.assignTeam(team1Id, "AERO");
-        lobby4Teams.assignTeam(team2Id, "MECA");
-        lobby4Teams.assignTeam(team3Id, "EXPE");
-        lobby4Teams.assignTeam(team4Id, "GECO");
+        lobby4Teams.assignTeam(team1Id, TeamLabel.AERO);
+        lobby4Teams.assignTeam(team2Id, TeamLabel.MECA);
+        lobby4Teams.assignTeam(team3Id, TeamLabel.EXPE);
+        lobby4Teams.assignTeam(team4Id, TeamLabel.GECO);
 
         UUID wrongHostId = UUID.randomUUID();
 
@@ -113,7 +113,7 @@ class LobbyTest {
 
     @Test
     void shouldNotStartGameWithWrong4Teams() {
-        lobby4Teams.assignTeam(team1Id, "AERO");
+        lobby4Teams.assignTeam(team1Id, TeamLabel.AERO);
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
@@ -142,7 +142,7 @@ class LobbyTest {
 
         NoAutoriseOperationException ex = assertThrows(
                 NoAutoriseOperationException.class,
-                () -> lobby4Teams.assignTeam(wrongClientId, "AERO")
+                () -> lobby4Teams.assignTeam(wrongClientId, TeamLabel.AERO)
         );
 
         assertEquals(ErrorKeys.CLIENT_NOT_IN_LOBBY, ex.getMessage());
@@ -150,11 +150,11 @@ class LobbyTest {
 
     @Test
     void shouldNotAssignTeamWithDuplicateLabel() {
-        lobby4Teams.assignTeam(team1Id, "AERO");
+        lobby4Teams.assignTeam(team1Id, TeamLabel.AERO);
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () ->  lobby4Teams.assignTeam(team2Id, "AERO")
+                () ->  lobby4Teams.assignTeam(team2Id, TeamLabel.AERO)
         );
 
         assertEquals(ErrorKeys.TEAM_LABEL_ALREADY_TAKEN, ex.getMessage());
@@ -162,21 +162,21 @@ class LobbyTest {
 
     @Test
     void shouldNotAssignTeamTwice() {
-        lobby4Teams.assignTeam(team1Id, "AERO");
+        lobby4Teams.assignTeam(team1Id, TeamLabel.AERO);
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () ->  lobby4Teams.assignTeam(team1Id, "EXPE")
+                () ->  lobby4Teams.assignTeam(team1Id, TeamLabel.EXPE)
         );
 
         assertEquals(ErrorKeys.CLIENT_ALREADY_CHOSE_TEAM, ex.getMessage());
     }
 
     @Test
-    void shouldNotAssignInvalidTeamLabel() {
+    void shouldNotAssignNullTeamLabel() {
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () ->  lobby4Teams.assignTeam(team1Id, "INVALID_LABEL")
+                () ->  lobby4Teams.assignTeam(team1Id, null)
         );
 
         assertEquals(ErrorKeys.INVALID_TEAM_LABEL, ex.getMessage());

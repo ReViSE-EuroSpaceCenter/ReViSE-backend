@@ -32,8 +32,8 @@ public class Team {
         this.resources = new Resources();
     }
 
-    public String getLabel() {
-        return label != null ? label.toString() : null;
+    public TeamLabel getLabel() {
+        return label != null ? label : null;
     }
 
     public void setLabel(TeamLabel label) {

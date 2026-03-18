@@ -1,4 +1,6 @@
 package be.eurospacecenter.revise.dto.response;
 
-public record TeamJoinedResponse(String teamLabel) {
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
+
+public record TeamJoinedResponse(TeamLabel teamLabel) {
 }

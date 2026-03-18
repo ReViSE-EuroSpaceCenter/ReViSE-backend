@@ -5,6 +5,7 @@ import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.mission.MissionManager;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.model.mission.TeamFullProgression;
@@ -34,7 +35,7 @@ public class MissionService implements Cleanable {
         managers.put(lobbyCode, new MissionManager(gameInfo));
     }
 
-    public void changeTeamMissionsState(String lobbyCode, UUID id, String teamLabel, List<MissionType> missionType) {
+    public void changeTeamMissionsState(String lobbyCode, UUID id, TeamLabel teamLabel, Set<MissionType> missionType) {
         MissionManager manager = getManager(lobbyCode);
 
         TeamProgression teamProgression = manager.changeTeamMissionsState(id, teamLabel, missionType);

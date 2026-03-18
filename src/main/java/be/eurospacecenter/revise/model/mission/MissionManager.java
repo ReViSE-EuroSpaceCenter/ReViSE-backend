@@ -5,9 +5,10 @@ import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.model.Team;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,7 +29,7 @@ public class MissionManager {
         return allTeamsMissionsCompleted;
     }
 
-    public TeamProgression changeTeamMissionsState(UUID id, String teamLabel, List<MissionType> missions) {
+    public TeamProgression changeTeamMissionsState(UUID id, TeamLabel teamLabel, Set<MissionType> missions) {
         if (teamLabel == null) {
             return changeTeamMissionsState(id, missions);
         }
@@ -45,7 +46,7 @@ public class MissionManager {
         return team.getProgression();
     }
 
-    public TeamProgression changeTeamMissionsState(UUID clientId, List<MissionType> missions) {
+    public TeamProgression changeTeamMissionsState(UUID clientId, Set<MissionType> missions) {
         Team team = gameInfo.getTeam(clientId);
         missions.forEach(team::updateMission);
 
@@ -64,7 +65,7 @@ public class MissionManager {
         return team.getFullProgression();
     }
 
-    public Map<String, TeamFullProgression> getTeamsFullProgression() {
+    public Map<TeamLabel, TeamFullProgression> getTeamsFullProgression() {
         Map<UUID, Team> teams = gameInfo.getTeams();
 
         return teams.values().stream().collect(Collectors.toMap(Team::getLabel, Team::getFullProgression));

@@ -1,6 +1,8 @@
 package be.eurospacecenter.revise.dto.response;
 
-import java.util.List;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 
-public record LobbyJoinedResponse(String clientId, List<String> availableTeams, List<String> allTeams) {
+import java.util.Set;
+
+public record LobbyJoinedResponse(String clientId, Set<TeamLabel> availableTeams, Set<TeamLabel> allTeams) {
 }
