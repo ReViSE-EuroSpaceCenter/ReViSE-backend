@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.service;
 
+import be.eurospacecenter.revise.config.AppMetrics;
 import be.eurospacecenter.revise.model.GameInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +19,12 @@ public class CleaningService {
     private final LobbyService lobbyService;
     private final List<Cleanable> cleanable;
 
-    public CleaningService(LobbyService lobbyService, List<Cleanable> cleanable) {
+    private final AppMetrics metrics;
+
+    public CleaningService(LobbyService lobbyService, List<Cleanable> cleanable, AppMetrics metrics) {
         this.lobbyService = lobbyService;
         this.cleanable = cleanable;
+        this.metrics = metrics;
     }
 
     @Scheduled(cron = "0 0 */12 * * *")
@@ -32,6 +36,7 @@ public class CleaningService {
 
             if (LocalDateTime.now().isAfter(gameInfo.getExpiresAt())) {
                 toRemove.add(code);
+                metrics.lobbyCleared();
             }
         });
 
