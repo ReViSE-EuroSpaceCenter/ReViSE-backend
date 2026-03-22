@@ -1,8 +1,14 @@
 package be.eurospacecenter.revise.service;
 
+import be.eurospacecenter.revise.config.AppMetrics;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.lobby.Lobby;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,11 +17,25 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class CleaningServiceTest {
 
-    LobbyService lobbyService = new LobbyService(null, null);
-    MissionService missionService = new MissionService(null, null);
-    LauncherService launcherService = new LauncherService(null);
+    LobbyService lobbyService;
+    MissionService missionService;
+    LauncherService launcherService;
+
+    @Mock
+    AppMetrics appMetrics;
+
+    @Mock
+    MeterRegistry meterRegistry;
+
+    @BeforeEach
+    void setup() {
+        lobbyService = new LobbyService(missionService, null, appMetrics);
+        missionService = new MissionService(null, launcherService);
+        launcherService = new LauncherService(null);
+    }
 
     @Test
     void shouldClearOnlyLobby12HoursOld() {
@@ -26,26 +46,33 @@ class CleaningServiceTest {
                 "4", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusMinutes(30)),
                 "5", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(1)),
                 "6", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(6)),
-                "7", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(11)));
+                "7", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(11))
+        );
 
         Map<String, Lobby> shouldNotBeThere = Map.of(
                 "A", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(12)),
                 "B", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(24)),
-                "C", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusHours(36)),
+                "C", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusMinutes(36 * 60)),
                 "D", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusDays(1)),
                 "E", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusDays(7)),
-                "F", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusMonths(1)));
+                "F", new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusMonths(1))
+        );
 
         shouldBeThere.forEach((k, v) -> lobbyService.addLobby(k, v));
         shouldNotBeThere.forEach((k, v) -> lobbyService.addLobby(k, v));
 
-        shouldBeThere.forEach(((k, v) -> missionService.registerManager(k, v.getGameInfo())));
+        shouldBeThere.forEach((k, v) -> missionService.registerManager(k, v.getGameInfo()));
         shouldNotBeThere.forEach((k, v) -> missionService.registerManager(k, v.getGameInfo()));
 
-        shouldBeThere.forEach(((k, v) -> launcherService.registerLauncher(k, v.getGameInfo())));
+        shouldBeThere.forEach((k, v) -> launcherService.registerLauncher(k, v.getGameInfo()));
         shouldNotBeThere.forEach((k, v) -> launcherService.registerLauncher(k, v.getGameInfo()));
 
-        CleaningService cleaningService = new CleaningService(lobbyService, List.of(lobbyService, missionService, launcherService));
+        CleaningService cleaningService = new CleaningService(
+                lobbyService,
+                List.of(lobbyService, missionService, launcherService),
+                appMetrics
+        );
+
         cleaningService.clearLobbies();
 
         shouldBeThere.forEach((k, v) -> assertTrue(lobbyService.lobbies.containsKey(k)));

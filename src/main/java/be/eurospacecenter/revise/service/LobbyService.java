@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.service;
 
+import be.eurospacecenter.revise.config.AppMetrics;
 import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
 import be.eurospacecenter.revise.dto.response.LobbyInfoResponse;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
@@ -27,12 +28,12 @@ public class LobbyService implements Cleanable {
     private final MissionService missionService;
     private final LobbyNotifier notifier;
 
-    public LobbyService(
-            MissionService missionService,
-            LobbyNotifier notifier
-    ) {
+    private final AppMetrics metrics;
+
+    public LobbyService(MissionService missionService, LobbyNotifier notifier, AppMetrics metrics) {
         this.missionService = missionService;
         this.notifier = notifier;
+        this.metrics = metrics;
     }
 
     public LobbyInfoResponse getLobbyInfo(String lobbyCode) {
@@ -48,6 +49,8 @@ public class LobbyService implements Cleanable {
         Lobby lobby = new Lobby(new Host(hostId), numberOfTeams, LocalDateTime.now());
         lobbies.put(lobbyCode, lobby);
 
+        metrics.lobbyCreated();
+
         return new LobbyCreationResponse(lobbyCode, hostId.toString());
     }
 
@@ -58,6 +61,7 @@ public class LobbyService implements Cleanable {
         lobby.addTeam(clientId);
 
         notifier.notifyClientJoined(lobbyCode);
+        metrics.lobbyJoined();
 
         return new LobbyJoinedResponse(clientId.toString(), lobby.getFreeTeamLabels(), lobby.getAllTeamLabels());
     }
@@ -77,6 +81,8 @@ public class LobbyService implements Cleanable {
 
         missionService.registerManager(lobbyCode, lobby.getGameInfo());
 
+        metrics.lobbyStarted();
+
         notifier.notifyGameStarted(lobbyCode);
     }
 
@@ -84,7 +90,9 @@ public class LobbyService implements Cleanable {
         return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.LOBBY_NOT_FOUND));
     }
 
-    /** DO NOT USE, only for testing purposes */
+    /**
+     * DO NOT USE, only for testing purposes
+     */
     public void addLobby(String lobbyCode, Lobby lobby) {
         lobbies.put(lobbyCode, lobby);
     }
