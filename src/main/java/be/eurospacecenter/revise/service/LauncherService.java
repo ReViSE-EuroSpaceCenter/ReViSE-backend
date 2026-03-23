@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.ScoreResponse;
+import be.eurospacecenter.revise.dto.response.ScoreDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.GameInfo;
@@ -41,10 +41,10 @@ public class LauncherService implements Cleanable {
         notifier.notifyResourcesUpdated(lobbyCode, teamResources);
     }
 
-    public ScoreResponse getGeneralScore(String lobbyCode, UUID hostId) {
+    public ScoreDTO getGeneralScore(String lobbyCode, UUID hostId) {
         LauncherManager launcherManager = getLauncher(lobbyCode);
         int score = launcherManager.getGeneralScore(hostId);
-        return new ScoreResponse(score);
+        return new ScoreDTO(score);
     }
 
     private LauncherManager getLauncher(String lobbyCode) {

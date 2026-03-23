@@ -179,7 +179,7 @@ class MissionManagerTest {
         missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.GECO, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
         missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, MissionType.getClassicMissions());
 
-        assertTrue(missionManager.isAllTeamsMissionsCompleted());
+        assertTrue(missionManager.getTeamsFullProgression().allTeamsMissionsCompleted());
     }
 
     @Test
@@ -193,7 +193,7 @@ class MissionManagerTest {
 
         missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, Set.of(MissionType.CLASSIC_1));
 
-        assertFalse(missionManager.isAllTeamsMissionsCompleted());
+        assertFalse(missionManager.getTeamsFullProgression().allTeamsMissionsCompleted());
     }
 
     @Test
@@ -203,7 +203,7 @@ class MissionManagerTest {
 
         missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.AERO, MissionType.getClassicMissions().stream().limit(7).collect(Collectors.toSet()));
 
-        assertFalse(missionManager.isAllTeamsMissionsCompleted());
+        assertFalse(missionManager.getTeamsFullProgression().allTeamsMissionsCompleted());
     }
 
     @Test
@@ -218,7 +218,7 @@ class MissionManagerTest {
 
         missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, Set.of(MissionType.CLASSIC_1));
 
-        assertFalse(missionManager.isAllTeamsMissionsCompleted());
+        assertFalse(missionManager.getTeamsFullProgression().allTeamsMissionsCompleted());
     }
 
     @Test
@@ -234,7 +234,7 @@ class MissionManagerTest {
         missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, Set.of(MissionType.CLASSIC_1));
         missionManager.changeTeamMissionsState(gameInfo.getHostId(), TeamLabel.MECA, Set.of(MissionType.CLASSIC_1));
 
-        assertTrue(missionManager.isAllTeamsMissionsCompleted());
+        assertTrue(missionManager.getTeamsFullProgression().allTeamsMissionsCompleted());
     }
 
     private GameInfo createTeams(TeamLabel... labels) {

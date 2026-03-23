@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
-import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
+import be.eurospacecenter.revise.dto.response.TeamFullProgressionDTO;
+import be.eurospacecenter.revise.dto.response.TeamsProgressionDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
@@ -139,18 +139,18 @@ class MissionManagerServiceTest {
     void shouldGetTeamFullProgression() {
         missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
 
-        TeamFullProgressionResponse response = missionService.getTeamFullProgression("XXXXXX", idOfTheLoneTeam);
+        TeamFullProgressionDTO response = missionService.getTeamFullProgression("XXXXXX", idOfTheLoneTeam);
 
         assertNotNull(response);
-        assertEquals(7, response.teamFullProgression().completedMissions().size());
-        assertNotNull(response.teamFullProgression().teamProgression());
+        assertEquals(7, response.completedMissions().size());
+        assertNotNull(response.teamProgressionDTO());
     }
 
     @Test
     void shouldGetFourGetTeamsFullProgression() {
         missionService.registerManager("XXXXXX", gameInfoWith4Teams);
 
-        TeamsProgressionResponse response = missionService.getTeamsFullProgression("XXXXXX");
+        TeamsProgressionDTO response = missionService.getTeamsFullProgression("XXXXXX");
 
         assertNotNull(response);
         assertEquals(4, response.teamsFullProgression().size());
@@ -162,7 +162,7 @@ class MissionManagerServiceTest {
     void shouldGetSixGetTeamsFullProgression() {
         missionService.registerManager("XXXXXX", gameInfoWith6Teams);
 
-        TeamsProgressionResponse response = missionService.getTeamsFullProgression("XXXXXX");
+        TeamsProgressionDTO response = missionService.getTeamsFullProgression("XXXXXX");
 
         assertNotNull(response);
         assertEquals(6, response.teamsFullProgression().size());

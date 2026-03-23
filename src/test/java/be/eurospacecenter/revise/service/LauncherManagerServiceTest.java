@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.ScoreResponse;
+import be.eurospacecenter.revise.dto.response.ScoreDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.GameInfo;
@@ -86,8 +86,8 @@ class LauncherManagerServiceTest {
         launcherService.registerLauncher("AAAAAAA", gameInfoWithOneLoneTeam);
         launcherService.updateResources("AAAAAAA", idOfTheLoneTeam, Map.of(ResourceType.ENERGY, 4));
 
-        ScoreResponse scoreResponse = launcherService.getGeneralScore("AAAAAAA", idOfTheHost);
+        ScoreDTO scoreDTO = launcherService.getGeneralScore("AAAAAAA", idOfTheHost);
 
-        assertEquals(24, scoreResponse.score());
+        assertEquals(24, scoreDTO.score());
     }
 }

@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
-import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
+import be.eurospacecenter.revise.dto.response.TeamFullProgressionDTO;
+import be.eurospacecenter.revise.dto.response.TeamsProgressionDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
@@ -39,23 +39,22 @@ public class MissionService implements Cleanable {
         MissionManager manager = getManager(lobbyCode);
 
         TeamProgression teamProgression = manager.changeTeamMissionsState(id, teamLabel, missionType);
-        boolean allTeamsMissionsCompleted = manager.isAllTeamsMissionsCompleted();
 
-        notifier.notifyTeamProgression(lobbyCode, teamProgression, allTeamsMissionsCompleted);
+        notifier.notifyTeamProgression(lobbyCode, teamProgression);
     }
 
 
-    public TeamsProgressionResponse getTeamsFullProgression(String lobbyCode) {
+    public TeamsProgressionDTO getTeamsFullProgression(String lobbyCode) {
         MissionManager manager = getManager(lobbyCode);
 
-        return new TeamsProgressionResponse(manager.getTeamsFullProgression(), manager.isAllTeamsMissionsCompleted());
+        return TeamsProgressionDTO.fromTeamsProgression(manager.getTeamsFullProgression());
     }
 
-    public TeamFullProgressionResponse getTeamFullProgression(String lobbyCode, UUID clientId) {
+    public TeamFullProgressionDTO getTeamFullProgression(String lobbyCode, UUID clientId) {
         MissionManager manager = getManager(lobbyCode);
         TeamFullProgression fullProgression = manager.getTeamFullProgression(clientId);
 
-        return new TeamFullProgressionResponse(fullProgression);
+        return TeamFullProgressionDTO.fromTeamFullProgression(fullProgression);
     }
 
     public void endMission(String lobbyCode, UUID hostId) {

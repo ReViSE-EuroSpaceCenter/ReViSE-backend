@@ -25,10 +25,6 @@ public class MissionManager {
         return gameInfo;
     }
 
-    public boolean isAllTeamsMissionsCompleted() {
-        return allTeamsMissionsCompleted;
-    }
-
     public TeamProgression changeTeamMissionsState(UUID id, TeamLabel teamLabel, Set<MissionType> missions) {
         if (teamLabel == null) {
             return changeTeamMissionsState(id, missions);
@@ -57,18 +53,31 @@ public class MissionManager {
 
     public TeamProgression getTeamProgression(UUID id) {
         Team team = gameInfo.getTeam(id);
-        return team.getProgression();
+
+        TeamProgression teamProgression = team.getProgression();
+
+        return new TeamProgression(
+                teamProgression.teamLabel(),
+                teamProgression.classicMissionsCompleted(),
+                teamProgression.firstBonusMissionCompleted(),
+                teamProgression.secondBonusMissionCompleted(),
+                allTeamsMissionsCompleted
+        );
     }
 
     public TeamFullProgression getTeamFullProgression(UUID id) {
         Team team = gameInfo.getTeam(id);
+
         return team.getFullProgression();
     }
 
-    public Map<TeamLabel, TeamFullProgression> getTeamsFullProgression() {
+    public TeamsProgression getTeamsFullProgression() {
         Map<UUID, Team> teams = gameInfo.getTeams();
 
-        return teams.values().stream().collect(Collectors.toMap(Team::getLabel, Team::getFullProgression));
+        return new TeamsProgression(
+                teams.values().stream().collect(Collectors.toMap(Team::getLabel, Team::getFullProgression)),
+                allTeamsMissionsCompleted
+        );
     }
 
     public void validateEndOfMission(UUID hostId) {

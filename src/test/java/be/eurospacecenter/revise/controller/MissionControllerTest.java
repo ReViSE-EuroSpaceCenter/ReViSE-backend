@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
+import be.eurospacecenter.revise.dto.response.LobbyJoinedDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.service.LobbyService;
@@ -55,7 +55,7 @@ class MissionControllerTest {
         Set<TeamLabel> labels = TeamLabel.getAllowedLabels(true);
 
         for (TeamLabel label : labels) {
-            LobbyJoinedResponse response = lobbyService.joinLobby(lobbyCode);
+            LobbyJoinedDTO response = lobbyService.joinLobby(lobbyCode);
             teamClientId = UUID.fromString(response.clientId());
             lobbyService.assignTeam(lobbyCode, teamClientId, label);
         }
@@ -147,18 +147,17 @@ class MissionControllerTest {
     }
 
     @Test
-    void getTeamMissionsShouldSucceed() {
+    void getTeamFullProgressionShouldSucceed() {
         restTestClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/api/missions/{lobbyCode}")
+                        .path("/api/missions/{lobbyCode}/team")
                         .queryParam("clientId", teamClientId)
                         .build(lobbyCode))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.teamFullProgression").exists()
-                .jsonPath("$.teamFullProgression.teamProgression").exists()
-                .jsonPath("$.teamFullProgression.completedMissions").exists();
+                .jsonPath("$.completedMissions").exists()
+                .jsonPath("$.teamProgressionDTO").exists();
     }
 
     @Test

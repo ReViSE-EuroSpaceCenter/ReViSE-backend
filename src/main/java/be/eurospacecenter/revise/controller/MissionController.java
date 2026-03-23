@@ -1,14 +1,13 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.request.EndMissionRequest;
-import be.eurospacecenter.revise.dto.request.TeamMissionStatusUpdateRequest;
-import be.eurospacecenter.revise.dto.response.TeamFullProgressionResponse;
-import be.eurospacecenter.revise.dto.response.TeamsProgressionResponse;
+import be.eurospacecenter.revise.dto.request.EndMissionDTO;
+import be.eurospacecenter.revise.dto.request.TeamMissionUpdateDTO;
+import be.eurospacecenter.revise.dto.response.TeamFullProgressionDTO;
+import be.eurospacecenter.revise.dto.response.TeamsProgressionDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.helper.LobbyCode;
 import be.eurospacecenter.revise.service.MissionService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
@@ -29,7 +28,7 @@ public class MissionController {
     }
 
     @GetMapping("/{lobbyCode}")
-    public TeamsProgressionResponse getGameInfo(
+    public TeamsProgressionDTO getTeamsFullProgression(
             @PathVariable
             @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode
@@ -37,24 +36,29 @@ public class MissionController {
         return missionService.getTeamsFullProgression(lobbyCode);
     }
 
-    @GetMapping(value = "/{lobbyCode}", params = "clientId")
-    public TeamFullProgressionResponse getTeamMissions(
+    @GetMapping(value = "/{lobbyCode}/team", params = "clientId")
+    public TeamFullProgressionDTO getTeamFullProgression(
             @PathVariable
             @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
 
-            @RequestParam(required = false)
-            @Parameter(
-                    name = "clientId",
-                    description = """
-                            Optional client identifier.
-                            If provided, returns the full progression of the client's team.
-                            If omitted, returns the global progression of each team.
-                            """
-            )
+            @RequestParam @Valid
             UUID clientId
     ) {
         return missionService.getTeamFullProgression(lobbyCode, clientId);
+    }
+
+    @PostMapping("/{lobbyCode}/end")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void endMission(
+            @PathVariable
+            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
+            String lobbyCode,
+
+            @RequestBody @Valid
+            EndMissionDTO request
+    ) {
+        missionService.endMission(lobbyCode, request.hostId());
     }
 
     @PutMapping("/{lobbyCode}")
@@ -66,21 +70,8 @@ public class MissionController {
             String lobbyCode,
 
             @RequestBody @Valid
-            TeamMissionStatusUpdateRequest request
+            TeamMissionUpdateDTO request
     ) {
         missionService.changeTeamMissionsState(lobbyCode, request.id(), request.teamLabel(), request.updateMissions());
-    }
-
-    @PostMapping("/{lobbyCode}/end")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void endMission(
-            @PathVariable
-            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
-            String lobbyCode,
-
-            @RequestBody @Valid
-            EndMissionRequest request
-    ) {
-        missionService.endMission(lobbyCode, request.hostId());
     }
 }

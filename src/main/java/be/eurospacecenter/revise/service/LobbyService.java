@@ -1,9 +1,9 @@
 package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.config.AppMetrics;
-import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
-import be.eurospacecenter.revise.dto.response.LobbyInfoResponse;
-import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
+import be.eurospacecenter.revise.dto.response.LobbyCreationDTO;
+import be.eurospacecenter.revise.dto.response.LobbyInfoDTO;
+import be.eurospacecenter.revise.dto.response.LobbyJoinedDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.lobby.Host;
@@ -36,13 +36,13 @@ public class LobbyService implements Cleanable {
         this.metrics = metrics;
     }
 
-    public LobbyInfoResponse getLobbyInfo(String lobbyCode) {
+    public LobbyInfoDTO getLobbyInfo(String lobbyCode) {
         Lobby lobby = getLobby(lobbyCode);
 
-        return new LobbyInfoResponse(lobby.getFreeTeamLabels(), lobby.getAllTeamLabels());
+        return new LobbyInfoDTO(lobby.getFreeTeamLabels(), lobby.getAllTeamLabels());
     }
 
-    public LobbyCreationResponse createLobby(int numberOfTeams) {
+    public LobbyCreationDTO createLobby(int numberOfTeams) {
         String lobbyCode = generateCode(random);
         UUID hostId = UUID.randomUUID();
 
@@ -51,10 +51,10 @@ public class LobbyService implements Cleanable {
 
         metrics.lobbyCreated();
 
-        return new LobbyCreationResponse(lobbyCode, hostId.toString());
+        return new LobbyCreationDTO(lobbyCode, hostId.toString());
     }
 
-    public LobbyJoinedResponse joinLobby(String lobbyCode) {
+    public LobbyJoinedDTO joinLobby(String lobbyCode) {
         Lobby lobby = getLobby(lobbyCode);
         UUID clientId = UUID.randomUUID();
 
@@ -63,7 +63,7 @@ public class LobbyService implements Cleanable {
         notifier.notifyClientJoined(lobbyCode);
         metrics.lobbyJoined();
 
-        return new LobbyJoinedResponse(clientId.toString(), lobby.getFreeTeamLabels(), lobby.getAllTeamLabels());
+        return new LobbyJoinedDTO(clientId.toString(), lobby.getFreeTeamLabels(), lobby.getAllTeamLabels());
     }
 
     public void assignTeam(String lobbyCode, UUID clientId, TeamLabel teamLabel) {

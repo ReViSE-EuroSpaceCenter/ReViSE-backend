@@ -4,5 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record EndMissionRequest(@NotNull UUID hostId) {
-}
+public record StartLobbyDTO(
+        @NotNull
+        UUID hostId
+) {}

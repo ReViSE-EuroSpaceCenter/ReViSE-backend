@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
-import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
+import be.eurospacecenter.revise.dto.response.LobbyCreationDTO;
+import be.eurospacecenter.revise.dto.response.LobbyJoinedDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -71,7 +71,7 @@ class LobbyControllerTest {
 
     @Test
     void getInfoForLobbyShouldSucceed() {
-        LobbyCreationResponse lobby = createLobby(4);
+        LobbyCreationDTO lobby = createLobby(4);
 
         restTestClient.get()
                 .uri("/api/lobbies/{lobbyCode}", lobby.lobbyCode())
@@ -93,7 +93,7 @@ class LobbyControllerTest {
 
     @Test
     void joinLobbyShouldSucceed() {
-        LobbyCreationResponse lobby = createLobby(4);
+        LobbyCreationDTO lobby = createLobby(4);
 
         restTestClient.post()
                 .uri("/api/lobbies/{lobbyCode}/join", lobby.lobbyCode())
@@ -125,12 +125,12 @@ class LobbyControllerTest {
 
     @Test
     void joinLobbyShouldFailForDuplicateTeamLabel() {
-        LobbyCreationResponse lobby = createLobby(4);
+        LobbyCreationDTO lobby = createLobby(4);
 
-        LobbyJoinedResponse firstClient = joinLobby(lobby.lobbyCode());
+        LobbyJoinedDTO firstClient = joinLobby(lobby.lobbyCode());
         assignTeam(lobby.lobbyCode(), firstClient.clientId(), "AERO");
 
-        LobbyJoinedResponse secondClient = joinLobby(lobby.lobbyCode());
+        LobbyJoinedDTO secondClient = joinLobby(lobby.lobbyCode());
 
         restTestClient.post()
                 .uri("/api/lobbies/{lobbyCode}/team", lobby.lobbyCode())
@@ -147,8 +147,8 @@ class LobbyControllerTest {
 
     @Test
     void assignTeamShouldFailForInvalidLobbyCode() {
-        LobbyCreationResponse lobby = createLobby(4);
-        LobbyJoinedResponse firstClient = joinLobby(lobby.lobbyCode());
+        LobbyCreationDTO lobby = createLobby(4);
+        LobbyJoinedDTO firstClient = joinLobby(lobby.lobbyCode());
 
         restTestClient.post()
                 .uri("/api/lobbies/{lobbyCode}/team", "INVALID")
@@ -166,7 +166,7 @@ class LobbyControllerTest {
 
     @Test
     void assignTeamShouldFailForInvalidUuid() {
-        LobbyCreationResponse lobby = createLobby(4);
+        LobbyCreationDTO lobby = createLobby(4);
 
         restTestClient.post()
                 .uri("/api/lobbies/{lobbyCode}/team", lobby.lobbyCode())
@@ -184,20 +184,20 @@ class LobbyControllerTest {
 
     @Test
     void joinLobbyShouldSucceedForDifferentTeamLabels() {
-        LobbyCreationResponse lobby = createLobby(4);
+        LobbyCreationDTO lobby = createLobby(4);
 
-        LobbyJoinedResponse firstClient = joinLobby(lobby.lobbyCode());
+        LobbyJoinedDTO firstClient = joinLobby(lobby.lobbyCode());
         assignTeam(lobby.lobbyCode(), firstClient.clientId(), "AERO");
 
-        LobbyJoinedResponse secondClient = joinLobby(lobby.lobbyCode());
+        LobbyJoinedDTO secondClient = joinLobby(lobby.lobbyCode());
         assignTeam(lobby.lobbyCode(), secondClient.clientId(), "GECO");
     }
 
     @Test
     void joinLobbyShouldFailForUnkownClient() {
-        LobbyCreationResponse lobby = createLobby(4);
+        LobbyCreationDTO lobby = createLobby(4);
 
-        LobbyJoinedResponse client = joinLobby(lobby.lobbyCode());
+        LobbyJoinedDTO client = joinLobby(lobby.lobbyCode());
         UUID newClientId = UUID.randomUUID();
 
         Assertions.assertNotEquals(client.clientId(), newClientId.toString());
@@ -233,7 +233,7 @@ class LobbyControllerTest {
 
     @Test
     void startLobbyShouldFailForInvalidUuid() {
-        LobbyCreationResponse lobby = createLobby(4);
+        LobbyCreationDTO lobby = createLobby(4);
 
         restTestClient.post()
                 .uri("/api/lobbies/{lobbyCode}/start", lobby.lobbyCode())
@@ -247,7 +247,7 @@ class LobbyControllerTest {
 
     @Test
     void startLobbyShouldFailForDifferentHostId() {
-        LobbyCreationResponse lobby = createLobby(4);
+        LobbyCreationDTO lobby = createLobby(4);
 
         restTestClient.post()
                 .uri("/api/lobbies/{lobbyCode}/start", lobby.lobbyCode())
@@ -261,7 +261,7 @@ class LobbyControllerTest {
 
     @Test
     void startGameShouldFailForUnassignedTeam() {
-        LobbyCreationResponse lobby = createLobby(4);
+        LobbyCreationDTO lobby = createLobby(4);
 
         restTestClient.post()
                 .uri("/api/lobbies/{lobbyCode}/start", lobby.lobbyCode())
@@ -277,23 +277,23 @@ class LobbyControllerTest {
        HELPERS
        ==================== */
 
-    private LobbyCreationResponse createLobby(int numberOfTeams) {
+    private LobbyCreationDTO createLobby(int numberOfTeams) {
         return restTestClient.post()
                 .uri("/api/lobbies")
                 .body(Map.of("numberOfTeams", numberOfTeams))
                 .exchange()
                 .expectStatus().isCreated()
-                .expectBody(LobbyCreationResponse.class)
+                .expectBody(LobbyCreationDTO.class)
                 .returnResult()
                 .getResponseBody();
     }
 
-    private LobbyJoinedResponse joinLobby(String lobbyCode) {
+    private LobbyJoinedDTO joinLobby(String lobbyCode) {
         return restTestClient.post()
                 .uri("/api/lobbies/{lobbyCode}/join", lobbyCode)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(LobbyJoinedResponse.class)
+                .expectBody(LobbyJoinedDTO.class)
                 .returnResult()
                 .getResponseBody();
     }

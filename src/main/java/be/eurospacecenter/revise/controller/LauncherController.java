@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.request.UpdateResourceRequest;
-import be.eurospacecenter.revise.dto.response.ScoreResponse;
+import be.eurospacecenter.revise.dto.request.ResourceUpdateDTO;
+import be.eurospacecenter.revise.dto.response.ScoreDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.helper.LobbyCode;
 import be.eurospacecenter.revise.service.LauncherService;
@@ -24,6 +24,18 @@ public class LauncherController {
         this.launcherService = launcherService;
     }
 
+    @GetMapping(value = "/{lobbyCode}/score", params = "hostId")
+    public ScoreDTO getGeneralScore(
+            @PathVariable
+            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
+            String lobbyCode,
+
+            @RequestParam @Valid
+            UUID hostId
+    ) {
+        return launcherService.getGeneralScore(lobbyCode, hostId);
+    }
+
     @PutMapping("/{lobbyCode}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateResources(
@@ -32,21 +44,8 @@ public class LauncherController {
             String lobbyCode,
 
             @RequestBody
-            UpdateResourceRequest request
+            ResourceUpdateDTO request
     ) {
         launcherService.updateResources(lobbyCode, request.clientId(), request.resources());
-    }
-
-    @GetMapping(value = "/{lobbyCode}/score", params = "hostId")
-    public ScoreResponse getGeneralScore(
-            @PathVariable
-            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
-            String lobbyCode,
-
-            @RequestParam
-            @Valid
-            UUID hostId
-    ) {
-        return launcherService.getGeneralScore(lobbyCode, hostId);
     }
 }

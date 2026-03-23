@@ -1,3 +1,3 @@
 package be.eurospacecenter.revise.dto.response;
 
-public record ScoreResponse(int score) { }
+public record ScoreDTO(int score) { }

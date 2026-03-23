@@ -2,7 +2,7 @@ package be.eurospacecenter.revise.notification;
 
 import be.eurospacecenter.revise.dto.event.LobbyEvent;
 import be.eurospacecenter.revise.dto.event.LobbyEventType;
-import be.eurospacecenter.revise.dto.response.TeamJoinedResponse;
+import be.eurospacecenter.revise.dto.response.TeamJoinedDTO;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class WebSocketLobbyNotifier implements LobbyNotifier {
     @Override
     public void notifyTeamJoined(String lobbyCode, TeamLabel teamLabel) {
         logger.info("Sending TEAM_JOINED event for lobby: {} with team: {}", lobbyCode, teamLabel);
-        LobbyEvent event = new LobbyEvent(LobbyEventType.TEAM_JOINED, new TeamJoinedResponse(teamLabel));
+        LobbyEvent event = new LobbyEvent(LobbyEventType.TEAM_JOINED, new TeamJoinedDTO(teamLabel));
 
         messagingTemplate.convertAndSend(LOBBY_TOPIC_PREFIX + lobbyCode, event);
         logger.info("TEAM_JOINED event sent successfully");

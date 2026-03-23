@@ -3,7 +3,7 @@ package be.eurospacecenter.revise.notification;
 import be.eurospacecenter.revise.dto.event.MissionEvent;
 import be.eurospacecenter.revise.dto.event.MissionEventType;
 
-import be.eurospacecenter.revise.dto.response.TeamProgressionResponse;
+import be.eurospacecenter.revise.dto.response.TeamProgressionDTO;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +22,9 @@ public class WebSocketMissionNotifier implements MissionNotifier {
     }
 
     @Override
-    public void notifyTeamProgression(String lobbyCode, TeamProgression teamProgression, boolean allTeamsMissionsCompleted) {
+    public void notifyTeamProgression(String lobbyCode, TeamProgression teamProgression) {
         logger.info("Sending TEAM_PROGRESSION event for game: {} with team: {} and progression: {}", lobbyCode, teamProgression.teamLabel(), teamProgression);
-        MissionEvent event = new MissionEvent(MissionEventType.TEAM_PROGRESSION, new TeamProgressionResponse(teamProgression, allTeamsMissionsCompleted));
+        MissionEvent event = new MissionEvent(MissionEventType.TEAM_PROGRESSION, TeamProgressionDTO.fromTeamProgression(teamProgression));
 
         messagingTemplate.convertAndSend(GAME_TOPIC_PREFIX + lobbyCode, event);
         logger.info("TEAM_PROGRESSION event sent successfully");

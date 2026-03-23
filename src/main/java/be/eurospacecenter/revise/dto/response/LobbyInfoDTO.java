@@ -4,5 +4,5 @@ import be.eurospacecenter.revise.model.lobby.TeamLabel;
 
 import java.util.Set;
 
-public record LobbyInfoResponse(Set<TeamLabel> availableTeams, Set<TeamLabel> allTeams) {
+public record LobbyInfoDTO(Set<TeamLabel> availableTeams, Set<TeamLabel> allTeams) {
 }

@@ -1,8 +1,8 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
-import be.eurospacecenter.revise.dto.response.LobbyInfoResponse;
-import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
+import be.eurospacecenter.revise.dto.response.LobbyCreationDTO;
+import be.eurospacecenter.revise.dto.response.LobbyInfoDTO;
+import be.eurospacecenter.revise.dto.response.LobbyJoinedDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
@@ -35,18 +35,18 @@ class LobbyServiceTest {
     void setup() {
         lobbyService.cleanUp(lobbyService.lobbies.keySet().stream().toList());
 
-        LobbyCreationResponse res4 = lobbyService.createLobby(4);
+        LobbyCreationDTO res4 = lobbyService.createLobby(4);
         hostIdFor4 = UUID.fromString(res4.hostId());
         lobbyCodeFor4 = res4.lobbyCode();
 
-        LobbyCreationResponse res6 = lobbyService.createLobby(6);
+        LobbyCreationDTO res6 = lobbyService.createLobby(6);
         hostIdFor6 = UUID.fromString(res6.hostId());
         lobbyCodeFor6 = res6.lobbyCode();
     }
 
     @Test
     void lobbyShouldReturnLobbyCodeFor4Teams() {
-        LobbyCreationResponse res = lobbyService.createLobby(4);
+        LobbyCreationDTO res = lobbyService.createLobby(4);
 
         UUID hostId = UUID.fromString(res.hostId());
 
@@ -57,7 +57,7 @@ class LobbyServiceTest {
 
     @Test
     void lobbyShouldReturnLobbyCodeFor6Teams() {
-        LobbyCreationResponse res = lobbyService.createLobby(6);
+        LobbyCreationDTO res = lobbyService.createLobby(6);
 
         UUID hostId = UUID.fromString(res.hostId());
 
@@ -68,7 +68,7 @@ class LobbyServiceTest {
 
     @Test
     void joinLobbyShouldSucceedFor4Teams() {
-        LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor4);
+        LobbyJoinedDTO res = lobbyService.joinLobby(lobbyCodeFor4);
 
         UUID clientId = UUID.fromString(res.clientId());
 
@@ -80,7 +80,7 @@ class LobbyServiceTest {
 
     @Test
     void joinLobbyShouldSucceedFor6Teams() {
-        LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
+        LobbyJoinedDTO res = lobbyService.joinLobby(lobbyCodeFor6);
 
         UUID clientId = UUID.fromString(res.clientId());
 
@@ -92,7 +92,7 @@ class LobbyServiceTest {
     @Test
     void availableTeamsShouldDecreaseAtEachAssignFor4() {
         for (int i = 4; i > 0; i--) {
-            LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor4);
+            LobbyJoinedDTO res = lobbyService.joinLobby(lobbyCodeFor4);
 
             UUID clientId = UUID.fromString(res.clientId());
 
@@ -107,7 +107,7 @@ class LobbyServiceTest {
     @Test
     void availableTeamsShouldDecreaseAtEachAssignFor6() {
         for (int i = 6; i > 0; i--) {
-            LobbyJoinedResponse res = lobbyService.joinLobby(lobbyCodeFor6);
+            LobbyJoinedDTO res = lobbyService.joinLobby(lobbyCodeFor6);
 
             UUID clientId = UUID.fromString(res.clientId());
 
@@ -132,12 +132,12 @@ class LobbyServiceTest {
         Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(true);
 
         teamLabelSet.forEach(label -> {
-            LobbyJoinedResponse firstTeam = lobbyService.joinLobby(lobbyCodeFor4);
+            LobbyJoinedDTO firstTeam = lobbyService.joinLobby(lobbyCodeFor4);
             UUID firstId = UUID.fromString(firstTeam.clientId());
 
             lobbyService.assignTeam(lobbyCodeFor4, firstId, label);
 
-            LobbyJoinedResponse secondTeam = lobbyService.joinLobby(lobbyCodeFor4);
+            LobbyJoinedDTO secondTeam = lobbyService.joinLobby(lobbyCodeFor4);
             UUID secondId = UUID.fromString(secondTeam.clientId());
 
             IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -152,12 +152,12 @@ class LobbyServiceTest {
         Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(false);
 
         teamLabelSet.forEach(label -> {
-            LobbyJoinedResponse firstTeam = lobbyService.joinLobby(lobbyCodeFor6);
+            LobbyJoinedDTO firstTeam = lobbyService.joinLobby(lobbyCodeFor6);
             UUID firstId = UUID.fromString(firstTeam.clientId());
 
             lobbyService.assignTeam(lobbyCodeFor6, firstId, label);
 
-            LobbyJoinedResponse secondTeam = lobbyService.joinLobby(lobbyCodeFor6);
+            LobbyJoinedDTO secondTeam = lobbyService.joinLobby(lobbyCodeFor6);
             UUID secondId = UUID.fromString(secondTeam.clientId());
 
             IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -173,7 +173,7 @@ class LobbyServiceTest {
         Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(true);
 
         teamLabelSet.forEach(label -> {
-            LobbyJoinedResponse firstTeam = lobbyService.joinLobby(lobbyCodeFor4);
+            LobbyJoinedDTO firstTeam = lobbyService.joinLobby(lobbyCodeFor4);
             UUID firstId = UUID.fromString(firstTeam.clientId());
 
             lobbyService.assignTeam(lobbyCodeFor4, firstId, label);
@@ -190,7 +190,7 @@ class LobbyServiceTest {
         Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(true);
 
         teamLabelSet.forEach(label -> {
-            LobbyJoinedResponse team = lobbyService.joinLobby(lobbyCodeFor4);
+            LobbyJoinedDTO team = lobbyService.joinLobby(lobbyCodeFor4);
             UUID teamId = UUID.fromString(team.clientId());
 
             lobbyService.assignTeam(lobbyCodeFor4, teamId, label);
@@ -204,7 +204,7 @@ class LobbyServiceTest {
         Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(false);
 
         teamLabelSet.forEach(label -> {
-            LobbyJoinedResponse team = lobbyService.joinLobby(lobbyCodeFor6);
+            LobbyJoinedDTO team = lobbyService.joinLobby(lobbyCodeFor6);
             UUID teamId = UUID.fromString(team.clientId());
 
             lobbyService.assignTeam(lobbyCodeFor6, teamId, label);
@@ -253,7 +253,7 @@ class LobbyServiceTest {
 
     @Test
     void getLobbyInfoForFour() {
-        LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor4);
+        LobbyInfoDTO res = lobbyService.getLobbyInfo(lobbyCodeFor4);
 
         assertEquals(4, res.allTeams().size());
         assertEquals(4, res.availableTeams().size());
@@ -261,7 +261,7 @@ class LobbyServiceTest {
 
     @Test
     void getLobbyInfoForSix() {
-        LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor6);
+        LobbyInfoDTO res = lobbyService.getLobbyInfo(lobbyCodeFor6);
 
         assertEquals(6, res.allTeams().size());
         assertEquals(6, res.availableTeams().size());
@@ -270,11 +270,11 @@ class LobbyServiceTest {
     @Test
     void getLobbyInfoShouldDecreaseAtEachJoinedFor4() {
         for (int i = 4; i > 0; i--) {
-            LobbyJoinedResponse joinedResponse = lobbyService.joinLobby(lobbyCodeFor4);
+            LobbyJoinedDTO joinedResponse = lobbyService.joinLobby(lobbyCodeFor4);
 
             UUID clientId = UUID.fromString(joinedResponse.clientId());
 
-            LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor4);
+            LobbyInfoDTO res = lobbyService.getLobbyInfo(lobbyCodeFor4);
 
             assertEquals(4, res.allTeams().size());
             assertEquals(i, res.availableTeams().size());
@@ -287,11 +287,11 @@ class LobbyServiceTest {
     @Test
     void getLobbyInfoShouldDecreaseAtEachJoinedFor6() {
         for (int i = 6; i > 0; i--) {
-            LobbyJoinedResponse joinedResponse = lobbyService.joinLobby(lobbyCodeFor6);
+            LobbyJoinedDTO joinedResponse = lobbyService.joinLobby(lobbyCodeFor6);
 
             UUID clientId = UUID.fromString(joinedResponse.clientId());
 
-            LobbyInfoResponse res = lobbyService.getLobbyInfo(lobbyCodeFor6);
+            LobbyInfoDTO res = lobbyService.getLobbyInfo(lobbyCodeFor6);
 
             assertEquals(6, res.allTeams().size());
             assertEquals(i, res.availableTeams().size());
