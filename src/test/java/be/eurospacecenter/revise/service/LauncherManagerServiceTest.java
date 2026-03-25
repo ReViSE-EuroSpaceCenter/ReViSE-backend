@@ -88,6 +88,6 @@ class LauncherManagerServiceTest {
 
         ScoreDTO scoreDTO = launcherService.getGeneralScore("AAAAAAA", idOfTheHost);
 
-        assertEquals(24, scoreDTO.score());
+        assertEquals(32, scoreDTO.score());
     }
 }
