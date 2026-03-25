@@ -139,7 +139,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "increase(lobby_joined_counter_total[$__range])",
+          "expr": "round(increase(lobby_joined_counter_total[$__range]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -203,7 +203,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "increase(lobby_started_counter_total[$__range])",
+          "expr": "round(increase(lobby_started_counter_total[$__range]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -268,7 +268,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "increase(logback_events_total{level=\"error\"}[$__range])",
+          "expr": "round(increase(logback_events_total{level=\"error\"}[$__range]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
