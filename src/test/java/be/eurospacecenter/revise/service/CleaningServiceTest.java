@@ -1,13 +1,10 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.config.AppMetrics;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.lobby.Lobby;
-import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -24,15 +21,9 @@ class CleaningServiceTest {
     MissionService missionService;
     LauncherService launcherService;
 
-    @Mock
-    AppMetrics appMetrics;
-
-    @Mock
-    MeterRegistry meterRegistry;
-
     @BeforeEach
     void setup() {
-        lobbyService = new LobbyService(missionService, null, appMetrics);
+        lobbyService = new LobbyService(missionService, null);
         missionService = new MissionService(null, launcherService);
         launcherService = new LauncherService(null);
     }
@@ -69,8 +60,7 @@ class CleaningServiceTest {
 
         CleaningService cleaningService = new CleaningService(
                 lobbyService,
-                List.of(lobbyService, missionService, launcherService),
-                appMetrics
+                List.of(lobbyService, missionService, launcherService)
         );
 
         cleaningService.clearLobbies();

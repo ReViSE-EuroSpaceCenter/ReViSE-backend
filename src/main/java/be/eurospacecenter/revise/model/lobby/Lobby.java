@@ -44,7 +44,7 @@ public class Lobby {
         team.setLabel(teamLabel);
     }
 
-    public Set<TeamLabel> getFreeTeamLabels() {
+    public Set<TeamLabel> getAvailableTeamLabels() {
         Map<UUID, Team> teams = gameInfo.getTeams();
 
         Set<TeamLabel> takenLabels = teams.values().stream().filter(Team::hasLabel).map(Team::getLabel).collect(Collectors.toSet());

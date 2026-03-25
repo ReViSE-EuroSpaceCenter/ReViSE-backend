@@ -7,23 +7,23 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.notification.LobbyNotifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 
 import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureRestTestClient
 class LobbyServiceTest {
-
-    @Autowired
     private LobbyService lobbyService;
+
+    private final MissionService missionService = mock(MissionService.class);
+    private final LobbyNotifier notifier = mock(LobbyNotifier.class);
 
     private UUID hostIdFor4;
     private String lobbyCodeFor4;
@@ -33,7 +33,7 @@ class LobbyServiceTest {
 
     @BeforeEach
     void setup() {
-        lobbyService.cleanUp(lobbyService.lobbies.keySet().stream().toList());
+        lobbyService = new LobbyService(missionService, notifier);
 
         LobbyCreationDTO res4 = lobbyService.createLobby(4);
         hostIdFor4 = UUID.fromString(res4.hostId());
