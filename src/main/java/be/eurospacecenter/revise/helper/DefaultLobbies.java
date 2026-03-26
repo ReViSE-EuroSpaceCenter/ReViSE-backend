@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.helper;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.lobby.Lobby;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.mission.MissionManager;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.service.LobbyService;
@@ -22,8 +23,8 @@ import java.util.UUID;
 @Profile("dev")
 public class DefaultLobbies implements CommandLineRunner {
 
-    private static final String LOBBY_CODE_FOUR_TEAMS = "AAAAAA";
-    private static final String LOBBY_CODE_SIX_TEAMS = "BBBBBB";
+    private static final LobbyCode LOBBY_CODE_FOUR_TEAMS = new LobbyCode("AAAAAA");
+    private static final LobbyCode LOBBY_CODE_SIX_TEAMS = new LobbyCode("BBBBBB");
 
     private static final UUID FOUR_TEAMS_HOST_ID = UUID.fromString("12345678-1234-1234-1234-4444444444f1");
     private static final UUID SIX_TEAMS_HOST_ID = UUID.fromString("12345678-1234-1234-1234-6666666666f1");
@@ -54,7 +55,7 @@ public class DefaultLobbies implements CommandLineRunner {
         setupLobby(LOBBY_CODE_SIX_TEAMS, SIX_TEAMS_HOST_ID, SIX_TEAMS);
     }
 
-    private void setupLobby(String lobbyCode, UUID hostId, int teamCount) {
+    private void setupLobby(LobbyCode lobbyCode, UUID hostId, int teamCount) {
         Lobby lobby = new Lobby(new Host(hostId), teamCount, LocalDateTime.now().plusYears(10));
         lobbyService.addLobby(lobbyCode, lobby);
 

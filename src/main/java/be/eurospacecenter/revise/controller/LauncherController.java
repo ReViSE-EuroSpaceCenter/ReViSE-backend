@@ -2,11 +2,9 @@ package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.request.ResourceUpdateDTO;
 import be.eurospacecenter.revise.dto.response.ScoreDTO;
-import be.eurospacecenter.revise.exceptions.ErrorKeys;
-import be.eurospacecenter.revise.helper.LobbyCode;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.service.LauncherService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -27,25 +25,25 @@ public class LauncherController {
     @GetMapping(value = "/{lobbyCode}/score", params = "hostId")
     public ScoreDTO getGeneralScore(
             @PathVariable
-            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
 
             @RequestParam @Valid
             UUID hostId
     ) {
-        return launcherService.getGeneralScore(lobbyCode, hostId);
+        LobbyCode code = new LobbyCode(lobbyCode);
+        return launcherService.getGeneralScore(code, hostId);
     }
 
     @PutMapping("/{lobbyCode}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateResources(
             @PathVariable
-            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
             String lobbyCode,
 
             @RequestBody
             ResourceUpdateDTO request
     ) {
-        launcherService.updateResources(lobbyCode, request.clientId(), request.resources());
+        LobbyCode code = new LobbyCode(lobbyCode);
+        launcherService.updateResources(code, request.clientId(), request.resources());
     }
 }

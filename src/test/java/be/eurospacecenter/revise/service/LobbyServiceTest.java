@@ -7,9 +7,12 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCodeGenerator;
 import be.eurospacecenter.revise.notification.LobbyNotifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Set;
@@ -22,26 +25,29 @@ import static org.mockito.Mockito.mock;
 class LobbyServiceTest {
     private LobbyService lobbyService;
 
+    @Autowired
+    private LobbyCodeGenerator lobbyCodeGenerator;
+
     private final MissionService missionService = mock(MissionService.class);
     private final LobbyNotifier notifier = mock(LobbyNotifier.class);
 
     private UUID hostIdFor4;
-    private String lobbyCodeFor4;
+    private LobbyCode lobbyCodeFor4;
 
     private UUID hostIdFor6;
-    private String lobbyCodeFor6;
+    private LobbyCode lobbyCodeFor6;
 
     @BeforeEach
     void setup() {
-        lobbyService = new LobbyService(missionService, notifier);
+        lobbyService = new LobbyService(missionService, notifier, lobbyCodeGenerator);
 
         LobbyCreationDTO res4 = lobbyService.createLobby(4);
         hostIdFor4 = UUID.fromString(res4.hostId());
-        lobbyCodeFor4 = res4.lobbyCode();
+        lobbyCodeFor4 = new LobbyCode(res4.lobbyCode());
 
         LobbyCreationDTO res6 = lobbyService.createLobby(6);
         hostIdFor6 = UUID.fromString(res6.hostId());
-        lobbyCodeFor6 = res6.lobbyCode();
+        lobbyCodeFor6 = new LobbyCode(res6.lobbyCode());
     }
 
     @Test
@@ -121,8 +127,10 @@ class LobbyServiceTest {
 
     @Test
     void joiningUnknownLobbyCodeShouldFail() {
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> lobbyService.joinLobby("INVALID")
+                () -> lobbyService.joinLobby(lobbyCode)
         );
         assertEquals(ErrorKeys.LOBBY_NOT_FOUND, ex.getMessage());
     }
@@ -215,8 +223,10 @@ class LobbyServiceTest {
 
     @Test
     void startingUnknownLobbyShouldFail() {
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> lobbyService.startGame("INVALID", hostIdFor4)
+                () -> lobbyService.startGame(lobbyCode, hostIdFor4)
         );
         assertEquals(ErrorKeys.LOBBY_NOT_FOUND, ex.getMessage());
     }
@@ -245,8 +255,10 @@ class LobbyServiceTest {
 
     @Test
     void getLobbyInfoShouldFailForUnknown() {
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> lobbyService.getLobbyInfo("INVALID")
+                () -> lobbyService.getLobbyInfo(lobbyCode)
         );
         assertEquals(ErrorKeys.LOBBY_NOT_FOUND, ex.getMessage());
     }

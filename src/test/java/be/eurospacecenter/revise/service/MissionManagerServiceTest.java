@@ -9,6 +9,7 @@ import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.Team;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
@@ -51,25 +52,32 @@ class MissionManagerServiceTest {
 
     @Test
     void shouldRegisterAGameWith4Teams() {
-        missionService.registerManager("XXXXXX", gameInfoWith4Teams);
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+        missionService.registerManager(lobbyCode, gameInfoWith4Teams);
 
-        assertEquals(gameInfoWith4Teams, missionService.getManager("XXXXXX").getGameInfo());
+        assertEquals(gameInfoWith4Teams, missionService.getManager(lobbyCode).getGameInfo());
     }
 
     @Test
     void shouldRegisterAGameWith6Teams() {
-        missionService.registerManager("XXXXXX", gameInfoWith6Teams);
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+        missionService.registerManager(lobbyCode, gameInfoWith6Teams);
 
-        assertEquals(gameInfoWith6Teams, missionService.getManager("XXXXXX").getGameInfo());
+        LobbyCode lb = new LobbyCode("XXXXXX");
+
+        assertEquals(gameInfoWith6Teams, missionService.getManager(lb).getGameInfo());
     }
 
     @Test
     void shouldRegisterTwoGames() {
-        missionService.registerManager("XXXXXX", gameInfoWith4Teams);
-        missionService.registerManager("YYYYYY", gameInfoWith6Teams);
+        LobbyCode lobbyCode1 = new LobbyCode("XXXXXX");
+        LobbyCode lobbyCode2 = new LobbyCode("YYYYYY");
 
-        assertEquals(gameInfoWith4Teams, missionService.getManager("XXXXXX").getGameInfo());
-        assertEquals(gameInfoWith6Teams, missionService.getManager("YYYYYY").getGameInfo());
+        missionService.registerManager(lobbyCode1, gameInfoWith4Teams);
+        missionService.registerManager(lobbyCode2, gameInfoWith6Teams);
+
+        assertEquals(gameInfoWith4Teams, missionService.getManager(lobbyCode1).getGameInfo());
+        assertEquals(gameInfoWith6Teams, missionService.getManager(lobbyCode2).getGameInfo());
     }
 
     @Test
@@ -81,34 +89,24 @@ class MissionManagerServiceTest {
     }
 
     @Test
-    void shouldFailToRegisterGameWithEmptyLobbyCode() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> missionService.registerManager("", gameInfoWith4Teams)
-        );
-        assertEquals(ErrorKeys.INVALID_LOBBY_CODE, ex.getMessage());
-
-        NotFoundException ex2 = assertThrows(NotFoundException.class,
-                () -> missionService.getManager("")
-        );
-        assertEquals(ErrorKeys.MISSION_MANAGER_NOT_FOUND, ex2.getMessage());
-    }
-
-    @Test
     void shouldCompleteTeamMission() {
-        missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+        missionService.registerManager(lobbyCode, gameInfoWithOneLoneTeam);
 
-        missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, Set.of(MissionType.CLASSIC_1));
+        missionService.changeTeamMissionsState(lobbyCode, idOfTheLoneTeam, null, Set.of(MissionType.CLASSIC_1));
 
-        TeamProgression progression = missionService.getManager("XXXXXX").getTeamProgression(idOfTheLoneTeam);
+        TeamProgression progression = missionService.getManager(lobbyCode).getTeamProgression(idOfTheLoneTeam);
 
         assertEquals(1, progression.classicMissionsCompleted());
     }
 
     @Test
     void shouldFailToCompleteTeamMissionWithNonExistingLobbyCode() {
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+
         Set<MissionType> missions = Set.of(MissionType.CLASSIC_1);
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, missions)
+                () -> missionService.changeTeamMissionsState(lobbyCode, idOfTheLoneTeam, null, missions)
         );
         assertEquals(ErrorKeys.MISSION_MANAGER_NOT_FOUND, ex.getMessage());
 
@@ -116,30 +114,36 @@ class MissionManagerServiceTest {
 
     @Test
     void shouldSucceedToCompleteMissionForHost() {
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+
         UUID hostId = gameInfoWith4Teams.getHostId();
 
-        missionService.registerManager("XXXXXX", gameInfoWith4Teams);
+        missionService.registerManager(lobbyCode, gameInfoWith4Teams);
 
-        assertDoesNotThrow(() -> missionService.changeTeamMissionsState("XXXXXX", hostId, TeamLabel.EXPE, Set.of(MissionType.CLASSIC_1)));
+        assertDoesNotThrow(() -> missionService.changeTeamMissionsState(lobbyCode, hostId, TeamLabel.EXPE, Set.of(MissionType.CLASSIC_1)));
     }
 
     @Test
     void shouldNotSucceedToCompleteMissionForUnknownHost() {
-        missionService.registerManager("XXXXXX", gameInfoWith4Teams);
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+
+        missionService.registerManager(lobbyCode, gameInfoWith4Teams);
         UUID randomHostId = UUID.randomUUID();
         Set<MissionType> missions = Set.of(MissionType.CLASSIC_1);
 
         NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
-                () -> missionService.changeTeamMissionsState("XXXXXX", randomHostId, TeamLabel.EXPE, missions)
+                () -> missionService.changeTeamMissionsState(lobbyCode, randomHostId, TeamLabel.EXPE, missions)
         );
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
 
     @Test
     void shouldGetTeamFullProgression() {
-        missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
 
-        TeamFullProgressionDTO response = missionService.getTeamFullProgression("XXXXXX", idOfTheLoneTeam);
+        missionService.registerManager(lobbyCode, gameInfoWithOneLoneTeam);
+
+        TeamFullProgressionDTO response = missionService.getTeamFullProgression(lobbyCode, idOfTheLoneTeam);
 
         assertNotNull(response);
         assertEquals(7, response.completedMissions().size());
@@ -148,9 +152,11 @@ class MissionManagerServiceTest {
 
     @Test
     void shouldGetFourGetTeamsFullProgression() {
-        missionService.registerManager("XXXXXX", gameInfoWith4Teams);
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
 
-        TeamsProgressionDTO response = missionService.getTeamsFullProgression("XXXXXX");
+        missionService.registerManager(lobbyCode, gameInfoWith4Teams);
+
+        TeamsProgressionDTO response = missionService.getTeamsFullProgression(lobbyCode);
 
         assertNotNull(response);
         assertEquals(4, response.teamsFullProgression().size());
@@ -160,9 +166,11 @@ class MissionManagerServiceTest {
 
     @Test
     void shouldGetSixGetTeamsFullProgression() {
-        missionService.registerManager("XXXXXX", gameInfoWith6Teams);
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
 
-        TeamsProgressionDTO response = missionService.getTeamsFullProgression("XXXXXX");
+        missionService.registerManager(lobbyCode, gameInfoWith6Teams);
+
+        TeamsProgressionDTO response = missionService.getTeamsFullProgression(lobbyCode);
 
         assertNotNull(response);
         assertEquals(6, response.teamsFullProgression().size());
@@ -172,49 +180,54 @@ class MissionManagerServiceTest {
 
     @Test
     void shouldAllowFinishingMission() {
-        missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+
+        missionService.registerManager(lobbyCode, gameInfoWithOneLoneTeam);
 
         for (MissionType missionType : MissionType.getClassicMissions()) {
             if (missionType == MissionType.CLASSIC_8) {
                 continue;
             }
 
-            missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, Set.of(missionType));
+            missionService.changeTeamMissionsState(lobbyCode, idOfTheLoneTeam, null, Set.of(missionType));
         }
 
-        assertDoesNotThrow(() -> missionService.endMission("XXXXXX", gameInfoWithOneLoneTeam.getHostId()));
+        assertDoesNotThrow(() -> missionService.endMission(lobbyCode, gameInfoWithOneLoneTeam.getHostId()));
     }
 
     @Test
     void shouldNotAllowNonHostToFinishMission() {
-        missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+        missionService.registerManager(lobbyCode, gameInfoWithOneLoneTeam);
 
         UUID nonHostId = UUID.randomUUID();
 
         NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
-                () -> missionService.endMission("XXXXXX", nonHostId)
+                () -> missionService.endMission(lobbyCode, nonHostId)
         );
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
 
     @Test
     void shouldNotAllowToFinishMissionWhenAtLeastOneClassicMissionIsNotCompleted() {
-        missionService.registerManager("XXXXXX", gameInfoWithOneLoneTeam);
+        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+
+        missionService.registerManager(lobbyCode, gameInfoWithOneLoneTeam);
 
         for (MissionType missionType : MissionType.getClassicMissions()) {
             if (missionType == MissionType.CLASSIC_8) {
                 continue;
             }
 
-            missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, Set.of(missionType));
+            missionService.changeTeamMissionsState(lobbyCode, idOfTheLoneTeam, null, Set.of(missionType));
         }
 
-        missionService.changeTeamMissionsState("XXXXXX", idOfTheLoneTeam, null, Set.of(MissionType.CLASSIC_1));
+        missionService.changeTeamMissionsState(lobbyCode, idOfTheLoneTeam, null, Set.of(MissionType.CLASSIC_1));
 
         UUID hostId = gameInfoWithOneLoneTeam.getHostId();
 
         InvalidMissionOperationException ex = assertThrows(InvalidMissionOperationException.class,
-                () -> missionService.endMission("XXXXXX", hostId)
+                () -> missionService.endMission(lobbyCode, hostId)
         );
         assertEquals(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS, ex.getMessage());
     }

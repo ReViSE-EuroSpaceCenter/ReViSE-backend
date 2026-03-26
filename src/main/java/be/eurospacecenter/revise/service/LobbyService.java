@@ -7,34 +7,34 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.metric.MetricType;
 import be.eurospacecenter.revise.metric.RecordMetric;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.lobby.Lobby;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCodeGenerator;
 import be.eurospacecenter.revise.notification.LobbyNotifier;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static be.eurospacecenter.revise.helper.LobbyCode.generateCode;
-
 @Service
 public class LobbyService implements Cleanable {
 
-    protected final Map<String, Lobby> lobbies = new ConcurrentHashMap<>();
-    private final SecureRandom random = new SecureRandom();
+    protected final Map<LobbyCode, Lobby> lobbies = new ConcurrentHashMap<>();
 
+    private final LobbyCodeGenerator lobbyCodeGenerator;
     private final MissionService missionService;
     private final LobbyNotifier notifier;
 
-    public LobbyService(MissionService missionService, LobbyNotifier notifier) {
+    public LobbyService(MissionService missionService, LobbyNotifier notifier, LobbyCodeGenerator lobbyCodeGenerator) {
         this.missionService = missionService;
         this.notifier = notifier;
+        this.lobbyCodeGenerator = lobbyCodeGenerator;
     }
 
-    public LobbyInfoDTO getLobbyInfo(String lobbyCode) {
+    public LobbyInfoDTO getLobbyInfo(LobbyCode lobbyCode) {
         Lobby lobby = getLobby(lobbyCode);
 
         return LobbyInfoDTO.fromLobby(lobby);
@@ -42,58 +42,58 @@ public class LobbyService implements Cleanable {
 
     @RecordMetric(MetricType.LOBBY_CREATED)
     public LobbyCreationDTO createLobby(int numberOfTeams) {
-        String lobbyCode = generateCode(random);
+        LobbyCode lobbyCode = lobbyCodeGenerator.generate();
         UUID hostId = UUID.randomUUID();
 
         Lobby lobby = new Lobby(new Host(hostId), numberOfTeams, LocalDateTime.now());
         lobbies.put(lobbyCode, lobby);
 
-        return new LobbyCreationDTO(lobbyCode, hostId.toString());
+        return new LobbyCreationDTO(lobbyCode.lobbyCode(), hostId.toString());
     }
 
     @RecordMetric(MetricType.LOBBY_JOINED)
-    public LobbyJoinedDTO joinLobby(String lobbyCode) {
+    public LobbyJoinedDTO joinLobby(LobbyCode lobbyCode) {
         Lobby lobby = getLobby(lobbyCode);
         UUID clientId = UUID.randomUUID();
 
         lobby.addTeam(clientId);
 
-        notifier.notifyClientJoined(lobbyCode);
+        notifier.notifyClientJoined(lobbyCode.lobbyCode());
 
         return new LobbyJoinedDTO(clientId.toString(), lobby.getAvailableTeamLabels(), lobby.getAllTeamLabels());
     }
 
-    public void assignTeam(String lobbyCode, UUID clientId, TeamLabel teamLabel) {
+    public void assignTeam(LobbyCode lobbyCode, UUID clientId, TeamLabel teamLabel) {
         Lobby lobby = getLobby(lobbyCode);
 
         lobby.assignTeam(clientId, teamLabel);
 
-        notifier.notifyTeamJoined(lobbyCode, teamLabel);
+        notifier.notifyTeamJoined(lobbyCode.lobbyCode(), teamLabel);
     }
 
     @RecordMetric(MetricType.LOBBY_STARTED)
-    public void startGame(String lobbyCode, UUID hostId) {
+    public void startGame(LobbyCode lobbyCode, UUID hostId) {
         Lobby lobby = getLobby(lobbyCode);
 
         lobby.startGame(hostId);
         missionService.registerManager(lobbyCode, lobby.getGameInfo());
 
-        notifier.notifyGameStarted(lobbyCode);
+        notifier.notifyGameStarted(lobbyCode.lobbyCode());
     }
 
-    private Lobby getLobby(String lobbyCode) {
+    private Lobby getLobby(LobbyCode lobbyCode) {
         return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.LOBBY_NOT_FOUND));
     }
 
     /**
      * DO NOT USE, only for testing purposes
      */
-    public void addLobby(String lobbyCode, Lobby lobby) {
+    public void addLobby(LobbyCode lobbyCode, Lobby lobby) {
         lobbies.put(lobbyCode, lobby);
     }
 
     @Override
-    public void cleanUp(List<String> toRemove) {
+    public void cleanUp(List<LobbyCode> toRemove) {
         toRemove.forEach(lobbies::remove);
     }
 }

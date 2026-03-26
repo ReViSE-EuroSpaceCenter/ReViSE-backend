@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.service;
 import be.eurospacecenter.revise.metric.MetricType;
 import be.eurospacecenter.revise.metric.RecordMetric;
 import be.eurospacecenter.revise.model.GameInfo;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,7 +29,7 @@ public class CleaningService {
     @RecordMetric(MetricType.LOBBY_CLEARED)
     @Scheduled(cron = "0 0 */12 * * *")
     protected int clearLobbies() {
-        List<String> toRemove = new ArrayList<>();
+        List<LobbyCode> toRemove = new ArrayList<>();
 
         lobbyService.lobbies.forEach((code, lobby) -> {
             GameInfo gameInfo = lobby.getGameInfo();

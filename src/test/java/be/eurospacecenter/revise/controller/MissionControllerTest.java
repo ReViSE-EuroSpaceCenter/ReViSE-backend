@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.controller;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.service.LobbyService;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Assertions;
@@ -28,7 +29,7 @@ class MissionControllerTest {
     @Autowired
     private LobbyService lobbyService;
 
-    private String lobbyCode;
+    private LobbyCode lobbyCode;
     private UUID teamClientId;
     private UUID hostId;
 
@@ -49,7 +50,7 @@ class MissionControllerTest {
 
         Assertions.assertNotNull(body);
 
-        lobbyCode = JsonPath.read(body, "$.lobbyCode");
+        lobbyCode = new LobbyCode(JsonPath.read(body, "$.lobbyCode"));
         hostId = UUID.fromString(JsonPath.read(body, "$.hostId"));
 
         Set<TeamLabel> labels = TeamLabel.getAllowedLabels(true);
@@ -66,7 +67,7 @@ class MissionControllerTest {
     @Test
     void changeMissionStateShouldSucceed() {
         restTestClient.put()
-                .uri("/api/missions/" + lobbyCode)
+                .uri("/api/missions/" + lobbyCode.lobbyCode())
                 .body(Map.of(
                         "id", teamClientId,
                         "updateMissions", Set.of("CLASSIC_1")
@@ -93,7 +94,7 @@ class MissionControllerTest {
     @Test
     void changeMissionStateShouldFailWithInvalidUuid() {
         restTestClient.put()
-                .uri("/api/missions/" + lobbyCode)
+                .uri("/api/missions/" + lobbyCode.lobbyCode())
                 .body(Map.of(
                         "id", "abc",
                         "updateMissions", Set.of("CLASSIC_1")
@@ -108,7 +109,7 @@ class MissionControllerTest {
     @Test
     void changeMissionStateShouldFailWithInvalidMission() {
         restTestClient.put()
-                .uri("/api/missions/" + lobbyCode)
+                .uri("/api/missions/" + lobbyCode.lobbyCode())
                 .body(Map.of(
                         "clientId", teamClientId,
                         "updateMissions", Set.of("INVALID_MISSION")
@@ -123,7 +124,7 @@ class MissionControllerTest {
     @Test
     void changeMissionStateShouldSucceedForHost() {
         restTestClient.put()
-                .uri("/api/missions/" + lobbyCode)
+                .uri("/api/missions/" + lobbyCode.lobbyCode())
                 .body(Map.of(
                         "id", hostId,
                         "teamLabel", "EXPE",
@@ -136,7 +137,7 @@ class MissionControllerTest {
     @Test
     void changeMissionStateShouldNotSucceedForUnknownHost() {
         restTestClient.put()
-                .uri("/api/missions/" + lobbyCode)
+                .uri("/api/missions/" + lobbyCode.lobbyCode())
                 .body(Map.of(
                         "id", UUID.randomUUID(),
                         "teamLabel", "EXPE",
@@ -152,7 +153,7 @@ class MissionControllerTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/missions/{lobbyCode}/team")
                         .queryParam("clientId", teamClientId)
-                        .build(lobbyCode))
+                        .build(lobbyCode.lobbyCode()))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -163,7 +164,7 @@ class MissionControllerTest {
     @Test
     void getTeamsProgressionShouldSucceed() {
         restTestClient.get()
-                .uri("/api/missions/" + lobbyCode)
+                .uri("/api/missions/" + lobbyCode.lobbyCode())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -187,7 +188,7 @@ class MissionControllerTest {
     @Test
     void endMissionShouldNotSucceedWithUnkownHost() {
         restTestClient.post()
-                .uri("/api/missions/" + lobbyCode + "/end")
+                .uri("/api/missions/" + lobbyCode.lobbyCode() + "/end")
                 .body(Map.of(
                         "hostId", UUID.randomUUID()
                 ))
@@ -201,7 +202,7 @@ class MissionControllerTest {
     @Test
     void endMissionShouldNotSucceedWithUncompletedMissions() {
         restTestClient.post()
-                .uri("/api/missions/" + lobbyCode + "/end")
+                .uri("/api/missions/" + lobbyCode.lobbyCode() + "/end")
                 .body(Map.of(
                         "hostId",hostId
                         ))

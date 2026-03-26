@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.controller;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.service.LobbyService;
 import be.eurospacecenter.revise.service.MissionService;
@@ -30,8 +31,8 @@ class LauncherManagerControllerTest {
     @Autowired
     private MissionService missionService;
 
-    private String lobbyCode;
-    private Map<UUID, TeamLabel> teams = new HashMap<>();
+    private LobbyCode lobbyCode;
+    private final Map<UUID, TeamLabel> teams = new HashMap<>();
     private UUID hostId;
 
     @BeforeEach
@@ -51,7 +52,7 @@ class LauncherManagerControllerTest {
 
         Assertions.assertNotNull(body);
 
-        lobbyCode = JsonPath.read(body, "$.lobbyCode");
+        lobbyCode = new LobbyCode(JsonPath.read(body, "$.lobbyCode"));
         hostId = UUID.fromString(JsonPath.read(body, "$.hostId"));
 
         Set<TeamLabel> labels = TeamLabel.getAllowedLabels(true);
@@ -84,7 +85,7 @@ class LauncherManagerControllerTest {
     @Test
     void updateRessourceShouldSucceed() {
         restTestClient.put()
-                .uri("/api/launchers/" + lobbyCode)
+                .uri("/api/launchers/" + lobbyCode.lobbyCode())
                 .body(Map.of(
                         "clientId", teams.keySet().iterator().next().toString(),
                         "resources", Map.of("ENERGY", 1, "HUMAN", 2, "CLOCK", 3)
@@ -111,7 +112,7 @@ class LauncherManagerControllerTest {
     @Test
     void updateRessourceShouldFailWithInvalidUuid() {
         restTestClient.put()
-                .uri("/api/launchers/" + lobbyCode)
+                .uri("/api/launchers/" + lobbyCode.lobbyCode())
                 .body(Map.of(
                         "clientId", UUID.randomUUID().toString(),
                         "resources", Map.of("ENERGY", 1, "HUMAN", 2, "CLOCK", 3)
@@ -126,7 +127,7 @@ class LauncherManagerControllerTest {
     @Test
     void updateRessourceShouldFailWithInvalidResource() {
         restTestClient.put()
-                .uri("/api/launchers/" + lobbyCode)
+                .uri("/api/launchers/" + lobbyCode.lobbyCode())
                 .body(Map.of(
                         "clientId", teams.keySet().iterator().next().toString(),
                         "resources", Map.of("WOOD", 1)
@@ -144,7 +145,7 @@ class LauncherManagerControllerTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/launchers/{lobbyCode}/score")
                         .queryParam("hostId", hostId.toString())
-                        .build(lobbyCode))
+                        .build(lobbyCode.lobbyCode()))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -172,7 +173,7 @@ class LauncherManagerControllerTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/launchers/{lobbyCode}/score")
                         .queryParam("hostId", UUID.randomUUID().toString())
-                        .build(lobbyCode))
+                        .build(lobbyCode.lobbyCode()))
                 .exchange()
                 .expectStatus().isForbidden()
                 .expectBody()
