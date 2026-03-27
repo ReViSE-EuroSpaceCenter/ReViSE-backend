@@ -38,7 +38,7 @@ public class LauncherService implements Cleanable {
         LauncherManager launcherManager = getLauncher(lobbyCode);
         TeamResources teamResources = launcherManager.updateResources(clientId, resources);
 
-        notifier.notifyResourcesUpdated(lobbyCode.lobbyCode(), teamResources);
+        notifier.notifyResourcesUpdated(lobbyCode, teamResources);
     }
 
     public int getTeamsScore(LobbyCode lobbyCode, UUID hostId) {

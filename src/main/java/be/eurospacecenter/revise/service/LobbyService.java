@@ -51,7 +51,7 @@ public class LobbyService implements Cleanable {
 
         lobby.addTeam(clientId);
 
-        notifier.notifyClientJoined(lobbyCode.lobbyCode());
+        notifier.notifyClientJoined(lobbyCode);
 
         return new LobbyJoined(clientId.toString(), lobby.getAvailableTeamLabels(), lobby.getAllTeamLabels());
     }
@@ -61,7 +61,7 @@ public class LobbyService implements Cleanable {
 
         lobby.assignTeam(clientId, teamLabel);
 
-        notifier.notifyTeamJoined(lobbyCode.lobbyCode(), teamLabel);
+        notifier.notifyTeamJoined(lobbyCode, teamLabel);
     }
 
     @RecordMetric(MetricType.LOBBY_STARTED)
@@ -71,7 +71,7 @@ public class LobbyService implements Cleanable {
         lobby.startGame(hostId);
         missionService.registerManager(lobbyCode, lobby.getGameInfo());
 
-        notifier.notifyGameStarted(lobbyCode.lobbyCode());
+        notifier.notifyGameStarted(lobbyCode);
     }
 
     private Lobby getLobby(LobbyCode lobbyCode) {

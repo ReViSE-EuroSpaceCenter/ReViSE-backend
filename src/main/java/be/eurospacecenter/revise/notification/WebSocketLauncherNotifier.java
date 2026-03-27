@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.notification;
 import be.eurospacecenter.revise.dto.event.LauncherEvent;
 import be.eurospacecenter.revise.dto.event.LauncherEventType;
 import be.eurospacecenter.revise.model.launcher.TeamResources;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -20,11 +21,11 @@ public class WebSocketLauncherNotifier implements LauncherNotifier {
     }
 
     @Override
-    public void notifyResourcesUpdated(String lobbyCode, TeamResources teamResources) {
-        logger.info("Sending RESOURCE_UPDATED event for launcher: {}", lobbyCode);
+    public void notifyResourcesUpdated(LobbyCode lobbyCode, TeamResources teamResources) {
+        logger.info("Sending RESOURCE_UPDATED event for launcher: {}", lobbyCode.lobbyCode());
         LauncherEvent event = new LauncherEvent(LauncherEventType.RESOURCE_UPDATED, teamResources);
 
-        messagingTemplate.convertAndSend(LAUNCHER_TOPIC_PREFIX + lobbyCode, event);
+        messagingTemplate.convertAndSend(LAUNCHER_TOPIC_PREFIX + lobbyCode.lobbyCode(), event);
         logger.info("RESOURCE_UPDATED event sent successfully");
     }
 }

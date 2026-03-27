@@ -37,7 +37,7 @@ public class MissionService implements Cleanable {
 
         TeamProgression teamProgression = manager.changeTeamMissionsState(id, teamLabel, missionType);
 
-        notifier.notifyTeamProgression(lobbyCode.lobbyCode(), teamProgression);
+        notifier.notifyTeamProgression(lobbyCode, teamProgression);
     }
 
 
@@ -59,7 +59,7 @@ public class MissionService implements Cleanable {
 
         launcherService.registerLauncher(lobbyCode, manager.getGameInfo());
 
-        notifier.notifyMissionEnded(lobbyCode.lobbyCode());
+        notifier.notifyMissionEnded(lobbyCode);
     }
 
     public MissionManager getManager(LobbyCode lobbyCode) {
