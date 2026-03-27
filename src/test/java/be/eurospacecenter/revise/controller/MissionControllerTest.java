@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.response.LobbyJoinedDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.model.lobby.LobbyJoined;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.service.LobbyService;
@@ -56,7 +56,7 @@ class MissionControllerTest {
         Set<TeamLabel> labels = TeamLabel.getAllowedLabels(true);
 
         for (TeamLabel label : labels) {
-            LobbyJoinedDTO response = lobbyService.joinLobby(lobbyCode);
+            LobbyJoined response = lobbyService.joinLobby(lobbyCode);
             teamClientId = UUID.fromString(response.clientId());
             lobbyService.assignTeam(lobbyCode, teamClientId, label);
         }

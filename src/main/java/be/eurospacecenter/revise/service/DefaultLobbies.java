@@ -1,4 +1,4 @@
-package be.eurospacecenter.revise.helper;
+package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.lobby.Lobby;
@@ -6,8 +6,6 @@ import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.mission.MissionManager;
 import be.eurospacecenter.revise.model.mission.MissionType;
-import be.eurospacecenter.revise.service.LobbyService;
-import be.eurospacecenter.revise.service.MissionService;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -57,7 +55,7 @@ public class DefaultLobbies implements CommandLineRunner {
 
     private void setupLobby(LobbyCode lobbyCode, UUID hostId, int teamCount) {
         Lobby lobby = new Lobby(new Host(hostId), teamCount, LocalDateTime.now().plusYears(10));
-        lobbyService.addLobby(lobbyCode, lobby);
+        lobbyService.lobbies.put(lobbyCode, lobby);
 
         Set<TeamLabel> allowedLabels = TeamLabel.getAllowedLabels(teamCount == FOUR_TEAMS);
 

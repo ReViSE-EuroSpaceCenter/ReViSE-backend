@@ -6,6 +6,9 @@ import be.eurospacecenter.revise.dto.request.StartLobbyDTO;
 import be.eurospacecenter.revise.dto.response.LobbyCreationDTO;
 import be.eurospacecenter.revise.dto.response.LobbyInfoDTO;
 import be.eurospacecenter.revise.dto.response.LobbyJoinedDTO;
+import be.eurospacecenter.revise.model.lobby.Lobby;
+import be.eurospacecenter.revise.model.lobby.LobbyCreation;
+import be.eurospacecenter.revise.model.lobby.LobbyJoined;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.service.LobbyService;
 import jakarta.validation.Valid;
@@ -29,7 +32,10 @@ public class LobbyController {
             @PathVariable String lobbyCode
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
-        return lobbyService.getLobbyInfo(code);
+
+        Lobby lobby = lobbyService.getLobbyInfo(code);
+
+        return LobbyInfoDTO.fromLobby(lobby);
     }
 
     @PostMapping
@@ -37,7 +43,8 @@ public class LobbyController {
     public LobbyCreationDTO createLobby(
             @RequestBody @Valid CreateLobbyDTO request
     ) {
-        return lobbyService.createLobby(request.numberOfTeams());
+        LobbyCreation lobbyCreation = lobbyService.createLobby(request.numberOfTeams());
+        return LobbyCreationDTO.fromLobbyCreation(lobbyCreation);
     }
 
     @PostMapping("/{lobbyCode}/join")
@@ -45,7 +52,10 @@ public class LobbyController {
             @PathVariable String lobbyCode
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
-        return lobbyService.joinLobby(code);
+
+        LobbyJoined lobbyJoined = lobbyService.joinLobby(code);
+
+        return LobbyJoinedDTO.fromLobbyJoined(lobbyJoined);
     }
 
     @PostMapping("/{lobbyCode}/team")

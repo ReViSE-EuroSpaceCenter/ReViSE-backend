@@ -1,16 +1,11 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.LobbyCreationDTO;
-import be.eurospacecenter.revise.dto.response.LobbyInfoDTO;
-import be.eurospacecenter.revise.dto.response.LobbyJoinedDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.metric.MetricType;
 import be.eurospacecenter.revise.metric.RecordMetric;
+import be.eurospacecenter.revise.model.lobby.*;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
-import be.eurospacecenter.revise.model.lobby.Host;
-import be.eurospacecenter.revise.model.lobby.Lobby;
-import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCodeGenerator;
 import be.eurospacecenter.revise.notification.LobbyNotifier;
 import org.springframework.stereotype.Service;
@@ -34,25 +29,23 @@ public class LobbyService implements Cleanable {
         this.lobbyCodeGenerator = lobbyCodeGenerator;
     }
 
-    public LobbyInfoDTO getLobbyInfo(LobbyCode lobbyCode) {
-        Lobby lobby = getLobby(lobbyCode);
-
-        return LobbyInfoDTO.fromLobby(lobby);
+    public Lobby getLobbyInfo(LobbyCode lobbyCode) {
+        return getLobby(lobbyCode);
     }
 
     @RecordMetric(MetricType.LOBBY_CREATED)
-    public LobbyCreationDTO createLobby(int numberOfTeams) {
+    public LobbyCreation createLobby(int numberOfTeams) {
         LobbyCode lobbyCode = lobbyCodeGenerator.generate();
         UUID hostId = UUID.randomUUID();
 
         Lobby lobby = new Lobby(new Host(hostId), numberOfTeams, LocalDateTime.now());
         lobbies.put(lobbyCode, lobby);
 
-        return new LobbyCreationDTO(lobbyCode.lobbyCode(), hostId.toString());
+        return new LobbyCreation(lobbyCode, hostId);
     }
 
     @RecordMetric(MetricType.LOBBY_JOINED)
-    public LobbyJoinedDTO joinLobby(LobbyCode lobbyCode) {
+    public LobbyJoined joinLobby(LobbyCode lobbyCode) {
         Lobby lobby = getLobby(lobbyCode);
         UUID clientId = UUID.randomUUID();
 
@@ -60,7 +53,7 @@ public class LobbyService implements Cleanable {
 
         notifier.notifyClientJoined(lobbyCode.lobbyCode());
 
-        return new LobbyJoinedDTO(clientId.toString(), lobby.getAvailableTeamLabels(), lobby.getAllTeamLabels());
+        return new LobbyJoined(clientId.toString(), lobby.getAvailableTeamLabels(), lobby.getAllTeamLabels());
     }
 
     public void assignTeam(LobbyCode lobbyCode, UUID clientId, TeamLabel teamLabel) {
@@ -83,13 +76,6 @@ public class LobbyService implements Cleanable {
 
     private Lobby getLobby(LobbyCode lobbyCode) {
         return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.LOBBY_NOT_FOUND));
-    }
-
-    /**
-     * DO NOT USE, only for testing purposes
-     */
-    public void addLobby(LobbyCode lobbyCode, Lobby lobby) {
-        lobbies.put(lobbyCode, lobby);
     }
 
     @Override

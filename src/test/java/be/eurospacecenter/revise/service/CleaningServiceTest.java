@@ -52,8 +52,8 @@ class CleaningServiceTest {
                 new LobbyCode("AAAAAM"), new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusMonths(1))
         );
 
-        shouldBeThere.forEach((k, v) -> lobbyService.addLobby(k, v));
-        shouldNotBeThere.forEach((k, v) -> lobbyService.addLobby(k, v));
+        lobbyService.lobbies.putAll(shouldBeThere);
+        lobbyService.lobbies.putAll(shouldNotBeThere);
 
         shouldBeThere.forEach((k, v) -> missionService.registerManager(k, v.getGameInfo()));
         shouldNotBeThere.forEach((k, v) -> missionService.registerManager(k, v.getGameInfo()));
