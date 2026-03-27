@@ -1,9 +1,9 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.request.EndMissionDTO;
+import be.eurospacecenter.revise.dto.request.MissionEndDTO;
 import be.eurospacecenter.revise.dto.request.TeamMissionUpdateDTO;
-import be.eurospacecenter.revise.dto.response.TeamFullProgressionDTO;
-import be.eurospacecenter.revise.dto.response.TeamsProgressionDTO;
+import be.eurospacecenter.revise.dto.team.TeamFullProgressionDTO;
+import be.eurospacecenter.revise.dto.team.TeamsProgressionDTO;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.mission.TeamFullProgression;
 import be.eurospacecenter.revise.model.mission.TeamsProgression;
@@ -58,7 +58,7 @@ public class MissionController {
             @PathVariable String lobbyCode,
 
             @RequestBody @Valid
-            EndMissionDTO request
+            MissionEndDTO request
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
         missionService.endMission(code, request.hostId());

@@ -1,4 +1,4 @@
-package be.eurospacecenter.revise.dto.response;
+package be.eurospacecenter.revise.dto.lobby;
 
 import be.eurospacecenter.revise.model.lobby.Lobby;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;

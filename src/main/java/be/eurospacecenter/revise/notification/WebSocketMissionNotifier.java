@@ -3,7 +3,7 @@ package be.eurospacecenter.revise.notification;
 import be.eurospacecenter.revise.dto.event.MissionEvent;
 import be.eurospacecenter.revise.dto.event.MissionEventType;
 
-import be.eurospacecenter.revise.dto.response.TeamProgressionDTO;
+import be.eurospacecenter.revise.dto.team.TeamProgressionDTO;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
 import org.slf4j.Logger;

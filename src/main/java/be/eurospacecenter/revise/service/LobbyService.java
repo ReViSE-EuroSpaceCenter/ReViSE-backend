@@ -36,12 +36,12 @@ public class LobbyService implements Cleanable {
     @RecordMetric(MetricType.LOBBY_CREATED)
     public LobbyCreation createLobby(int numberOfTeams) {
         LobbyCode lobbyCode = lobbyCodeGenerator.generate();
-        UUID hostId = UUID.randomUUID();
+        Host host = new Host(UUID.randomUUID());
 
-        Lobby lobby = new Lobby(new Host(hostId), numberOfTeams, LocalDateTime.now());
+        Lobby lobby = new Lobby(host, numberOfTeams, LocalDateTime.now());
         lobbies.put(lobbyCode, lobby);
 
-        return new LobbyCreation(lobbyCode, hostId);
+        return new LobbyCreation(lobbyCode, host.id());
     }
 
     @RecordMetric(MetricType.LOBBY_JOINED)
@@ -50,7 +50,6 @@ public class LobbyService implements Cleanable {
         UUID clientId = UUID.randomUUID();
 
         lobby.addTeam(clientId);
-
         notifier.notifyClientJoined(lobbyCode);
 
         return new LobbyJoined(clientId.toString(), lobby.getAvailableTeamLabels(), lobby.getAllTeamLabels());

@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
 import be.eurospacecenter.revise.dto.request.ResourceUpdateDTO;
-import be.eurospacecenter.revise.dto.response.ScoreDTO;
+import be.eurospacecenter.revise.dto.launcher.ScoreDTO;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.service.LauncherService;
 import jakarta.validation.Valid;

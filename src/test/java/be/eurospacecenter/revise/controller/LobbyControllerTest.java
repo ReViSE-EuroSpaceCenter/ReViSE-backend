@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.response.LobbyCreationDTO;
-import be.eurospacecenter.revise.dto.response.LobbyJoinedDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyCreationDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyJoinedDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

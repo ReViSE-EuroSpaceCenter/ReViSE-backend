@@ -1,11 +1,11 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.request.AssignTeamDTO;
-import be.eurospacecenter.revise.dto.request.CreateLobbyDTO;
-import be.eurospacecenter.revise.dto.request.StartLobbyDTO;
-import be.eurospacecenter.revise.dto.response.LobbyCreationDTO;
-import be.eurospacecenter.revise.dto.response.LobbyInfoDTO;
-import be.eurospacecenter.revise.dto.response.LobbyJoinedDTO;
+import be.eurospacecenter.revise.dto.team.TeamAssignedDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyCreateDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyStartedDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyCreationDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyInfoDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyJoinedDTO;
 import be.eurospacecenter.revise.model.lobby.Lobby;
 import be.eurospacecenter.revise.model.lobby.LobbyCreation;
 import be.eurospacecenter.revise.model.lobby.LobbyJoined;
@@ -41,7 +41,7 @@ public class LobbyController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public LobbyCreationDTO createLobby(
-            @RequestBody @Valid CreateLobbyDTO request
+            @RequestBody @Valid LobbyCreateDTO request
     ) {
         LobbyCreation lobbyCreation = lobbyService.createLobby(request.numberOfTeams());
         return LobbyCreationDTO.fromLobbyCreation(lobbyCreation);
@@ -63,7 +63,7 @@ public class LobbyController {
     public void assignTeam(
             @PathVariable String lobbyCode,
 
-            @RequestBody @Valid AssignTeamDTO request
+            @RequestBody @Valid TeamAssignedDTO request
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
         lobbyService.assignTeam(code, request.clientId(), request.teamLabel());
@@ -74,7 +74,7 @@ public class LobbyController {
     public void startLobby(
             @PathVariable String lobbyCode,
 
-            @RequestBody @Valid StartLobbyDTO request
+            @RequestBody @Valid LobbyStartedDTO request
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
         lobbyService.startGame(code, request.hostId());

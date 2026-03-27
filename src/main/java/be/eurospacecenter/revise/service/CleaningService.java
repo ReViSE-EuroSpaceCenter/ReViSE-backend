@@ -40,7 +40,6 @@ public class CleaningService {
         });
 
         cleanable.forEach(c -> c.cleanUp(toRemove));
-
         logger.info("Clearing {} games", toRemove.size());
 
         return toRemove.size();

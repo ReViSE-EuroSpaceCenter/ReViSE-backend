@@ -55,8 +55,8 @@ public class MissionService implements Cleanable {
 
     public void endMission(LobbyCode lobbyCode, UUID hostId) {
         MissionManager manager = getManager(lobbyCode);
-        manager.validateEndOfMission(hostId);
 
+        manager.validateEndOfMission(hostId);
         launcherService.registerLauncher(lobbyCode, manager.getGameInfo());
 
         notifier.notifyMissionEnded(lobbyCode);
