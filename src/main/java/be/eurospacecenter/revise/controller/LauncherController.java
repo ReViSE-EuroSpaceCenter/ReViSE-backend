@@ -23,7 +23,7 @@ public class LauncherController {
     }
 
     @GetMapping(value = "/{lobbyCode}/score", params = "hostId")
-    public ScoreDTO getGeneralScore(
+    public ScoreDTO getTeamsScore(
             @PathVariable
             String lobbyCode,
 
@@ -31,7 +31,10 @@ public class LauncherController {
             UUID hostId
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
-        return launcherService.getGeneralScore(code, hostId);
+
+        int score = launcherService.getTeamsScore(code, hostId);
+
+        return new ScoreDTO(score);
     }
 
     @PutMapping("/{lobbyCode}")

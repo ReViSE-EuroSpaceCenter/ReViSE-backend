@@ -1,6 +1,5 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.ScoreDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.model.GameInfo;
 import be.eurospacecenter.revise.model.launcher.ResourceType;
@@ -71,8 +70,8 @@ class LauncherManagerServiceTest {
         launcherService.registerLauncher(lobbyCode, gameInfoWithOneLoneTeam);
         launcherService.updateResources(lobbyCode, idOfTheLoneTeam, Map.of(ResourceType.ENERGY, 4));
 
-        ScoreDTO scoreDTO = launcherService.getGeneralScore(lobbyCode, idOfTheHost);
+        int score = launcherService.getTeamsScore(lobbyCode, idOfTheHost);
 
-        assertEquals(32, scoreDTO.score());
+        assertEquals(32, score);
     }
 }

@@ -21,10 +21,10 @@ public class LauncherManager {
         return gameInfo.getTeam(clientId).updateResources(resources);
     }
 
-    public int getGeneralScore(UUID hostId) {
+    public int getTeamsScore(UUID hostId) {
         if (gameInfo.isNotHost(hostId)) {
             throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
         }
-        return gameInfo.getTotalScore();
+        return gameInfo.getTeamsScore();
     }
 }

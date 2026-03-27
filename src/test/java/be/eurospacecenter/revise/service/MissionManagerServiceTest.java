@@ -1,7 +1,5 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.TeamFullProgressionDTO;
-import be.eurospacecenter.revise.dto.response.TeamsProgressionDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
@@ -12,7 +10,9 @@ import be.eurospacecenter.revise.model.Team;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.mission.TeamFullProgression;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
+import be.eurospacecenter.revise.model.mission.TeamsProgression;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,11 +143,11 @@ class MissionManagerServiceTest {
 
         missionService.registerManager(lobbyCode, gameInfoWithOneLoneTeam);
 
-        TeamFullProgressionDTO response = missionService.getTeamFullProgression(lobbyCode, idOfTheLoneTeam);
+        TeamFullProgression response = missionService.getTeamFullProgression(lobbyCode, idOfTheLoneTeam);
 
         assertNotNull(response);
         assertEquals(7, response.completedMissions().size());
-        assertNotNull(response.teamProgressionDTO());
+        assertNotNull(response.teamProgression());
     }
 
     @Test
@@ -156,7 +156,7 @@ class MissionManagerServiceTest {
 
         missionService.registerManager(lobbyCode, gameInfoWith4Teams);
 
-        TeamsProgressionDTO response = missionService.getTeamsFullProgression(lobbyCode);
+        TeamsProgression response = missionService.getTeamsProgression(lobbyCode);
 
         assertNotNull(response);
         assertEquals(4, response.teamsFullProgression().size());
@@ -170,7 +170,7 @@ class MissionManagerServiceTest {
 
         missionService.registerManager(lobbyCode, gameInfoWith6Teams);
 
-        TeamsProgressionDTO response = missionService.getTeamsFullProgression(lobbyCode);
+        TeamsProgression response = missionService.getTeamsProgression(lobbyCode);
 
         assertNotNull(response);
         assertEquals(6, response.teamsFullProgression().size());

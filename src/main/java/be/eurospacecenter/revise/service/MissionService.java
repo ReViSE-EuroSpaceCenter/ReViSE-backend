@@ -1,16 +1,11 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.TeamFullProgressionDTO;
-import be.eurospacecenter.revise.dto.response.TeamsProgressionDTO;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
-import be.eurospacecenter.revise.model.mission.MissionManager;
-import be.eurospacecenter.revise.model.mission.MissionType;
-import be.eurospacecenter.revise.model.mission.TeamFullProgression;
-import be.eurospacecenter.revise.model.mission.TeamProgression;
+import be.eurospacecenter.revise.model.mission.*;
 import be.eurospacecenter.revise.notification.MissionNotifier;
 import org.springframework.stereotype.Service;
 
@@ -46,17 +41,16 @@ public class MissionService implements Cleanable {
     }
 
 
-    public TeamsProgressionDTO getTeamsFullProgression(LobbyCode lobbyCode) {
+    public TeamsProgression getTeamsProgression(LobbyCode lobbyCode) {
         MissionManager manager = getManager(lobbyCode);
 
-        return TeamsProgressionDTO.fromTeamsProgression(manager.getTeamsFullProgression());
+        return manager.getTeamsFullProgression();
     }
 
-    public TeamFullProgressionDTO getTeamFullProgression(LobbyCode lobbyCode, UUID clientId) {
+    public TeamFullProgression getTeamFullProgression(LobbyCode lobbyCode, UUID clientId) {
         MissionManager manager = getManager(lobbyCode);
-        TeamFullProgression fullProgression = manager.getTeamFullProgression(clientId);
 
-        return TeamFullProgressionDTO.fromTeamFullProgression(fullProgression);
+        return manager.getTeamFullProgression(clientId);
     }
 
     public void endMission(LobbyCode lobbyCode, UUID hostId) {

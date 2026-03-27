@@ -58,7 +58,7 @@ public class GameInfo {
         return host.id();
     }
 
-    public int getTotalScore() {
+    public int getTeamsScore() {
         return teams.values().stream()
                 .mapToInt(Team::score)
                 .sum();

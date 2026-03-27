@@ -5,6 +5,8 @@ import be.eurospacecenter.revise.dto.request.TeamMissionUpdateDTO;
 import be.eurospacecenter.revise.dto.response.TeamFullProgressionDTO;
 import be.eurospacecenter.revise.dto.response.TeamsProgressionDTO;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
+import be.eurospacecenter.revise.model.mission.TeamFullProgression;
+import be.eurospacecenter.revise.model.mission.TeamsProgression;
 import be.eurospacecenter.revise.service.MissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -30,7 +32,10 @@ public class MissionController {
             @PathVariable String lobbyCode
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
-        return missionService.getTeamsFullProgression(code);
+
+        TeamsProgression teamsProgression = missionService.getTeamsProgression(code);
+
+        return TeamsProgressionDTO.fromTeamsProgression(teamsProgression);
     }
 
     @GetMapping(value = "/{lobbyCode}/team", params = "clientId")
@@ -41,7 +46,10 @@ public class MissionController {
             UUID clientId
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
-        return missionService.getTeamFullProgression(code, clientId);
+
+        TeamFullProgression teamFullProgression = missionService.getTeamFullProgression(code, clientId);
+
+        return TeamFullProgressionDTO.fromTeamFullProgression(teamFullProgression);
     }
 
     @PostMapping("/{lobbyCode}/end")

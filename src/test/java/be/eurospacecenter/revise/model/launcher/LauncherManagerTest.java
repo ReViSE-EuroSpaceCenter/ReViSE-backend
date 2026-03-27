@@ -39,7 +39,7 @@ class LauncherManagerTest {
 
     @Test
     void gameCreation() {
-        assertEquals(66, gameWithTwoTeam.getGeneralScore(hostId));
+        assertEquals(66, gameWithTwoTeam.getTeamsScore(hostId));
     }
 
     @Test
@@ -49,7 +49,7 @@ class LauncherManagerTest {
         assertEquals(ResourceType.ENERGY.getMax()-3, teamResources.resources().get(ResourceType.ENERGY));
         assertEquals(ResourceType.HUMAN.getMax(), teamResources.resources().get(ResourceType.HUMAN));
         assertEquals(ResourceType.CLOCK.getMax(), teamResources.resources().get(ResourceType.CLOCK));
-        assertEquals(65, gameWithTwoTeam.getGeneralScore(hostId));
+        assertEquals(65, gameWithTwoTeam.getTeamsScore(hostId));
     }
 
     @Test
@@ -59,7 +59,7 @@ class LauncherManagerTest {
         assertEquals(ResourceType.ENERGY.getMax(), teamResources.resources().get(ResourceType.ENERGY));
         assertEquals(ResourceType.HUMAN.getMax()-2, teamResources.resources().get(ResourceType.HUMAN));
         assertEquals(ResourceType.CLOCK.getMax(), teamResources.resources().get(ResourceType.CLOCK));
-        assertEquals(64, gameWithTwoTeam.getGeneralScore(hostId));
+        assertEquals(64, gameWithTwoTeam.getTeamsScore(hostId));
     }
 
     @Test
@@ -69,7 +69,7 @@ class LauncherManagerTest {
         assertEquals(ResourceType.ENERGY.getMax(), teamResources.resources().get(ResourceType.ENERGY));
         assertEquals(ResourceType.HUMAN.getMax(), teamResources.resources().get(ResourceType.HUMAN));
         assertEquals(ResourceType.CLOCK.getMax()-1, teamResources.resources().get(ResourceType.CLOCK));
-        assertEquals(65, gameWithTwoTeam.getGeneralScore(hostId));
+        assertEquals(65, gameWithTwoTeam.getTeamsScore(hostId));
     }
 
     @Test
@@ -84,7 +84,7 @@ class LauncherManagerTest {
         assertEquals(ResourceType.ENERGY.getMax()-4, teamResources.resources().get(ResourceType.ENERGY));
         assertEquals(ResourceType.HUMAN.getMax()-1, teamResources.resources().get(ResourceType.HUMAN));
         assertEquals(ResourceType.CLOCK.getMax()-3, teamResources.resources().get(ResourceType.CLOCK));
-        assertEquals(61, gameWithTwoTeam.getGeneralScore(hostId));
+        assertEquals(61, gameWithTwoTeam.getTeamsScore(hostId));
     }
 
     @Test
@@ -107,7 +107,7 @@ class LauncherManagerTest {
         assertEquals(ResourceType.HUMAN.getMax()-2, secondTeamResources.resources().get(ResourceType.HUMAN));
         assertEquals(ResourceType.CLOCK.getMax(), secondTeamResources.resources().get(ResourceType.CLOCK));
 
-        assertEquals(60, gameWithTwoTeam.getGeneralScore(hostId));
+        assertEquals(60, gameWithTwoTeam.getTeamsScore(hostId));
     }
 
     @Test
@@ -124,12 +124,12 @@ class LauncherManagerTest {
     }
 
     @Test
-    void getGeneralScoreWithInvalidHostId() {
+    void getTeamsScoreWithInvalidHostId() {
         UUID unknownHostId = UUID.randomUUID();
 
         NoAutoriseOperationException ex = assertThrows(
                 NoAutoriseOperationException.class,
-                () -> gameWithTwoTeam.getGeneralScore(unknownHostId)
+                () -> gameWithTwoTeam.getTeamsScore(unknownHostId)
         );
 
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
