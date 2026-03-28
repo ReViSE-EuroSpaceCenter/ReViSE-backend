@@ -3,10 +3,10 @@ package be.eurospacecenter.revise.service;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.lobby.Lobby;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
-import be.eurospacecenter.revise.model.lobbycode.LobbyCodeGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -18,11 +18,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class CleaningServiceTest {
+    @InjectMocks
+    private LobbyService lobbyService;
 
-    LobbyService lobbyService;
-    MissionService missionService;
-    LauncherService launcherService;
-    LobbyCodeGenerator lobbyCodeGenerator;
+    @InjectMocks
+    private MissionService missionService;
+
+    @InjectMocks
+    private LauncherService launcherService;
+
+    private CleaningService cleaningService;
 
     // ---------------------------------------------------------------------
     // Setup
@@ -30,9 +35,10 @@ class CleaningServiceTest {
 
     @BeforeEach
     void setup() {
-        lobbyService = new LobbyService(missionService, null, lobbyCodeGenerator);
-        missionService = new MissionService(null, launcherService);
-        launcherService = new LauncherService(null);
+        cleaningService = new CleaningService(
+                lobbyService,
+                List.of(lobbyService, missionService, launcherService)
+        );
     }
 
     // ---------------------------------------------------------------------
@@ -69,20 +75,15 @@ class CleaningServiceTest {
         shouldBeThere.forEach((k, v) -> launcherService.registerLauncher(k, v.getGameInfo()));
         shouldNotBeThere.forEach((k, v) -> launcherService.registerLauncher(k, v.getGameInfo()));
 
-        CleaningService cleaningService = new CleaningService(
-                lobbyService,
-                List.of(lobbyService, missionService, launcherService)
-        );
-
         cleaningService.clearLobbies();
 
-        shouldBeThere.forEach((k, v) -> assertTrue(lobbyService.lobbies.containsKey(k)));
-        shouldNotBeThere.forEach((k, v) -> assertFalse(lobbyService.lobbies.containsKey(k)));
+        shouldBeThere.forEach((k, v) -> assertTrue(lobbyService.lobbies.containsKey(k), "Should keep " + k));
+        shouldNotBeThere.forEach((k, v) -> assertFalse(lobbyService.lobbies.containsKey(k), "Should remove " + k));
 
-        shouldBeThere.forEach((k, v) -> assertTrue(missionService.managers.containsKey(k)));
-        shouldNotBeThere.forEach((k, v) -> assertFalse(missionService.managers.containsKey(k)));
+        shouldBeThere.forEach((k, v) -> assertTrue(missionService.managers.containsKey(k), "Manager should still exist for " + k));
+        shouldNotBeThere.forEach((k, v) -> assertFalse(missionService.managers.containsKey(k), "Manager should be cleared for " + k));
 
-        shouldBeThere.forEach((k, v) -> assertTrue(launcherService.launchers.containsKey(k)));
-        shouldNotBeThere.forEach((k, v) -> assertFalse(launcherService.launchers.containsKey(k)));
+        shouldBeThere.forEach((k, v) -> assertTrue(launcherService.launchers.containsKey(k), "Launcher should still exist for " + k));
+        shouldNotBeThere.forEach((k, v) -> assertFalse(launcherService.launchers.containsKey(k), "Launcher should be cleared for " + k));
     }
 }
