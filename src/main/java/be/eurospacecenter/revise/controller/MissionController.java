@@ -61,7 +61,7 @@ public class MissionController {
             MissionEndDTO request
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
-        missionService.endMission(code, request.hostId());
+        missionService.startLauncher(code, request.hostId());
     }
 
     @PutMapping("/{lobbyCode}")

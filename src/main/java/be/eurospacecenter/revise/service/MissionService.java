@@ -53,7 +53,7 @@ public class MissionService implements Cleanable {
         return manager.getTeamFullProgression(clientId);
     }
 
-    public void endMission(LobbyCode lobbyCode, UUID hostId) {
+    public void startLauncher(LobbyCode lobbyCode, UUID hostId) {
         MissionManager manager = getManager(lobbyCode);
 
         manager.validateEndOfMission(hostId);

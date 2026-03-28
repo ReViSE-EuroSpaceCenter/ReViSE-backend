@@ -26,6 +26,7 @@ public enum TeamLabel {
     }
 
     public static Set<TeamLabel> getAllowedLabels(boolean isFourTeamsMode) {
-        return isFourTeamsMode ? FOUR_TEAMS_MODE : SIX_TEAMS_MODE;
+        return isFourTeamsMode ? EnumSet.copyOf(FOUR_TEAMS_MODE) :
+                EnumSet.copyOf(SIX_TEAMS_MODE);
     }
 }
