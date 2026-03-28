@@ -8,6 +8,10 @@ class LobbyCodeGeneratorTest {
 
     LobbyCodeGenerator lobbyCodeGenerator = new LobbyCodeGenerator();
 
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
+
     @Test
     void generateLobbyCode() {
         LobbyCode lobbyCode = lobbyCodeGenerator.generate();

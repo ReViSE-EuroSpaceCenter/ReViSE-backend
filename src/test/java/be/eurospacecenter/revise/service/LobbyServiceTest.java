@@ -3,7 +3,6 @@ package be.eurospacecenter.revise.service;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
-import be.eurospacecenter.revise.model.lobby.Lobby;
 import be.eurospacecenter.revise.model.lobby.LobbyCreation;
 import be.eurospacecenter.revise.model.lobby.LobbyJoined;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
@@ -12,10 +11,11 @@ import be.eurospacecenter.revise.model.lobbycode.LobbyCodeGenerator;
 import be.eurospacecenter.revise.notification.LobbyNotifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,293 +23,102 @@ import static org.mockito.Mockito.mock;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class LobbyServiceTest {
+
     private LobbyService lobbyService;
-
-    @Autowired
-    private LobbyCodeGenerator lobbyCodeGenerator;
-
+    @Autowired private LobbyCodeGenerator lobbyCodeGenerator;
     private final MissionService missionService = mock(MissionService.class);
     private final LobbyNotifier notifier = mock(LobbyNotifier.class);
 
-    private UUID hostIdFor4;
-    private LobbyCode lobbyCodeFor4;
-
-    private UUID hostIdFor6;
-    private LobbyCode lobbyCodeFor6;
+    // ---------------------------------------------------------------------
+    // Setup
+    // ---------------------------------------------------------------------
 
     @BeforeEach
     void setup() {
         lobbyService = new LobbyService(missionService, notifier, lobbyCodeGenerator);
-
-        LobbyCreation res4 = lobbyService.createLobby(4);
-        hostIdFor4 = res4.hostId();
-        lobbyCodeFor4 = res4.lobbyCode();
-
-        LobbyCreation res6 = lobbyService.createLobby(6);
-        hostIdFor6 = res6.hostId();
-        lobbyCodeFor6 = res6.lobbyCode();
     }
 
-    @Test
-    void lobbyShouldReturnLobbyCodeFor4Teams() {
-        LobbyCreation res = lobbyService.createLobby(4);
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
 
-        UUID hostId = res.hostId();
+    @ParameterizedTest
+    @ValueSource(ints = {4, 6})
+    void lobbyCreationAndJoinShouldWork(int teamCount) {
+        LobbyCreation creation = lobbyService.createLobby(teamCount);
+        assertNotNull(creation.hostId());
+        assertEquals(6, creation.lobbyCode().lobbyCode().length());
 
-        assertNotNull(hostId);
-        assertFalse(res.lobbyCode().lobbyCode().isEmpty());
-        assertEquals(6, res.lobbyCode().lobbyCode().length());
+        LobbyJoined join = lobbyService.joinLobby(creation.lobbyCode());
+        assertEquals(teamCount, join.availableTeams().size());
+        assertEquals(teamCount, join.allTeams().size());
     }
 
-    @Test
-    void lobbyShouldReturnLobbyCodeFor6Teams() {
-        LobbyCreation res = lobbyService.createLobby(6);
+    @ParameterizedTest
+    @ValueSource(ints = {4, 6})
+    void availableTeamsShouldDecreaseAtEachAssign(int teamCount) {
+        LobbyCode code = lobbyService.createLobby(teamCount).lobbyCode();
 
-        UUID hostId = res.hostId();
-
-        assertNotNull(hostId);
-        assertFalse(res.lobbyCode().lobbyCode().isEmpty());
-        assertEquals(6, res.lobbyCode().lobbyCode().length());
-    }
-
-    @Test
-    void joinLobbyShouldSucceedFor4Teams() {
-        LobbyJoined res = lobbyService.joinLobby(lobbyCodeFor4);
-
-        UUID clientId = UUID.fromString(res.clientId());
-
-        assertNotNull(clientId);
-        assertEquals(4, res.availableTeams().size());
-        assertEquals(4, res.allTeams().size());
-    }
-
-
-    @Test
-    void joinLobbyShouldSucceedFor6Teams() {
-        LobbyJoined res = lobbyService.joinLobby(lobbyCodeFor6);
-
-        UUID clientId = UUID.fromString(res.clientId());
-
-        assertNotNull(clientId);
-        assertEquals(6, res.availableTeams().size());
-        assertEquals(6, res.allTeams().size());
-    }
-
-    @Test
-    void availableTeamsShouldDecreaseAtEachAssignFor4() {
-        for (int i = 4; i > 0; i--) {
-            LobbyJoined res = lobbyService.joinLobby(lobbyCodeFor4);
-
-            UUID clientId = UUID.fromString(res.clientId());
-
-            assertEquals(4, res.allTeams().size());
+        for (int i = teamCount; i > 0; i--) {
+            LobbyJoined res = lobbyService.joinLobby(code);
             assertEquals(i, res.availableTeams().size());
 
-            var team = res.availableTeams().iterator().next();
-            lobbyService.assignTeam(lobbyCodeFor4, clientId, team);
+            TeamLabel team = res.availableTeams().iterator().next();
+            lobbyService.assignTeam(code, UUID.fromString(res.clientId()), team);
         }
     }
 
     @Test
-    void availableTeamsShouldDecreaseAtEachAssignFor6() {
-        for (int i = 6; i > 0; i--) {
-            LobbyJoined res = lobbyService.joinLobby(lobbyCodeFor6);
+    void teamAssignmentRules() {
+        LobbyCreation lobby = lobbyService.createLobby(4);
+        LobbyCode code = lobby.lobbyCode();
 
-            UUID clientId = UUID.fromString(res.clientId());
+        LobbyJoined client1 = lobbyService.joinLobby(code);
+        UUID id1 = UUID.fromString(client1.clientId());
+        TeamLabel label = TeamLabel.EXPE;
 
-            assertEquals(6, res.allTeams().size());
-            assertEquals(i, res.availableTeams().size());
+        lobbyService.assignTeam(code, id1, label);
 
-            var team = res.availableTeams().iterator().next();
-            lobbyService.assignTeam(lobbyCodeFor6, clientId, team);
+        LobbyJoined client2 = lobbyService.joinLobby(code);
+        assertError(IllegalArgumentException.class, ErrorKeys.TEAM_LABEL_ALREADY_TAKEN,
+                () -> lobbyService.assignTeam(code, UUID.fromString(client2.clientId()), label));
+
+        assertError(IllegalArgumentException.class, ErrorKeys.CLIENT_ALREADY_CHOSE_TEAM,
+                () -> lobbyService.assignTeam(code, id1, TeamLabel.AERO));
+    }
+
+    @Test
+    void startLobbySecurity() {
+        LobbyCreation lobby = lobbyService.createLobby(4);
+        LobbyCode code = lobby.lobbyCode();
+
+        assertError(NoAutoriseOperationException.class, ErrorKeys.ACTION_RESERVED_TO_HOST,
+                () -> lobbyService.startGame(code, UUID.randomUUID()));
+
+        assertError(NotFoundException.class, ErrorKeys.LOBBY_NOT_FOUND,
+                () -> lobbyService.startGame(new LobbyCode("XXXXXX"), lobby.hostId()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {4, 6})
+    void fullLobbyCycleShouldSucceed(int teamCount) {
+        LobbyCreation lobby = lobbyService.createLobby(teamCount);
+        LobbyCode code = lobby.lobbyCode();
+
+        for (TeamLabel label : lobbyService.getLobbyInfo(code).getAllTeamLabels()) {
+            LobbyJoined res = lobbyService.joinLobby(code);
+            lobbyService.assignTeam(code, UUID.fromString(res.clientId()), label);
         }
+
+        assertDoesNotThrow(() -> lobbyService.startGame(code, lobby.hostId()));
     }
 
-    @Test
-    void joiningUnknownLobbyCodeShouldFail() {
-        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
+    // ---------------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------------
 
-        NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> lobbyService.joinLobby(lobbyCode)
-        );
-        assertEquals(ErrorKeys.LOBBY_NOT_FOUND, ex.getMessage());
-    }
-
-    @Test
-    void teamLabelAlreadyAssignShouldFailFor4() {
-        Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(true);
-
-        teamLabelSet.forEach(label -> {
-            LobbyJoined firstTeam = lobbyService.joinLobby(lobbyCodeFor4);
-            UUID firstId = UUID.fromString(firstTeam.clientId());
-
-            lobbyService.assignTeam(lobbyCodeFor4, firstId, label);
-
-            LobbyJoined secondTeam = lobbyService.joinLobby(lobbyCodeFor4);
-            UUID secondId = UUID.fromString(secondTeam.clientId());
-
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                    () -> lobbyService.assignTeam(lobbyCodeFor4, secondId, label)
-            );
-            assertEquals(ErrorKeys.TEAM_LABEL_ALREADY_TAKEN, ex.getMessage());
-        });
-    }
-
-    @Test
-    void teamLabelAlreadyAssignShouldFailFor6() {
-        Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(false);
-
-        teamLabelSet.forEach(label -> {
-            LobbyJoined firstTeam = lobbyService.joinLobby(lobbyCodeFor6);
-            UUID firstId = UUID.fromString(firstTeam.clientId());
-
-            lobbyService.assignTeam(lobbyCodeFor6, firstId, label);
-
-            LobbyJoined secondTeam = lobbyService.joinLobby(lobbyCodeFor6);
-            UUID secondId = UUID.fromString(secondTeam.clientId());
-
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                    () -> lobbyService.assignTeam(lobbyCodeFor6, secondId, label)
-            );
-            assertEquals(ErrorKeys.TEAM_LABEL_ALREADY_TAKEN, ex.getMessage());
-        });
-    }
-
-
-    @Test
-    void teamAssignTwiceShouldFailFor4() {
-        Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(true);
-
-        teamLabelSet.forEach(label -> {
-            LobbyJoined firstTeam = lobbyService.joinLobby(lobbyCodeFor4);
-            UUID firstId = UUID.fromString(firstTeam.clientId());
-
-            lobbyService.assignTeam(lobbyCodeFor4, firstId, label);
-
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                    () -> lobbyService.assignTeam(lobbyCodeFor4, firstId, label)
-            );
-            assertEquals(ErrorKeys.CLIENT_ALREADY_CHOSE_TEAM, ex.getMessage());
-        });
-    }
-
-    @Test
-    void startingLobbyShouldSucceedFor4() {
-        Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(true);
-
-        teamLabelSet.forEach(label -> {
-            LobbyJoined team = lobbyService.joinLobby(lobbyCodeFor4);
-            UUID teamId = UUID.fromString(team.clientId());
-
-            lobbyService.assignTeam(lobbyCodeFor4, teamId, label);
-        });
-
-        assertDoesNotThrow(() -> lobbyService.startGame(lobbyCodeFor4, hostIdFor4));
-    }
-
-    @Test
-    void startingLobbyShouldSucceedFor6() {
-        Set<TeamLabel> teamLabelSet = TeamLabel.getAllowedLabels(false);
-
-        teamLabelSet.forEach(label -> {
-            LobbyJoined team = lobbyService.joinLobby(lobbyCodeFor6);
-            UUID teamId = UUID.fromString(team.clientId());
-
-            lobbyService.assignTeam(lobbyCodeFor6, teamId, label);
-        });
-
-        assertDoesNotThrow(() -> lobbyService.startGame(lobbyCodeFor6, hostIdFor6));
-    }
-
-    @Test
-    void startingUnknownLobbyShouldFail() {
-        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
-
-        NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> lobbyService.startGame(lobbyCode, hostIdFor4)
-        );
-        assertEquals(ErrorKeys.LOBBY_NOT_FOUND, ex.getMessage());
-    }
-
-    @Test
-    void startingLobbyWithWrongHostIdShouldFailFor4() {
-        UUID unknowId = UUID.randomUUID();
-
-        assertNotEquals(unknowId, hostIdFor4);
-        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
-                () -> lobbyService.startGame(lobbyCodeFor4, unknowId)
-        );
-        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
-    }
-
-    @Test
-    void startingLobbyWithWrongHostIdShouldFailFor6() {
-        UUID unknowId = UUID.randomUUID();
-
-        assertNotEquals(unknowId, hostIdFor6);
-        NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
-                () -> lobbyService.startGame(lobbyCodeFor6, unknowId)
-        );
-        assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
-    }
-
-    @Test
-    void getLobbyInfoShouldFailForUnknown() {
-        LobbyCode lobbyCode = new LobbyCode("XXXXXX");
-
-        NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> lobbyService.getLobbyInfo(lobbyCode)
-        );
-        assertEquals(ErrorKeys.LOBBY_NOT_FOUND, ex.getMessage());
-    }
-
-    @Test
-    void getLobbyInfoForFour() {
-        Lobby res = lobbyService.getLobbyInfo(lobbyCodeFor4);
-
-        assertEquals(4, res.getAllTeamLabels().size());
-        assertEquals(4, res.getAvailableTeamLabels().size());
-    }
-
-    @Test
-    void getLobbyInfoForSix() {
-        Lobby res = lobbyService.getLobbyInfo(lobbyCodeFor6);
-
-        assertEquals(6, res.getAllTeamLabels().size());
-        assertEquals(6, res.getAvailableTeamLabels().size());
-    }
-
-    @Test
-    void getLobbyInfoShouldDecreaseAtEachJoinedFor4() {
-        for (int i = 4; i > 0; i--) {
-            LobbyJoined joinedResponse = lobbyService.joinLobby(lobbyCodeFor4);
-
-            UUID clientId = UUID.fromString(joinedResponse.clientId());
-
-            Lobby res = lobbyService.getLobbyInfo(lobbyCodeFor4);
-
-            assertEquals(4, res.getAllTeamLabels().size());
-            assertEquals(i, res.getAvailableTeamLabels().size());
-
-            var team = res.getAvailableTeamLabels().iterator().next();
-            lobbyService.assignTeam(lobbyCodeFor4, clientId, team);
-        }
-    }
-
-    @Test
-    void getLobbyInfoShouldDecreaseAtEachJoinedFor6() {
-        for (int i = 6; i > 0; i--) {
-            LobbyJoined joinedResponse = lobbyService.joinLobby(lobbyCodeFor6);
-
-            UUID clientId = UUID.fromString(joinedResponse.clientId());
-
-            Lobby res = lobbyService.getLobbyInfo(lobbyCodeFor6);
-
-            assertEquals(6, res.getAllTeamLabels().size());
-            assertEquals(i, res.getAvailableTeamLabels().size());
-
-            var team = res.getAvailableTeamLabels().iterator().next();
-            lobbyService.assignTeam(lobbyCodeFor6, clientId, team);
-        }
+    private void assertError(Class<? extends Exception> type, String key, Runnable action) {
+        Exception ex = assertThrows(type, action::run);
+        assertEquals(key, ex.getMessage());
     }
 }

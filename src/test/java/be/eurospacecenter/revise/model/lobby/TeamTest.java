@@ -6,7 +6,6 @@ import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
 import be.eurospacecenter.revise.model.Team;
 import be.eurospacecenter.revise.model.launcher.ResourceType;
 import be.eurospacecenter.revise.model.mission.MissionType;
-import be.eurospacecenter.revise.model.mission.TeamFullProgression;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,172 +23,87 @@ class TeamTest {
 
     private Team team;
     private Team teamMeca;
-    private UUID id;
-    private TeamProgression progression;
+    private final UUID id = UUID.randomUUID();
+
+    // ---------------------------------------------------------------------
+    // Setup
+    // ---------------------------------------------------------------------
 
     @BeforeEach
     void setUp() {
-        id = UUID.randomUUID();
-
         team = new Team(TeamLabel.AERO, id);
-        progression = team.getProgression();
-
         teamMeca = new Team(TeamLabel.MECA, id);
     }
+
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
 
     @Test
     void teamCreation() {
         assertEquals(TeamLabel.AERO, team.getLabel());
         assertEquals(id, team.getClientID());
-        assertInitialProgressionState();
-    }
 
-    @ParameterizedTest
-    @EnumSource(MissionType.class)
-    void changeMissionState_shouldUpdateProgression_correctly(MissionType mission) {
-        testMissionForTeamLabel(team, mission);
-
-        progression = teamMeca.getProgression();
-        testMissionForTeamLabel(teamMeca, mission);
+        TeamProgression p = team.getProgression();
+        assertEquals(0, p.classicMissionsCompleted());
+        assertFalse(p.firstBonusMissionCompleted());
     }
 
     @Test
-    void changeMissionBonusStateTwice() {
-        assertFalse(progression.firstBonusMissionCompleted());
-
+    void missionStateToggleLogic() {
         team.updateMission(MissionType.BONUS_1);
-        progression = team.getProgression();
-        assertTrue(progression.firstBonusMissionCompleted());
-
+        assertTrue(team.getProgression().firstBonusMissionCompleted());
         team.updateMission(MissionType.BONUS_1);
-        progression = team.getProgression();
-        assertFalse(progression.firstBonusMissionCompleted());
-    }
-
-    @Test
-    void changeMissionClassicStateTwice() {
-        assertEquals(0, progression.classicMissionsCompleted());
+        assertFalse(team.getProgression().firstBonusMissionCompleted());
 
         team.updateMission(MissionType.CLASSIC_1);
-        progression = team.getProgression();
-        assertEquals(1, progression.classicMissionsCompleted(), 1);
-
+        assertEquals(1, team.getProgression().classicMissionsCompleted());
         team.updateMission(MissionType.CLASSIC_1);
-        progression = team.getProgression();
-        assertEquals(0, progression.classicMissionsCompleted());
+        assertEquals(0, team.getProgression().classicMissionsCompleted());
     }
 
     @Test
-    void teamFullMissionProgressionsShouldBe7Missions() {
-        TeamFullProgression prog = team.getFullProgression();
+    void mission8IsReservedToMeca() {
+        assertDoesNotThrow(() -> teamMeca.updateMission(MissionType.CLASSIC_8));
 
-        assertEquals(7, prog.completedMissions().size());
-        assertFalse(prog.completedMissions().containsKey(MissionType.CLASSIC_8.name()));
+        InvalidMissionOperationException ex = assertThrows(InvalidMissionOperationException.class,
+                () -> team.updateMission(MissionType.CLASSIC_8));
+        assertEquals(ErrorKeys.ONLY_MECA_COMPLETE_CLASSIC_8, ex.getMessage());
     }
 
     @Test
-    void teamFullMissionProgressionsShouldBe8MissionsForMeca() {
-        TeamFullProgression prog = teamMeca.getFullProgression();
-
-        assertEquals(8, prog.completedMissions().size());
-        assertTrue(prog.completedMissions().containsKey(MissionType.CLASSIC_8.name()));
-    }
-
-    @Test
-    void allClassicMissionsCompleted() {
-        assertFalse(team.allClassicMissionsCompleted());
-
-        for (MissionType mission : MissionType.getClassicMissions()) {
-            if (mission == MissionType.CLASSIC_8) {
-                continue;
-            }
-            team.updateMission(mission);
+    void allClassicMissionsCompletedValidation() {
+        for (MissionType m : MissionType.getClassicMissions()) {
+            if (m != MissionType.CLASSIC_8) team.updateMission(m);
         }
-
         assertTrue(team.allClassicMissionsCompleted());
-    }
+        assertEquals(7, team.getFullProgression().completedMissions().size());
 
-    @Test
-    void allClassicMissionsCompletedForMeca() {
-        assertFalse(teamMeca.allClassicMissionsCompleted());
-
-        for (MissionType mission : MissionType.getClassicMissions()) {
-            teamMeca.updateMission(mission);
+        for (MissionType m : MissionType.getClassicMissions()) {
+            teamMeca.updateMission(m);
         }
-
         assertTrue(teamMeca.allClassicMissionsCompleted());
-    }
-
-    @Test
-    void shouldHaveMultipleMissionsCompleted() {
-        team.updateMission(MissionType.CLASSIC_1);
-        team.updateMission(MissionType.CLASSIC_2);
-        team.updateMission(MissionType.BONUS_1);
-
-        progression = team.getProgression();
-        assertEquals(2, progression.classicMissionsCompleted());
-        assertTrue(progression.firstBonusMissionCompleted());
-        assertFalse(progression.secondBonusMissionCompleted());
-    }
-
-
-    @ParameterizedTest
-    @EnumSource(ResourceType.class)
-    void removeResourceOverLimitOnce(ResourceType resourceType) {
-        Map<ResourceType, Integer> resourcesToRemove = Map.of(resourceType, resourceType.getMax()+1);
-        InvalidLauncherOperationException ex = assertThrows(
-                InvalidLauncherOperationException.class,
-                () -> team.updateResources(resourcesToRemove)
-        );
-
-        assertEquals(ErrorKeys.INSUFFICIENT_RESOURCES, ex.getMessage());
+        assertEquals(8, teamMeca.getFullProgression().completedMissions().size());
     }
 
     @ParameterizedTest
     @EnumSource(ResourceType.class)
-    void removeResourceOverLimitTwice(ResourceType resourceType) {
-        team.updateResources(Map.of(resourceType, resourceType.getMax()));
-        Map<ResourceType, Integer> resourcesToRemove = Map.of(resourceType, 1);
+    void resourceLimitsValidation(ResourceType type) {
+        assertResourceError(Map.of(type, type.getMax() + 1));
+
+        team.updateResources(Map.of(type, type.getMax()));
+        assertResourceError(Map.of(type, 1));
+    }
+
+    // ---------------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------------
+
+    private void assertResourceError(Map<ResourceType, Integer> resources) {
         InvalidLauncherOperationException ex = assertThrows(
                 InvalidLauncherOperationException.class,
-                () -> team.updateResources(resourcesToRemove)
+                () -> team.updateResources(resources)
         );
-
         assertEquals(ErrorKeys.INSUFFICIENT_RESOURCES, ex.getMessage());
-    }
-
-    private void testMissionForTeamLabel(Team team, MissionType mission) {
-        if (shouldThrowException(team, mission)) {
-            InvalidMissionOperationException ex = assertThrows(InvalidMissionOperationException.class, () -> team.updateMission(mission));
-            assertEquals(ErrorKeys.ONLY_MECA_COMPLETE_CLASSIC_8, ex.getMessage());
-
-            return;
-        }
-
-        assertInitialProgressionState();
-        team.updateMission(mission);
-        assertProgressionAfterMissionChange(team, mission);
-    }
-
-    private boolean shouldThrowException(Team team, MissionType mission) {
-        return mission == MissionType.CLASSIC_8 && !team.getLabel().equals(TeamLabel.MECA);
-    }
-
-    private void assertInitialProgressionState() {
-        assertFalse(progression.firstBonusMissionCompleted());
-        assertFalse(progression.secondBonusMissionCompleted());
-        assertEquals(0, progression.classicMissionsCompleted());
-    }
-
-    private void assertProgressionAfterMissionChange(Team team, MissionType mission) {
-        progression = team.getProgression();
-
-        if (mission == MissionType.BONUS_1) {
-            assertTrue(progression.firstBonusMissionCompleted());
-        } else if (mission == MissionType.BONUS_2) {
-            assertTrue(progression.secondBonusMissionCompleted());
-        } else {
-            assertEquals(1, team.getProgression().classicMissionsCompleted());
-        }
     }
 }

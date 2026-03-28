@@ -13,6 +13,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GameInfoTest {
 
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
+
     @Test
     void foundTeamByLabel() {
         GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()), LocalDateTime.now());

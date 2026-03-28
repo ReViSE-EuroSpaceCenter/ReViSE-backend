@@ -36,6 +36,10 @@ class MissionManagerServiceTest {
     private GameInfo gameInfoWith6Teams;
     private UUID idOfTheLoneTeam;
 
+    // ---------------------------------------------------------------------
+    // Setup
+    // ---------------------------------------------------------------------
+
     @BeforeEach
     void setUp() {
         missionService.managers.clear();
@@ -49,6 +53,9 @@ class MissionManagerServiceTest {
         gameInfoWith6Teams = createTeams(TeamLabel.AERO, TeamLabel.MECA, TeamLabel.EXPE, TeamLabel.GECO, TeamLabel.MEDI, TeamLabel.COOP);
     }
 
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
 
     @Test
     void shouldRegisterAGameWith4Teams() {
@@ -231,6 +238,10 @@ class MissionManagerServiceTest {
         );
         assertEquals(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS, ex.getMessage());
     }
+
+    // ---------------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------------
 
     private GameInfo createTeams(TeamLabel... labels) {
         GameInfo gameInfo = new GameInfo(new Host(UUID.randomUUID()), LocalDateTime.now());

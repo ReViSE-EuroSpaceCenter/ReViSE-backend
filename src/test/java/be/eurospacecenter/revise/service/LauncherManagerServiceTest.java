@@ -30,6 +30,9 @@ class LauncherManagerServiceTest {
     private UUID idOfTheHost;
     private UUID idOfTheLoneTeam;
 
+    // ---------------------------------------------------------------------
+    // Setup
+    // ---------------------------------------------------------------------
 
     @BeforeEach
     void setUp() {
@@ -42,6 +45,9 @@ class LauncherManagerServiceTest {
         gameInfoWithOneLoneTeam = gameInfo;
     }
 
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
 
     @Test
     void registerLauncherWithNullLobbyCode() {

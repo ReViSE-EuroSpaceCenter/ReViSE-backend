@@ -24,12 +24,20 @@ class CleaningServiceTest {
     LauncherService launcherService;
     LobbyCodeGenerator lobbyCodeGenerator;
 
+    // ---------------------------------------------------------------------
+    // Setup
+    // ---------------------------------------------------------------------
+
     @BeforeEach
     void setup() {
         lobbyService = new LobbyService(missionService, null, lobbyCodeGenerator);
         missionService = new MissionService(null, launcherService);
         launcherService = new LauncherService(null);
     }
+
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
 
     @Test
     void shouldClearOnlyLobby12HoursOld() {

@@ -18,20 +18,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
 class MissionControllerTest {
 
-    @Autowired
-    private RestTestClient restTestClient;
-
-    @Autowired
-    private LobbyService lobbyService;
+    @Autowired private RestTestClient restTestClient;
+    @Autowired private LobbyService lobbyService;
 
     private LobbyCode lobbyCode;
     private UUID teamClientId;
     private UUID hostId;
+
+    // ---------------------------------------------------------------------
+    // Setup
+    // ---------------------------------------------------------------------
 
     @BeforeEach
     void setUp() {
@@ -43,108 +43,73 @@ class MissionControllerTest {
                 .expectBody()
                 .returnResult();
 
-
         Assertions.assertNotNull(result.getResponseBody());
-
-        String body = new String(result.getResponseBody());
-
-        Assertions.assertNotNull(body);
-
+        var body = new String(result.getResponseBody());
         lobbyCode = new LobbyCode(JsonPath.read(body, "$.lobbyCode"));
         hostId = UUID.fromString(JsonPath.read(body, "$.hostId"));
 
-        Set<TeamLabel> labels = TeamLabel.getAllowedLabels(true);
-
-        for (TeamLabel label : labels) {
-            LobbyJoined response = lobbyService.joinLobby(lobbyCode);
-            teamClientId = UUID.fromString(response.clientId());
-            lobbyService.assignTeam(lobbyCode, teamClientId, label);
+        for (TeamLabel label : TeamLabel.getAllowedLabels(true)) {
+            LobbyJoined join = lobbyService.joinLobby(lobbyCode);
+            UUID cid = UUID.fromString(join.clientId());
+            lobbyService.assignTeam(lobbyCode, cid, label);
+            teamClientId = cid;
         }
 
         lobbyService.startGame(lobbyCode, hostId);
     }
 
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
+
     @Test
     void changeMissionStateShouldSucceed() {
-        restTestClient.put()
-                .uri("/api/missions/" + lobbyCode.lobbyCode())
-                .body(Map.of(
-                        "id", teamClientId,
-                        "updateMissions", Set.of("CLASSIC_1")
-                ))
-                .exchange()
+        putMission(Map.of("id", teamClientId, "updateMissions", Set.of("CLASSIC_1")))
                 .expectStatus().isNoContent();
     }
 
     @Test
     void changeMissionStateShouldFailWithInvalidLobbyCode() {
-        restTestClient.put()
+        var response = restTestClient.put()
                 .uri("/api/missions/INVALID")
-                .body(Map.of(
-                        "id", teamClientId,
-                        "updateMissions", Set.of("CLASSIC_1")
-                ))
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.detail")
-                .isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+                .body(Map.of("id", teamClientId, "updateMissions", Set.of("CLASSIC_1")))
+                .exchange();
+
+        expectBadRequest(ErrorKeys.INVALID_LOBBY_CODE, response);
     }
 
     @Test
     void changeMissionStateShouldFailWithInvalidUuid() {
-        restTestClient.put()
-                .uri("/api/missions/" + lobbyCode.lobbyCode())
-                .body(Map.of(
-                        "id", "abc",
-                        "updateMissions", Set.of("CLASSIC_1")
-                ))
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.detail")
-                .isEqualTo(ErrorKeys.INVALID_UUID);
+        expectBadRequest(
+                ErrorKeys.INVALID_UUID,
+                putMission(Map.of("id", "abc", "updateMissions", Set.of("CLASSIC_1")))
+        );
     }
 
     @Test
     void changeMissionStateShouldFailWithInvalidMission() {
-        restTestClient.put()
-                .uri("/api/missions/" + lobbyCode.lobbyCode())
-                .body(Map.of(
-                        "clientId", teamClientId,
-                        "updateMissions", Set.of("INVALID_MISSION")
-                ))
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.detail")
-                .isEqualTo(ErrorKeys.INVALID_MISSION_TYPE);
+        expectBadRequest(
+                ErrorKeys.INVALID_MISSION_TYPE,
+                putMission(Map.of("clientId", teamClientId, "updateMissions", Set.of("INVALID_MISSION")))
+        );
     }
 
     @Test
     void changeMissionStateShouldSucceedForHost() {
-        restTestClient.put()
-                .uri("/api/missions/" + lobbyCode.lobbyCode())
-                .body(Map.of(
-                        "id", hostId,
-                        "teamLabel", "EXPE",
-                        "updateMissions", Set.of("CLASSIC_1")
-                ))
-                .exchange()
-                .expectStatus().isNoContent();
+        putMission(Map.of(
+                "id", hostId,
+                "teamLabel", "EXPE",
+                "updateMissions", Set.of("CLASSIC_1")
+        )).expectStatus().isNoContent();
     }
 
     @Test
     void changeMissionStateShouldNotSucceedForUnknownHost() {
-        restTestClient.put()
-                .uri("/api/missions/" + lobbyCode.lobbyCode())
-                .body(Map.of(
-                        "id", UUID.randomUUID(),
-                        "teamLabel", "EXPE",
-                        "updateMissions", Set.of("CLASSIC_1")
-                ))
-                .exchange()
-                .expectStatus().isForbidden();
+        putMission(Map.of(
+                "id", UUID.randomUUID(),
+                "teamLabel", "EXPE",
+                "updateMissions", Set.of("CLASSIC_1")
+        )).expectStatus().isForbidden();
     }
 
     @Test
@@ -173,43 +138,56 @@ class MissionControllerTest {
 
     @Test
     void endMissionShouldNotSucceedWithInvalidLobbyCode() {
-        restTestClient.post()
+        var response = restTestClient.post()
                 .uri("/api/missions/INVALID/end")
-                .body(Map.of(
-                        "hostId", teamClientId
-                ))
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.detail")
-                .isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+                .body(Map.of("hostId", teamClientId))
+                .exchange();
+
+        expectBadRequest(ErrorKeys.INVALID_LOBBY_CODE, response);
     }
 
     @Test
-    void endMissionShouldNotSucceedWithUnkownHost() {
-        restTestClient.post()
+    void endMissionShouldNotSucceedWithUnknownHost() {
+        var response = restTestClient.post()
                 .uri("/api/missions/" + lobbyCode.lobbyCode() + "/end")
-                .body(Map.of(
-                        "hostId", UUID.randomUUID()
-                ))
-                .exchange()
-                .expectStatus().isForbidden()
+                .body(Map.of("hostId", UUID.randomUUID()))
+                .exchange();
+
+        expectReservedToHost(response);
+    }
+
+    @Test
+    void endMissionShouldNotSucceedWithUncompletedMissions() {
+        var response = restTestClient.post()
+                .uri("/api/missions/" + lobbyCode.lobbyCode() + "/end")
+                .body(Map.of("hostId", hostId))
+                .exchange();
+
+        expectBadRequest(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS, response);
+    }
+
+    // ---------------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------------
+
+    private void expectBadRequest(String expectedKey, RestTestClient.ResponseSpec response) {
+        response.expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail")
+                .isEqualTo(expectedKey);
+    }
+
+    private void expectReservedToHost(RestTestClient.ResponseSpec response) {
+        response.expectStatus().isForbidden()
                 .expectBody()
                 .jsonPath("$.detail")
                 .isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
     }
 
-    @Test
-    void endMissionShouldNotSucceedWithUncompletedMissions() {
-        restTestClient.post()
-                .uri("/api/missions/" + lobbyCode.lobbyCode() + "/end")
-                .body(Map.of(
-                        "hostId",hostId
-                        ))
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.detail")
-                .isEqualTo(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS);
+    private RestTestClient.ResponseSpec putMission(Object body) {
+        return restTestClient.put()
+                .uri("/api/missions/" + lobbyCode.lobbyCode())
+                .body(body)
+                .exchange();
     }
 }

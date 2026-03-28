@@ -8,6 +8,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TeamLabelTest {
 
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
+
     @Test
     void validLabel_fourTeamsMode() {
         assertTrue(TeamLabel.isValidLabel(TeamLabel.MECA, true));

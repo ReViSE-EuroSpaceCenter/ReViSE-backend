@@ -52,6 +52,49 @@ class LauncherManagerControllerTest {
         completeMissionsAndEndGame();
     }
 
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
+
+    @Test
+    void updateResources_shouldSucceed() {
+        updateResources(lobbyCode.lobbyCode(), validClientId, VALID_RESOURCES).expectStatus().isNoContent();
+    }
+
+    @Test
+    void updateResources_shouldFail_withInvalidLobbyCode() {
+        updateResources("INVALID", validClientId, VALID_RESOURCES).expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+    }
+
+    @Test
+    void updateResources_shouldFail_withInvalidClient() {
+        updateResources(lobbyCode.lobbyCode(), UUID.randomUUID(), VALID_RESOURCES).expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.CLIENT_NOT_IN_LOBBY);
+    }
+
+    @Test
+    void updateResources_shouldFail_withInvalidResource() {
+        updateResources(lobbyCode.lobbyCode(), validClientId, Map.of("WOOD", 1)).expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_RESOURCE_TYPE);
+    }
+
+    @Test
+    void getScore_shouldSucceed() {
+        getScore(lobbyCode.lobbyCode(), hostId).expectStatus().isOk().expectBody().jsonPath("$.score").isNumber();
+    }
+
+    @Test
+    void getScore_shouldFail_withInvalidLobbyCode() {
+        getScore("INVALID", hostId).expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+    }
+
+    @Test
+    void getScore_shouldFail_withInvalidHost() {
+        getScore(lobbyCode.lobbyCode(), UUID.randomUUID()).expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
+    }
+
+    // ---------------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------------
+
     private void createLobbyAndHost() {
         var responseBody = restTestClient.post().uri("/api/lobbies").body(Map.of("numberOfTeams", 4)).exchange().expectStatus().isCreated().expectBody(String.class).returnResult().getResponseBody();
 
@@ -82,58 +125,11 @@ class LauncherManagerControllerTest {
         missionService.startLauncher(lobbyCode, hostId);
     }
 
-    // ---------------------------------------------------------------------
-    // Helpers REST
-    // ---------------------------------------------------------------------
-
     private RestTestClient.ResponseSpec updateResources(String lobby, UUID clientId, Map<String, Integer> resources) {
         return restTestClient.put().uri(BASE_URI + "/" + lobby).body(Map.of("clientId", clientId.toString(), "resources", resources)).exchange();
     }
 
     private RestTestClient.ResponseSpec getScore(String lobby, UUID hostId) {
         return restTestClient.get().uri(uriBuilder -> uriBuilder.path(BASE_URI + "/{lobbyCode}/score").queryParam("hostId", hostId.toString()).build(lobby)).exchange();
-    }
-
-    // ---------------------------------------------------------------------
-    // Tests - Update resources
-    // ---------------------------------------------------------------------
-
-    @Test
-    void updateResources_shouldSucceed() {
-        updateResources(lobbyCode.lobbyCode(), validClientId, VALID_RESOURCES).expectStatus().isNoContent();
-    }
-
-    @Test
-    void updateResources_shouldFail_withInvalidLobbyCode() {
-        updateResources("INVALID", validClientId, VALID_RESOURCES).expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
-    }
-
-    @Test
-    void updateResources_shouldFail_withInvalidClient() {
-        updateResources(lobbyCode.lobbyCode(), UUID.randomUUID(), VALID_RESOURCES).expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.CLIENT_NOT_IN_LOBBY);
-    }
-
-    @Test
-    void updateResources_shouldFail_withInvalidResource() {
-        updateResources(lobbyCode.lobbyCode(), validClientId, Map.of("WOOD", 1)).expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_RESOURCE_TYPE);
-    }
-
-    // ---------------------------------------------------------------------
-    // Tests - Score
-    // ---------------------------------------------------------------------
-
-    @Test
-    void getScore_shouldSucceed() {
-        getScore(lobbyCode.lobbyCode(), hostId).expectStatus().isOk().expectBody().jsonPath("$.score").isNumber();
-    }
-
-    @Test
-    void getScore_shouldFail_withInvalidLobbyCode() {
-        getScore("INVALID", hostId).expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
-    }
-
-    @Test
-    void getScore_shouldFail_withInvalidHost() {
-        getScore(lobbyCode.lobbyCode(), UUID.randomUUID()).expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
     }
 }
