@@ -1,16 +1,17 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.request.AssignTeamRequest;
-import be.eurospacecenter.revise.dto.request.CreateLobbyRequest;
-import be.eurospacecenter.revise.dto.request.StartLobbyRequest;
-import be.eurospacecenter.revise.dto.response.LobbyCreationResponse;
-import be.eurospacecenter.revise.dto.response.LobbyInfoResponse;
-import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
-import be.eurospacecenter.revise.exceptions.ErrorKeys;
-import be.eurospacecenter.revise.helper.LobbyCode;
+import be.eurospacecenter.revise.dto.team.TeamAssignedDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyCreateDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyStartedDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyCreationDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyInfoDTO;
+import be.eurospacecenter.revise.dto.lobby.LobbyJoinedDTO;
+import be.eurospacecenter.revise.model.lobby.Lobby;
+import be.eurospacecenter.revise.model.lobby.LobbyCreation;
+import be.eurospacecenter.revise.model.lobby.LobbyJoined;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.service.LobbyService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,61 +27,57 @@ public class LobbyController {
         this.lobbyService = lobbyService;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public LobbyCreationResponse createLobby(
-            @RequestBody @Valid
-            CreateLobbyRequest request
+    @GetMapping("/{lobbyCode}")
+    public LobbyInfoDTO getLobbyInfo(
+            @PathVariable String lobbyCode
     ) {
-        return lobbyService.createLobby(request.numberOfTeams());
+        LobbyCode code = new LobbyCode(lobbyCode);
+
+        Lobby lobby = lobbyService.getLobbyInfo(code);
+
+        return LobbyInfoDTO.fromLobby(lobby);
     }
 
-    @GetMapping("/{lobbyCode}")
-    public LobbyInfoResponse getLobbyInfo(
-            @PathVariable
-            @Pattern(regexp = LobbyCode.PATTERN, message = "Code de lobby invalide")
-            String lobbyCode
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public LobbyCreationDTO createLobby(
+            @RequestBody @Valid LobbyCreateDTO request
     ) {
-        return lobbyService.getLobbyInfo(lobbyCode);
+        LobbyCreation lobbyCreation = lobbyService.createLobby(request.numberOfTeams());
+        return LobbyCreationDTO.fromLobbyCreation(lobbyCreation);
     }
 
     @PostMapping("/{lobbyCode}/join")
-    public LobbyJoinedResponse joinLobby(
-            @PathVariable
-            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
-            String lobbyCode
+    public LobbyJoinedDTO joinLobby(
+            @PathVariable String lobbyCode
     ) {
-        return lobbyService.joinLobby(lobbyCode);
+        LobbyCode code = new LobbyCode(lobbyCode);
+
+        LobbyJoined lobbyJoined = lobbyService.joinLobby(code);
+
+        return LobbyJoinedDTO.fromLobbyJoined(lobbyJoined);
     }
 
     @PostMapping("/{lobbyCode}/team")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void assignTeam(
-            @PathVariable
-            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
-            String lobbyCode,
+            @PathVariable String lobbyCode,
 
-            @RequestBody @Valid
-            AssignTeamRequest request
+            @RequestBody @Valid TeamAssignedDTO request
     ) {
-        lobbyService.assignTeam(
-                lobbyCode,
-                request.clientId(),
-                request.teamLabel()
-        );
+        LobbyCode code = new LobbyCode(lobbyCode);
+        lobbyService.assignTeam(code, request.clientId(), request.teamLabel());
     }
 
     @PostMapping("/{lobbyCode}/start")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void startLobby(
-            @PathVariable
-            @Pattern(regexp = LobbyCode.PATTERN, message = ErrorKeys.INVALID_LOBBY_CODE)
-            String lobbyCode,
+            @PathVariable String lobbyCode,
 
-            @RequestBody @Valid
-            StartLobbyRequest request
+            @RequestBody @Valid LobbyStartedDTO request
     ) {
-        lobbyService.startGame(lobbyCode, request.hostId());
+        LobbyCode code = new LobbyCode(lobbyCode);
+        lobbyService.startGame(code, request.hostId());
     }
 
 }

@@ -24,7 +24,7 @@ public class Missions {
     }
 
     public TeamProgression getProgression(TeamLabel teamLabel) {
-        return new TeamProgression(teamLabel, countCompletedMissions(), missionsMap.get(MissionType.BONUS_1), missionsMap.get(MissionType.BONUS_2));
+        return new TeamProgression(teamLabel, countCompletedMissions(), missionsMap.get(MissionType.BONUS_1), missionsMap.get(MissionType.BONUS_2), false);
     }
 
     public TeamFullProgression getFullProgression(TeamLabel teamLabel) {

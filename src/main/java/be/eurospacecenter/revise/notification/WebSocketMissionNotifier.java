@@ -3,7 +3,8 @@ package be.eurospacecenter.revise.notification;
 import be.eurospacecenter.revise.dto.event.MissionEvent;
 import be.eurospacecenter.revise.dto.event.MissionEventType;
 
-import be.eurospacecenter.revise.dto.response.TeamProgressionResponse;
+import be.eurospacecenter.revise.dto.team.TeamProgressionDTO;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,20 +23,20 @@ public class WebSocketMissionNotifier implements MissionNotifier {
     }
 
     @Override
-    public void notifyTeamProgression(String lobbyCode, TeamProgression teamProgression, boolean allTeamsMissionsCompleted) {
-        logger.info("Sending TEAM_PROGRESSION event for game: {} with team: {} and progression: {}", lobbyCode, teamProgression.teamLabel(), teamProgression);
-        MissionEvent event = new MissionEvent(MissionEventType.TEAM_PROGRESSION, new TeamProgressionResponse(teamProgression, allTeamsMissionsCompleted));
+    public void notifyTeamProgression(LobbyCode lobbyCode, TeamProgression teamProgression) {
+        logger.info("Sending TEAM_PROGRESSION event for game: {} with team: {} and progression: {}", lobbyCode.lobbyCode(), teamProgression.teamLabel(), teamProgression);
+        MissionEvent event = new MissionEvent(MissionEventType.TEAM_PROGRESSION, TeamProgressionDTO.fromTeamProgression(teamProgression));
 
-        messagingTemplate.convertAndSend(GAME_TOPIC_PREFIX + lobbyCode, event);
+        messagingTemplate.convertAndSend(GAME_TOPIC_PREFIX + lobbyCode.lobbyCode(), event);
         logger.info("TEAM_PROGRESSION event sent successfully");
     }
 
     @Override
-    public void notifyMissionEnded(String lobbyCode) {
-        logger.info("Sending MISSION_ENDED event for game: {}", lobbyCode);
+    public void notifyMissionEnded(LobbyCode lobbyCode) {
+        logger.info("Sending MISSION_ENDED event for game: {}", lobbyCode.lobbyCode());
         MissionEvent event = new MissionEvent(MissionEventType.MISSION_ENDED, null);
 
-        messagingTemplate.convertAndSend(GAME_TOPIC_PREFIX + lobbyCode, event);
+        messagingTemplate.convertAndSend(GAME_TOPIC_PREFIX + lobbyCode.lobbyCode(), event);
         logger.info("MISSION_ENDED event sent successfully");
     }
 }

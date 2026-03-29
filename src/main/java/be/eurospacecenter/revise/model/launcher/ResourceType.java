@@ -3,7 +3,7 @@ package be.eurospacecenter.revise.model.launcher;
 public enum ResourceType {
     ENERGY(40),
     HUMAN(6),
-    CLOCK(6);
+    CLOCK(14);
 
     private final int max;
 

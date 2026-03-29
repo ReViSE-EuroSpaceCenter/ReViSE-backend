@@ -27,6 +27,10 @@ class LobbyTest {
     private final Lobby lobby4Teams = new Lobby(host, 4, LocalDateTime.now());
     private final Lobby lobby6Teams = new Lobby(host, 6, LocalDateTime.now());
 
+    // ---------------------------------------------------------------------
+    // Setup
+    // ---------------------------------------------------------------------
+
     @BeforeEach
     void setUp() {
         lobby4Teams.addTeam(team1Id);
@@ -42,6 +46,10 @@ class LobbyTest {
         lobby6Teams.addTeam(team6Id);
 
     }
+
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
 
     @Test
     void shouldNotStartGameWithEmptyTeam() {

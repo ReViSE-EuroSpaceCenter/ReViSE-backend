@@ -6,5 +6,6 @@ public record TeamProgression(
         TeamLabel teamLabel,
         int classicMissionsCompleted,
         boolean firstBonusMissionCompleted,
-        boolean secondBonusMissionCompleted
+        boolean secondBonusMissionCompleted,
+        boolean allTeamsMissionsCompleted
 ) {}

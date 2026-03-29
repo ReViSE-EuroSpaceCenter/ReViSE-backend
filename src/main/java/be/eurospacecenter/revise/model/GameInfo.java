@@ -7,7 +7,6 @@ import be.eurospacecenter.revise.model.lobby.TeamLabel;
 
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +20,7 @@ public class GameInfo {
     private final LocalDateTime expiresAt;
 
     public GameInfo(Host host, LocalDateTime createdAt) {
-        this.host = Objects.requireNonNull(host);
+        this.host = host;
         this.teams = new ConcurrentHashMap<>();
         this.expiresAt = createdAt.plusHours(LOBBY_TTL);
     }
@@ -58,7 +57,7 @@ public class GameInfo {
         return host.id();
     }
 
-    public int getTotalScore() {
+    public int getTeamsScore() {
         return teams.values().stream()
                 .mapToInt(Team::score)
                 .sum();

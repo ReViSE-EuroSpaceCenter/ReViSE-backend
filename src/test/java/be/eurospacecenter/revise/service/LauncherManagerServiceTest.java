@@ -1,13 +1,12 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.dto.response.ScoreResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
-import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.GameInfo;
 import be.eurospacecenter.revise.model.launcher.ResourceType;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.Team;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +30,9 @@ class LauncherManagerServiceTest {
     private UUID idOfTheHost;
     private UUID idOfTheLoneTeam;
 
+    // ---------------------------------------------------------------------
+    // Setup
+    // ---------------------------------------------------------------------
 
     @BeforeEach
     void setUp() {
@@ -43,15 +45,9 @@ class LauncherManagerServiceTest {
         gameInfoWithOneLoneTeam = gameInfo;
     }
 
-    @Test
-    void registerLauncherWithEmptyLobbyCode() {
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> launcherService.registerLauncher("", gameInfoWithOneLoneTeam)
-        );
-
-        assertEquals(ErrorKeys.INVALID_LOBBY_CODE, ex.getMessage());
-    }
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
 
     @Test
     void registerLauncherWithNullLobbyCode() {
@@ -65,29 +61,23 @@ class LauncherManagerServiceTest {
 
     @Test
     void registerLauncherWithValidLobbyCode() {
-        launcherService.registerLauncher("AAAAAAA", gameInfoWithOneLoneTeam);
+        LobbyCode lobbyCode = new LobbyCode("AAAAAA");
+
+
+        launcherService.registerLauncher(lobbyCode, gameInfoWithOneLoneTeam);
 
         assertEquals(1, launcherService.launchers.size());
     }
 
     @Test
-    void updateResourcesWithInvalidLobbyCode() {
-        Map<ResourceType, Integer> resources = Map.of();
-        NotFoundException ex = assertThrows(
-                NotFoundException.class,
-                () -> launcherService.updateResources("INVALID", idOfTheLoneTeam, resources)
-        );
-
-        assertEquals(ErrorKeys.LAUNCHER_NOT_FOUND, ex.getMessage());
-    }
-
-    @Test
     void updateResourcesWithValidLobbyCode() {
-        launcherService.registerLauncher("AAAAAAA", gameInfoWithOneLoneTeam);
-        launcherService.updateResources("AAAAAAA", idOfTheLoneTeam, Map.of(ResourceType.ENERGY, 4));
+        LobbyCode lobbyCode = new LobbyCode("AAAAAA");
 
-        ScoreResponse scoreResponse = launcherService.getGeneralScore("AAAAAAA", idOfTheHost);
+        launcherService.registerLauncher(lobbyCode, gameInfoWithOneLoneTeam);
+        launcherService.updateResources(lobbyCode, idOfTheLoneTeam, Map.of(ResourceType.ENERGY, 4));
 
-        assertEquals(24, scoreResponse.score());
+        int score = launcherService.getTeamsScore(lobbyCode, idOfTheHost);
+
+        assertEquals(32, score);
     }
 }

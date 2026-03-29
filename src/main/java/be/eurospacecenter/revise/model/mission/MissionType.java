@@ -18,6 +18,6 @@ public enum MissionType {
     private static final Set<MissionType> CLASSIC_MISSIONS = EnumSet.range(CLASSIC_1, CLASSIC_8);
 
     public static Set<MissionType> getClassicMissions() {
-        return CLASSIC_MISSIONS;
+        return EnumSet.copyOf(CLASSIC_MISSIONS);
     }
 }

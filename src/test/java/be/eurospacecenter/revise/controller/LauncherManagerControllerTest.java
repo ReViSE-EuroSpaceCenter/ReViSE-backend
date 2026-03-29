@@ -1,13 +1,13 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.response.LobbyJoinedResponse;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.model.lobby.LobbyJoined;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.service.LobbyService;
 import be.eurospacecenter.revise.service.MissionService;
 import com.jayway.jsonpath.JsonPath;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +15,18 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTe
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
 class LauncherManagerControllerTest {
+
+    private static final String BASE_URI = "/api/launchers";
+    private static final Map<String, Integer> VALID_RESOURCES = Map.of("ENERGY", 1, "HUMAN", 2, "CLOCK", 3);
 
     @Autowired
     private RestTestClient restTestClient;
@@ -30,153 +37,99 @@ class LauncherManagerControllerTest {
     @Autowired
     private MissionService missionService;
 
-    private String lobbyCode;
-    private Map<UUID, TeamLabel> teams = new HashMap<>();
+    private LobbyCode lobbyCode;
     private UUID hostId;
+    private UUID validClientId;
+
+    // ---------------------------------------------------------------------
+    // Setup
+    // ---------------------------------------------------------------------
 
     @BeforeEach
     void setUp() {
-        var result = restTestClient.post()
-                .uri("/api/lobbies")
-                .body(Map.of("numberOfTeams", 4))
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody()
-                .returnResult();
+        createLobbyAndHost();
+        joinClientAndStartGame();
+        completeMissionsAndEndGame();
+    }
 
+    // ---------------------------------------------------------------------
+    // Tests
+    // ---------------------------------------------------------------------
 
-        Assertions.assertNotNull(result.getResponseBody());
+    @Test
+    void updateResources_shouldSucceed() {
+        updateResources(lobbyCode.lobbyCode(), validClientId, VALID_RESOURCES).expectStatus().isNoContent();
+    }
 
-        String body = new String(result.getResponseBody());
+    @Test
+    void updateResources_shouldFail_withInvalidLobbyCode() {
+        updateResources("INVALID", validClientId, VALID_RESOURCES).expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+    }
 
-        Assertions.assertNotNull(body);
+    @Test
+    void updateResources_shouldFail_withInvalidClient() {
+        updateResources(lobbyCode.lobbyCode(), UUID.randomUUID(), VALID_RESOURCES).expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.CLIENT_NOT_IN_LOBBY);
+    }
 
-        lobbyCode = JsonPath.read(body, "$.lobbyCode");
-        hostId = UUID.fromString(JsonPath.read(body, "$.hostId"));
+    @Test
+    void updateResources_shouldFail_withInvalidResource() {
+        updateResources(lobbyCode.lobbyCode(), validClientId, Map.of("WOOD", 1)).expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_RESOURCE_TYPE);
+    }
 
-        Set<TeamLabel> labels = TeamLabel.getAllowedLabels(true);
+    @Test
+    void getScore_shouldSucceed() {
+        getScore(lobbyCode.lobbyCode(), hostId).expectStatus().isOk().expectBody().jsonPath("$.score").isNumber();
+    }
 
-        for (TeamLabel label : labels) {
-            LobbyJoinedResponse response = lobbyService.joinLobby(lobbyCode);
-            teams.put(UUID.fromString(response.clientId()), label);
-            lobbyService.assignTeam(lobbyCode, UUID.fromString(response.clientId()), label);
-        }
+    @Test
+    void getScore_shouldFail_withInvalidLobbyCode() {
+        getScore("INVALID", hostId).expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+    }
 
+    @Test
+    void getScore_shouldFail_withInvalidHost() {
+        getScore(lobbyCode.lobbyCode(), UUID.randomUUID()).expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
+    }
+
+    // ---------------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------------
+
+    private void createLobbyAndHost() {
+        var responseBody = restTestClient.post().uri("/api/lobbies").body(Map.of("numberOfTeams", 4)).exchange().expectStatus().isCreated().expectBody(String.class).returnResult().getResponseBody();
+
+        assertNotNull(responseBody);
+
+        lobbyCode = new LobbyCode(JsonPath.read(responseBody, "$.lobbyCode"));
+        hostId = UUID.fromString(JsonPath.read(responseBody, "$.hostId"));
+    }
+
+    private void joinClientAndStartGame() {
+        TeamLabel.getAllowedLabels(true).forEach(teamLabel -> {
+            LobbyJoined joined = lobbyService.joinLobby(lobbyCode);
+            validClientId = UUID.fromString(joined.clientId());
+
+            lobbyService.assignTeam(lobbyCode, validClientId, teamLabel);
+        });
         lobbyService.startGame(lobbyCode, hostId);
+    }
 
-
-        for (Map.Entry<UUID, TeamLabel> entry : teams.entrySet()) {
-            UUID teamId = entry.getKey();
-            TeamLabel label = entry.getValue();
-
-            Set<MissionType> missionsToComplete = new HashSet<>(MissionType.getClassicMissions());
-
-            if (label != TeamLabel.MECA) {
-                missionsToComplete.remove(MissionType.CLASSIC_8);
+    private void completeMissionsAndEndGame() {
+        TeamLabel.getAllowedLabels(true).forEach(teamLabel -> {
+            Set<MissionType> missions = MissionType.getClassicMissions();
+            if (teamLabel != TeamLabel.MECA) {
+                missions.remove(MissionType.CLASSIC_8);
             }
-
-            missionService.changeTeamMissionsState(lobbyCode, teamId, null, missionsToComplete);
-        }
-
-        missionService.endMission(lobbyCode, hostId);
+            missionService.changeTeamMissionsState(lobbyCode, hostId, teamLabel, missions);
+        });
+        missionService.startLauncher(lobbyCode, hostId);
     }
 
-    @Test
-    void updateRessourceShouldSucceed() {
-        restTestClient.put()
-                .uri("/api/launchers/" + lobbyCode)
-                .body(Map.of(
-                        "clientId", teams.keySet().iterator().next().toString(),
-                        "resources", Map.of("ENERGY", 1, "HUMAN", 2, "CLOCK", 3)
-                ))
-                .exchange()
-                .expectStatus().isNoContent();
+    private RestTestClient.ResponseSpec updateResources(String lobby, UUID clientId, Map<String, Integer> resources) {
+        return restTestClient.put().uri(BASE_URI + "/" + lobby).body(Map.of("clientId", clientId.toString(), "resources", resources)).exchange();
     }
 
-    @Test
-    void updateRessourceShouldFailWithInvalidLobbyCode() {
-        restTestClient.put()
-                .uri("/api/launchers/INVALID")
-                .body(Map.of(
-                        "clientId", teams.keySet().iterator().next().toString(),
-                        "resources", Map.of("ENERGY", 1, "HUMAN", 2, "CLOCK", 3)
-                ))
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.detail")
-                .isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
-    }
-
-    @Test
-    void updateRessourceShouldFailWithInvalidUuid() {
-        restTestClient.put()
-                .uri("/api/launchers/" + lobbyCode)
-                .body(Map.of(
-                        "clientId", UUID.randomUUID().toString(),
-                        "resources", Map.of("ENERGY", 1, "HUMAN", 2, "CLOCK", 3)
-                ))
-                .exchange()
-                .expectStatus().isForbidden()
-                .expectBody()
-                .jsonPath("$.detail")
-                .isEqualTo(ErrorKeys.CLIENT_NOT_IN_LOBBY);
-    }
-
-    @Test
-    void updateRessourceShouldFailWithInvalidResource() {
-        restTestClient.put()
-                .uri("/api/launchers/" + lobbyCode)
-                .body(Map.of(
-                        "clientId", teams.keySet().iterator().next().toString(),
-                        "resources", Map.of("WOOD", 1)
-                ))
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.detail")
-                .isEqualTo(ErrorKeys.INVALID_RESOURCE_TYPE);
-    }
-
-    @Test
-    void getScoreShouldSucceed() {
-        restTestClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/api/launchers/{lobbyCode}/score")
-                        .queryParam("hostId", hostId.toString())
-                        .build(lobbyCode))
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.score")
-                .isNumber();
-    }
-
-    @Test
-    void getScoreShouldFailWithInvalidLobbyCode() {
-        restTestClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/api/launchers/{lobbyCode}/score")
-                        .queryParam("hostId", hostId.toString())
-                        .build("INVALID"))
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.detail")
-                .isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
-    }
-
-    @Test
-    void getScoreShouldFailWithInvalidUuid() {
-        restTestClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/api/launchers/{lobbyCode}/score")
-                        .queryParam("hostId", UUID.randomUUID().toString())
-                        .build(lobbyCode))
-                .exchange()
-                .expectStatus().isForbidden()
-                .expectBody()
-                .jsonPath("$.detail")
-                .isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
+    private RestTestClient.ResponseSpec getScore(String lobby, UUID hostId) {
+        return restTestClient.get().uri(uriBuilder -> uriBuilder.path(BASE_URI + "/{lobbyCode}/score").queryParam("hostId", hostId.toString()).build(lobby)).exchange();
     }
 }

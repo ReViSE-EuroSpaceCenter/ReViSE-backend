@@ -1,7 +1,9 @@
 package be.eurospacecenter.revise.service;
 
-import be.eurospacecenter.revise.config.AppMetrics;
+import be.eurospacecenter.revise.metric.MetricType;
+import be.eurospacecenter.revise.metric.RecordMetric;
 import be.eurospacecenter.revise.model.GameInfo;
+import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,30 +21,28 @@ public class CleaningService {
     private final LobbyService lobbyService;
     private final List<Cleanable> cleanable;
 
-    private final AppMetrics metrics;
-
-    public CleaningService(LobbyService lobbyService, List<Cleanable> cleanable, AppMetrics metrics) {
+    public CleaningService(LobbyService lobbyService, List<Cleanable> cleanable) {
         this.lobbyService = lobbyService;
         this.cleanable = cleanable;
-        this.metrics = metrics;
     }
 
+    @RecordMetric(MetricType.LOBBY_CLEARED)
     @Scheduled(cron = "0 0 */12 * * *")
-    protected void clearLobbies() {
-        List<String> toRemove = new ArrayList<>();
+    protected int clearLobbies() {
+        List<LobbyCode> toRemove = new ArrayList<>();
 
         lobbyService.lobbies.forEach((code, lobby) -> {
             GameInfo gameInfo = lobby.getGameInfo();
 
             if (LocalDateTime.now().isAfter(gameInfo.getExpiresAt())) {
                 toRemove.add(code);
-                metrics.lobbyCleared();
             }
         });
 
         cleanable.forEach(c -> c.cleanUp(toRemove));
-
         logger.info("Clearing {} games", toRemove.size());
+
+        return toRemove.size();
     }
 
 }
