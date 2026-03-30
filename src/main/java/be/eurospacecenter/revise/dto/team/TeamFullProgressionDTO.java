@@ -6,7 +6,7 @@ import java.util.Map;
 
 public record TeamFullProgressionDTO(
         Map<String, Boolean> completedMissions,
-        TeamProgressionDTO teamProgressionDTO
+        TeamProgressionDTO teamProgression
 ) {
     public static TeamFullProgressionDTO fromTeamFullProgression(TeamFullProgression teamFullProgression) {
         TeamProgressionDTO teamProgressionDTO = TeamProgressionDTO.fromTeamProgression(teamFullProgression.teamProgression());

@@ -123,7 +123,7 @@ class MissionControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.completedMissions").exists()
-                .jsonPath("$.teamProgressionDTO").exists();
+                .jsonPath("$.teamProgression").exists();
     }
 
     @Test
