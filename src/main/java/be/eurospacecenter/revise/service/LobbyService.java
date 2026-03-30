@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class LobbyService implements Cleanable {
 
-    protected final Map<LobbyCode, Lobby> lobbies = new ConcurrentHashMap<>();
+    final Map<LobbyCode, Lobby> lobbies = new ConcurrentHashMap<>();
 
     private final LobbyCodeGenerator lobbyCodeGenerator;
     private final MissionService missionService;
@@ -71,6 +71,10 @@ public class LobbyService implements Cleanable {
         missionService.registerManager(lobbyCode, lobby.getGameInfo());
 
         notifier.notifyGameStarted(lobbyCode);
+    }
+
+    void addLobby(LobbyCode lobbyCode, Lobby lobby) {
+        lobbies.put(lobbyCode, lobby);
     }
 
     private Lobby getLobby(LobbyCode lobbyCode) {
