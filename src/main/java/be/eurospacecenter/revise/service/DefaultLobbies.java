@@ -55,7 +55,7 @@ public class DefaultLobbies implements CommandLineRunner {
 
     private void setupLobby(LobbyCode lobbyCode, UUID hostId, int teamCount) {
         Lobby lobby = new Lobby(new Host(hostId), teamCount, LocalDateTime.now().plusYears(10));
-        lobbyService.lobbies.put(lobbyCode, lobby);
+        lobbyService.addLobby(lobbyCode, lobby);
 
         Set<TeamLabel> allowedLabels = TeamLabel.getAllowedLabels(teamCount == FOUR_TEAMS);
 
