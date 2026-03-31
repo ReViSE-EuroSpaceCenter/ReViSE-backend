@@ -14,7 +14,7 @@ This repository contains the backend of the online version of ReViSE, which is b
 
 ## Getting Started
 To run the backend locally, follow these steps:
-1. **Clone the main repository:**
+1. **Clone the project repository:**
    ```bash
    git clone https://github.com/ReViSE-EuroSpaceCenter/ReViSE-backend
     ```
