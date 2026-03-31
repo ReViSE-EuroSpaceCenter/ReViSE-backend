@@ -56,7 +56,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-            <version>3.5.12</version>
+            <version>3.5.13</version>
         </dependency>
 
         <dependency>
