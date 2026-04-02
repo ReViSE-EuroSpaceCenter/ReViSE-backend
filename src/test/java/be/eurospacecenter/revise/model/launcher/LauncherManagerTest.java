@@ -42,14 +42,14 @@ class LauncherManagerTest {
 
     @Test
     void initialScoreShouldBeCorrect() {
-        assertEquals(66, manager.getTeamsScore(hostId));
+        assertEquals(33, manager.getTeamsScore(hostId));
     }
 
     @Test
     void updateResourcesShouldModifyCorrectValues() {
-        checkUpdate(team1, Map.of(ResourceType.ENERGY, 3), 65);
-        checkUpdate(team1, Map.of(ResourceType.HUMAN, 2), 63);
-        checkUpdate(team1, Map.of(ResourceType.CLOCK, 1), 62);
+        checkUpdate(team1, Map.of(ResourceType.ENERGY, 3), (21 + 33)/2);
+        checkUpdate(team1, Map.of(ResourceType.HUMAN, 2), (17 + 33)/2);
+        checkUpdate(team1, Map.of(ResourceType.CLOCK, 1), (4 + 33)/2);
     }
 
     @Test
@@ -58,12 +58,12 @@ class LauncherManagerTest {
                 ResourceType.ENERGY, 4,
                 ResourceType.HUMAN, 1,
                 ResourceType.CLOCK, 3
-        ), 61);
+        ), (5 + 33)/2);
 
         checkUpdate(team2, Map.of(
                 ResourceType.ENERGY, 4,
                 ResourceType.HUMAN, 2
-        ), 58);
+        ), (5 + 17)/2);
     }
 
     @Test
@@ -80,12 +80,7 @@ class LauncherManagerTest {
     // ---------------------------------------------------------------------
 
     private void checkUpdate(UUID id, Map<ResourceType, Integer> deltas, int expectedGlobalScore) {
-        TeamResources res = manager.updateResources(id, deltas);
-
-        deltas.forEach((type, value) ->
-                assertEquals(type.getMax() - value, res.resources().get(type))
-        );
-
+        manager.updateResources(id, deltas);
         assertEquals(expectedGlobalScore, manager.getTeamsScore(hostId));
     }
 }

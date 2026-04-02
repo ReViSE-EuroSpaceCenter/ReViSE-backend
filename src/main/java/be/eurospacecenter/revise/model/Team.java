@@ -64,8 +64,8 @@ public class Team {
         return missions.getFullProgression(label);
     }
 
-    public TeamResources updateResources(Map<ResourceType, Integer> toRemove) {
-        Map<ResourceType, Integer> resourcesMap = this.resources.update(toRemove);
+    public TeamResources updateResources(Map<ResourceType, Integer> newResources) {
+        Map<ResourceType, Integer> resourcesMap = this.resources.update(newResources);
         return new TeamResources(label, resourcesMap);
     }
 

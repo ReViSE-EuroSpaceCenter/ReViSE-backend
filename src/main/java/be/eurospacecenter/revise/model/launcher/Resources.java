@@ -22,18 +22,16 @@ public class Resources {
                 + resourcesMap.get(ResourceType.CLOCK);
     }
 
-    public Map<ResourceType, Integer> update(Map<ResourceType, Integer> toRemove) {
-        checkSufficientResources(toRemove);
-        toRemove.forEach((type, amount) ->
-                resourcesMap.merge(type, -amount, Integer::sum)
-        );
+    public Map<ResourceType, Integer> update(Map<ResourceType, Integer> newResources) {
+        checkSufficientResources(newResources);
+        resourcesMap.putAll(newResources);
         return Map.copyOf(resourcesMap);
     }
 
-    private void checkSufficientResources(Map<ResourceType, Integer> toRemove) {
-        toRemove.forEach((type, required) -> {
+    private void checkSufficientResources(Map<ResourceType, Integer> newResources) {
+        newResources.forEach((type, newAmount) -> {
             int current = resourcesMap.getOrDefault(type, 0);
-            if (current < required) {
+            if (current < newAmount) {
                 throw new InvalidLauncherOperationException(ErrorKeys.INSUFFICIENT_RESOURCES);
             }
         });

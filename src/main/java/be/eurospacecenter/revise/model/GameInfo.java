@@ -58,8 +58,7 @@ public class GameInfo {
     }
 
     public int getTeamsScore() {
-        return teams.values().stream()
-                .mapToInt(Team::score)
-                .sum();
+        int total = teams.values().stream().mapToInt(Team::score).sum();
+        return total / teams.size();
     }
 }

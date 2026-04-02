@@ -1,10 +1,10 @@
-package be.eurospacecenter.revise.model.lobby;
+package be.eurospacecenter.revise.model;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidLauncherOperationException;
 import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
-import be.eurospacecenter.revise.model.Team;
 import be.eurospacecenter.revise.model.launcher.ResourceType;
+import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,10 +89,13 @@ class TeamTest {
     @ParameterizedTest
     @EnumSource(ResourceType.class)
     void resourceLimitsValidation(ResourceType type) {
-        assertResourceError(Map.of(type, type.getMax() + 1));
+        assertDoesNotThrow(() -> team.updateResources(Map.of(type, type.getMax())));
+    }
 
-        team.updateResources(Map.of(type, type.getMax()));
-        assertResourceError(Map.of(type, 1));
+    @ParameterizedTest
+    @EnumSource(ResourceType.class)
+    void resourceOverLimitsValidation(ResourceType type) {
+        assertResourceError(Map.of(type, type.getMax() + 1));
     }
 
     // ---------------------------------------------------------------------
