@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class LobbyServiceTest {
+class LobbyManagerServiceTest {
 
     private LobbyService lobbyService;
     @Autowired private LobbyCodeGenerator lobbyCodeGenerator;
@@ -95,7 +95,7 @@ class LobbyServiceTest {
         assertError(NoAutoriseOperationException.class, ErrorKeys.ACTION_RESERVED_TO_HOST,
                 () -> lobbyService.startGame(code, UUID.randomUUID()));
 
-        assertError(NotFoundException.class, ErrorKeys.LOBBY_NOT_FOUND,
+        assertError(NotFoundException.class, ErrorKeys.LOBBY_MANAGER_NOT_FOUND,
                 () -> lobbyService.startGame(new LobbyCode("XXXXXX"), lobby.hostId()));
     }
 

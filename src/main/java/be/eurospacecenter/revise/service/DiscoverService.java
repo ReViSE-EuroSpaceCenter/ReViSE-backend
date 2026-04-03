@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.exceptions.InvalidGameStateException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.metric.MetricType;
 import be.eurospacecenter.revise.metric.RecordMetric;
@@ -67,7 +68,16 @@ public class DiscoverService implements Cleanable {
     }
 
     private DiscoverManager getManager(LobbyCode lobbyCode) {
-        return Optional.ofNullable(managers.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.DISCOVER_MANAGER_NOT_FOUND));
+        DiscoverManager manager = Optional.ofNullable(managers.get(lobbyCode))
+                .orElseThrow(() -> new NotFoundException(ErrorKeys.DISCOVER_MANAGER_NOT_FOUND));
+
+        GameState currentState = manager.getGameInfo().getState();
+
+        if (currentState != STATE) {
+            throw new InvalidGameStateException(currentState);
+        }
+
+        return manager;
     }
 
     @Override

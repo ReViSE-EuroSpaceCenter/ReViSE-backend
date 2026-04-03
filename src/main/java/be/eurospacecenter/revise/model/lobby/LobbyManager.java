@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Lobby {
+public class LobbyManager {
 
     private static final int TEAM_COUNT_FOUR = 4;
     private static final int TEAM_COUNT_SIX = 6;
@@ -17,7 +17,7 @@ public class Lobby {
     private final GameInfo gameInfo;
     private final boolean isFourTeamsMode;
 
-    public Lobby(Host host, int numberOfTeams, LocalDateTime createdAt) {
+    public LobbyManager(Host host, int numberOfTeams, LocalDateTime createdAt) {
         validateTeamCount(numberOfTeams);
 
         this.gameInfo = new GameInfo(host, createdAt);

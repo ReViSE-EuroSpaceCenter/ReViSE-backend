@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.exceptions.InvalidGameStateException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.metric.MetricType;
 import be.eurospacecenter.revise.metric.RecordMetric;
@@ -20,7 +21,7 @@ public class LobbyService implements Cleanable {
     // Will be used in US 1O7
     private static final GameState STATE = GameState.LOBBY;
 
-    final Map<LobbyCode, Lobby> managers = new ConcurrentHashMap<>();
+    final Map<LobbyCode, LobbyManager> managers = new ConcurrentHashMap<>();
 
     private final LobbyCodeGenerator lobbyCodeGenerator;
     private final MissionService missionService;
@@ -32,7 +33,7 @@ public class LobbyService implements Cleanable {
         this.lobbyCodeGenerator = lobbyCodeGenerator;
     }
 
-    public Lobby getLobbyInfo(LobbyCode lobbyCode) {
+    public LobbyManager getLobbyInfo(LobbyCode lobbyCode) {
         return getManager(lobbyCode);
     }
 
@@ -41,47 +42,56 @@ public class LobbyService implements Cleanable {
         LobbyCode lobbyCode = lobbyCodeGenerator.generate();
         Host host = new Host(UUID.randomUUID());
 
-        Lobby lobby = new Lobby(host, numberOfTeams, LocalDateTime.now());
-        managers.put(lobbyCode, lobby);
+        LobbyManager lobbyManager = new LobbyManager(host, numberOfTeams, LocalDateTime.now());
+        managers.put(lobbyCode, lobbyManager);
 
         return new LobbyCreation(lobbyCode, host.id());
     }
 
     @RecordMetric(MetricType.GAME_JOINED)
     public LobbyJoined joinLobby(LobbyCode lobbyCode) {
-        Lobby lobby = getManager(lobbyCode);
+        LobbyManager lobbyManager = getManager(lobbyCode);
         UUID clientId = UUID.randomUUID();
 
-        lobby.addTeam(clientId);
+        lobbyManager.addTeam(clientId);
         notifier.notifyClientJoined(lobbyCode);
 
-        return new LobbyJoined(clientId.toString(), lobby.getAvailableTeamLabels(), lobby.getAllTeamLabels());
+        return new LobbyJoined(clientId.toString(), lobbyManager.getAvailableTeamLabels(), lobbyManager.getAllTeamLabels());
     }
 
     public void assignTeam(LobbyCode lobbyCode, UUID clientId, TeamLabel teamLabel) {
-        Lobby lobby = getManager(lobbyCode);
+        LobbyManager lobbyManager = getManager(lobbyCode);
 
-        lobby.assignTeam(clientId, teamLabel);
+        lobbyManager.assignTeam(clientId, teamLabel);
 
         notifier.notifyTeamJoined(lobbyCode, teamLabel);
     }
 
     @RecordMetric(MetricType.GAME_STARTED)
     public void startGame(LobbyCode lobbyCode, UUID hostId) {
-        Lobby lobby = getManager(lobbyCode);
+        LobbyManager lobbyManager = getManager(lobbyCode);
 
-        lobby.startGame(hostId);
-        missionService.registerManager(lobbyCode, lobby.getGameInfo());
+        lobbyManager.startGame(hostId);
+        missionService.registerManager(lobbyCode, lobbyManager.getGameInfo());
 
         notifier.notifyGameStarted(lobbyCode);
     }
 
-    void addLobby(LobbyCode lobbyCode, Lobby lobby) {
-        managers.put(lobbyCode, lobby);
+    void addLobby(LobbyCode lobbyCode, LobbyManager lobbyManager) {
+        managers.put(lobbyCode, lobbyManager);
     }
 
-    private Lobby getManager(LobbyCode lobbyCode) {
-        return Optional.ofNullable(managers.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.LOBBY_NOT_FOUND));
+    private LobbyManager getManager(LobbyCode lobbyCode) {
+        LobbyManager manager = Optional.ofNullable(managers.get(lobbyCode))
+                .orElseThrow(() -> new NotFoundException(ErrorKeys.LOBBY_MANAGER_NOT_FOUND));
+
+        GameState currentState = manager.getGameInfo().getState();
+
+        if (currentState != STATE) {
+            throw new InvalidGameStateException(currentState);
+        }
+
+        return manager;
     }
 
     @Override

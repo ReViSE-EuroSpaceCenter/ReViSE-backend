@@ -103,6 +103,9 @@ class DiscoverManagerControllerTest {
 
     @Test
     void endDiscover_ShouldNotSucceedWithUnknownHost() {
+        createLobbyAndHost();
+        joinClientAndStartGame();
+
         restTestClient.post()
                 .uri("/api/missions/" + lobbyCode.lobbyCode() + "/end")
                 .body(Map.of("hostId", UUID.randomUUID()))
@@ -119,6 +122,31 @@ class DiscoverManagerControllerTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
+    }
+
+    @Test
+    void illegalStateShouldBeReturnedWhenTryingToUpdateResourcesAfterDiscoverEnded() {
+        restTestClient.post()
+                .uri("/api/discover/" + lobbyCode.lobbyCode() + "/end")
+                .body(Map.of("hostId", hostId))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
+
+        updateResources(lobbyCode.lobbyCode(), validClientId, VALID_RESOURCES)
+                .expectStatus()
+                .is4xxClientError()
+                .expectBody().jsonPath("$.error").isEqualTo(ErrorKeys.INVALID_GAME_STATE);
+    }
+
+    @Test
+    void illegalStateShouldBeReturnedWhenTryingToChangeMissionStateAfterMissionEnded() {
+        restTestClient.put()
+                .uri("/api/missions/" + lobbyCode.lobbyCode())
+                .body(Map.of("id", validClientId, "updateMissions", Set.of("CLASSIC_1")))
+                .exchange().expectStatus()
+                .is4xxClientError()
+                .expectBody().jsonPath("$.error").isEqualTo(ErrorKeys.INVALID_GAME_STATE);
     }
 
     // ---------------------------------------------------------------------
