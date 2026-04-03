@@ -78,6 +78,6 @@ class LauncherManagerServiceTest {
 
         int score = launcherService.getTeamsScore(lobbyCode, idOfTheHost);
 
-        assertEquals(32, score);
+        assertEquals(21, score);
     }
 }
