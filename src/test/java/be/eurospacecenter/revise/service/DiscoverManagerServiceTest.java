@@ -4,6 +4,7 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.GameInfo;
+import be.eurospacecenter.revise.model.GameState;
 import be.eurospacecenter.revise.model.discover.ResourceType;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.Team;
@@ -48,6 +49,7 @@ class DiscoverManagerServiceTest {
 
         GameInfo gameInfo = new GameInfo(new Host(idOfTheHost), LocalDateTime.now());
         gameInfo.addTeam(new Team(TeamLabel.EXPE, idOfTheLoneTeam));
+        gameInfo.changeState(GameState.MISSION);
         gameInfoWithOneLoneTeam = gameInfo;
     }
 
@@ -118,6 +120,4 @@ class DiscoverManagerServiceTest {
                 () -> discoverService.endDiscover(lobbyCode, newId)
         );
     }
-
-
 }

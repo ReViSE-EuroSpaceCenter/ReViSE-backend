@@ -3,6 +3,7 @@ package be.eurospacecenter.revise.model.discover;
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.model.GameInfo;
+import be.eurospacecenter.revise.model.GameState;
 
 import java.util.Map;
 import java.util.UUID;
@@ -28,9 +29,11 @@ public class DiscoverManager {
         return gameInfo.getTeamsScore();
     }
 
-    public void validateEndOfMission(UUID hostId) {
+    public void endDiscover(UUID hostId) {
         if (gameInfo.isNotHost(hostId)) {
             throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
         }
+
+        gameInfo.changeState(GameState.END);
     }
 }

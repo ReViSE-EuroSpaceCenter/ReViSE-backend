@@ -4,6 +4,7 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.metric.MetricType;
 import be.eurospacecenter.revise.metric.RecordMetric;
+import be.eurospacecenter.revise.model.GameState;
 import be.eurospacecenter.revise.model.lobby.*;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCodeGenerator;
@@ -16,6 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class LobbyService implements Cleanable {
+    // Will be used in US 1O7
+    private static final GameState STATE = GameState.LOBBY;
 
     final Map<LobbyCode, Lobby> managers = new ConcurrentHashMap<>();
 

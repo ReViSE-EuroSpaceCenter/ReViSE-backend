@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class MissionService implements Cleanable {
 
+    private static final GameState STATE = GameState.MISSION;
+
     final Map<LobbyCode, MissionManager> managers = new ConcurrentHashMap<>();
 
     private final MissionNotifier notifier;
@@ -29,6 +31,8 @@ public class MissionService implements Cleanable {
         if (lobbyCode == null) {
             throw new IllegalArgumentException(ErrorKeys.INVALID_LOBBY_CODE);
         }
+
+        gameInfo.changeState(STATE);
 
         managers.put(lobbyCode, new MissionManager(gameInfo));
     }

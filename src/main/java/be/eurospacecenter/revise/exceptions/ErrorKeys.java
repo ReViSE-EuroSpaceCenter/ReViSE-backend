@@ -22,4 +22,5 @@ public final class ErrorKeys {
     public static final String TEAM_NOT_FOUND = "teamNotFound";
     public static final String DISCOVER_MANAGER_NOT_FOUND = "discoverNotFound";
     public static final String DISCOVER_START_INCOMPLETE_MISSIONS = "discoverStartIncompleteMissions";
+    public static final String INVALID_GAME_STATE_TRANSITION = "invalidGameStateTransition";
 }

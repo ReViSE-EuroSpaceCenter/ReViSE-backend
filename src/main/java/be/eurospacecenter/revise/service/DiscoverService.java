@@ -5,6 +5,7 @@ import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.metric.MetricType;
 import be.eurospacecenter.revise.metric.RecordMetric;
 import be.eurospacecenter.revise.model.GameInfo;
+import be.eurospacecenter.revise.model.GameState;
 import be.eurospacecenter.revise.model.discover.DiscoverManager;
 
 import be.eurospacecenter.revise.model.discover.ResourceType;
@@ -22,6 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class DiscoverService implements Cleanable {
 
+    private static final GameState STATE = GameState.DISCOVER;
+
     final Map<LobbyCode, DiscoverManager> managers = new ConcurrentHashMap<>();
 
     private final DiscoverNotifier notifier;
@@ -34,6 +37,9 @@ public class DiscoverService implements Cleanable {
         if (lobbyCode == null) {
             throw new IllegalArgumentException(ErrorKeys.INVALID_LOBBY_CODE);
         }
+
+        gameInfo.changeState(STATE);
+
         managers.put(lobbyCode, new DiscoverManager(gameInfo));
     }
 
@@ -55,7 +61,7 @@ public class DiscoverService implements Cleanable {
     public void endDiscover(LobbyCode lobbyCode, UUID hostId) {
         DiscoverManager discoverManager = getManager(lobbyCode);
 
-        discoverManager.validateEndOfMission(hostId);
+        discoverManager.endDiscover(hostId);
 
         notifier.notifyDiscoverEnded(lobbyCode);
     }
