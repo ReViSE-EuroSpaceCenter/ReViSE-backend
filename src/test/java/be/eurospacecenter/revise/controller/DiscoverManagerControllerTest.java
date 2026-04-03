@@ -91,6 +91,36 @@ class DiscoverManagerControllerTest {
         getScore(lobbyCode.lobbyCode(), UUID.randomUUID()).expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
     }
 
+    @Test
+    void endDiscover_ShouldSucceed_WithValidLobbyCodeHostId() {
+        restTestClient.post()
+                .uri("/api/discover/" + lobbyCode.lobbyCode() + "/end")
+                .body(Map.of("hostId", hostId))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
+    }
+
+    @Test
+    void endDiscover_ShouldNotSucceedWithUnknownHost() {
+        restTestClient.post()
+                .uri("/api/missions/" + lobbyCode.lobbyCode() + "/end")
+                .body(Map.of("hostId", UUID.randomUUID()))
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+
+    @Test
+    void endDiscover_ShouldNotSucceedWithInvalidLobbyCode() {
+        restTestClient.post()
+                .uri("/api/discover/INVALID/end")
+                .body(Map.of("hostId", hostId))
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
+
     // ---------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------
@@ -122,7 +152,7 @@ class DiscoverManagerControllerTest {
             }
             missionService.changeTeamMissionsState(lobbyCode, hostId, teamLabel, missions);
         });
-        missionService.startDiscover(lobbyCode, hostId);
+        missionService.endMission(lobbyCode, hostId);
     }
 
     private RestTestClient.ResponseSpec updateResources(String lobby, UUID clientId, Map<String, Integer> resources) {

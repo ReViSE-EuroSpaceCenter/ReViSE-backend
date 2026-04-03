@@ -42,10 +42,10 @@ class MetricsAspectTest {
 
         int count = testService.clearLobbies() + testService.clearLobbiesWithCount(2);
 
-        assertMetric(MetricType.LOBBY_CREATED, 1.0);
-        assertMetric(MetricType.LOBBY_JOINED, 2.0);
-        assertMetric(MetricType.LOBBY_STARTED, 1.0);
-        assertMetric(MetricType.LOBBY_CLEARED, count);
+        assertMetric(MetricType.GAME_CREATED, 1.0);
+        assertMetric(MetricType.GAME_JOINED, 2.0);
+        assertMetric(MetricType.GAME_STARTED, 1.0);
+        assertMetric(MetricType.GAME_CLEARED, count);
     }
 
     // ---------------------------------------------------------------------
@@ -71,27 +71,27 @@ class MetricsAspectTest {
     }
 
     static class TestServiceImpl implements TestService {
-        @RecordMetric(MetricType.LOBBY_CREATED)
+        @RecordMetric(MetricType.GAME_CREATED)
         public void createLobby() {
             // Placeholder for lobby creation logic
         }
 
-        @RecordMetric(MetricType.LOBBY_JOINED)
+        @RecordMetric(MetricType.GAME_JOINED)
         public void joinLobby() {
             // Placeholder for lobby joining logic
         }
 
-        @RecordMetric(MetricType.LOBBY_STARTED)
+        @RecordMetric(MetricType.GAME_STARTED)
         public void startGame() {
             // Placeholder for lobby starting logic
         }
 
-        @RecordMetric(MetricType.LOBBY_CLEARED)
+        @RecordMetric(MetricType.GAME_CLEARED)
         public int clearLobbies() {
             return 1;
         }
 
-        @RecordMetric(MetricType.LOBBY_CLEARED)
+        @RecordMetric(MetricType.GAME_CLEARED)
         public int clearLobbiesWithCount(int count) {
             return count;
         }

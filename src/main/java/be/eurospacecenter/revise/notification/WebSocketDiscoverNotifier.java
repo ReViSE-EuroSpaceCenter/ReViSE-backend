@@ -28,4 +28,13 @@ public class WebSocketDiscoverNotifier implements DiscoverNotifier {
         messagingTemplate.convertAndSend(DISCOVER_TOPIC_PREFIX + lobbyCode.lobbyCode(), event);
         logger.info("RESOURCE_UPDATED event sent successfully");
     }
+
+    @Override
+    public void notifyDiscoverEnded(LobbyCode lobbyCode) {
+        logger.info("Sending DISCOVER_ENDED event for discovery: {}", lobbyCode.lobbyCode());
+        DiscoverEvent event = new DiscoverEvent(DiscoverEventType.DISCOVER_ENDED, null);
+
+        messagingTemplate.convertAndSend(DISCOVER_TOPIC_PREFIX + lobbyCode.lobbyCode(), event);
+        logger.info("DISCOVER_ENDED event sent successfully");
+    }
 }

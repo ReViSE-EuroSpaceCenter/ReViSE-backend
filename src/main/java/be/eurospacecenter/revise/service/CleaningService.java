@@ -26,7 +26,7 @@ public class CleaningService {
         this.cleanable = cleanable;
     }
 
-    @RecordMetric(MetricType.LOBBY_CLEARED)
+    @RecordMetric(MetricType.GAME_CLEARED)
     @Scheduled(cron = "0 0 */12 * * *")
     protected int clearLobbies() {
         List<LobbyCode> toRemove = new ArrayList<>();

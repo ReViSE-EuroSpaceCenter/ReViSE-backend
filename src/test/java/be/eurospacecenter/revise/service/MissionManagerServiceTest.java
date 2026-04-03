@@ -199,7 +199,7 @@ class MissionManagerServiceTest {
             missionService.changeTeamMissionsState(lobbyCode, idOfTheLoneTeam, null, Set.of(missionType));
         }
 
-        assertDoesNotThrow(() -> missionService.startDiscover(lobbyCode, gameInfoWithOneLoneTeam.getHostId()));
+        assertDoesNotThrow(() -> missionService.endMission(lobbyCode, gameInfoWithOneLoneTeam.getHostId()));
     }
 
     @Test
@@ -210,7 +210,7 @@ class MissionManagerServiceTest {
         UUID nonHostId = UUID.randomUUID();
 
         NoAutoriseOperationException ex = assertThrows(NoAutoriseOperationException.class,
-                () -> missionService.startDiscover(lobbyCode, nonHostId)
+                () -> missionService.endMission(lobbyCode, nonHostId)
         );
         assertEquals(ErrorKeys.ACTION_RESERVED_TO_HOST, ex.getMessage());
     }
@@ -234,7 +234,7 @@ class MissionManagerServiceTest {
         UUID hostId = gameInfoWithOneLoneTeam.getHostId();
 
         InvalidMissionOperationException ex = assertThrows(InvalidMissionOperationException.class,
-                () -> missionService.startDiscover(lobbyCode, hostId)
+                () -> missionService.endMission(lobbyCode, hostId)
         );
         assertEquals(ErrorKeys.DISCOVER_START_INCOMPLETE_MISSIONS, ex.getMessage());
     }

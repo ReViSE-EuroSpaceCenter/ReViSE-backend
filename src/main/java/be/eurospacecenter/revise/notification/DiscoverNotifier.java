@@ -5,4 +5,5 @@ import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 
 public interface DiscoverNotifier {
     void notifyResourcesUpdated(LobbyCode lobbyCode, TeamResources teamResources);
+    void notifyDiscoverEnded(LobbyCode lobbyCode);
 }

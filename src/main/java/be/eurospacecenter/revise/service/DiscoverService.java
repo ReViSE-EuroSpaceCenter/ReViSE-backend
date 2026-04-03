@@ -2,6 +2,8 @@ package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
+import be.eurospacecenter.revise.metric.MetricType;
+import be.eurospacecenter.revise.metric.RecordMetric;
 import be.eurospacecenter.revise.model.GameInfo;
 import be.eurospacecenter.revise.model.discover.DiscoverManager;
 
@@ -20,7 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class DiscoverService implements Cleanable {
 
-    protected final Map<LobbyCode, DiscoverManager> managers = new ConcurrentHashMap<>();
+    final Map<LobbyCode, DiscoverManager> managers = new ConcurrentHashMap<>();
+
     private final DiscoverNotifier notifier;
 
     public DiscoverService(DiscoverNotifier notifier) {
@@ -46,6 +49,15 @@ public class DiscoverService implements Cleanable {
         DiscoverManager discoverManager = getManager(lobbyCode);
 
         return discoverManager.getTeamsScore(hostId);
+    }
+
+    @RecordMetric(MetricType.GAME_ENDED)
+    public void endDiscover(LobbyCode lobbyCode, UUID hostId) {
+        DiscoverManager discoverManager = getManager(lobbyCode);
+
+        discoverManager.validateEndOfMission(hostId);
+
+        notifier.notifyDiscoverEnded(lobbyCode);
     }
 
     private DiscoverManager getManager(LobbyCode lobbyCode) {

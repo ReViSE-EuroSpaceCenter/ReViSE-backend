@@ -27,4 +27,10 @@ public class DiscoverManager {
         }
         return gameInfo.getTeamsScore();
     }
+
+    public void validateEndOfMission(UUID hostId) {
+        if (gameInfo.isNotHost(hostId)) {
+            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
+        }
+    }
 }

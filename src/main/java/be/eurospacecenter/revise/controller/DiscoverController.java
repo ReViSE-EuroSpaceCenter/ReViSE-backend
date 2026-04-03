@@ -1,5 +1,6 @@
 package be.eurospacecenter.revise.controller;
 
+import be.eurospacecenter.revise.dto.request.EndDTO;
 import be.eurospacecenter.revise.dto.request.ResourceUpdateDTO;
 import be.eurospacecenter.revise.dto.discover.ScoreDTO;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
@@ -48,5 +49,17 @@ public class DiscoverController {
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
         discoverService.updateResources(code, request.clientId(), request.resources());
+    }
+
+    @PostMapping("/{lobbyCode}/end")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void endMission(
+            @PathVariable String lobbyCode,
+
+            @RequestBody @Valid
+            EndDTO request
+    ) {
+        LobbyCode code = new LobbyCode(lobbyCode);
+        discoverService.endDiscover(code, request.hostId());
     }
 }

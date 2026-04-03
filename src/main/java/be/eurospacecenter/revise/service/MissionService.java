@@ -15,7 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class MissionService implements Cleanable {
 
-    protected final Map<LobbyCode, MissionManager> managers = new ConcurrentHashMap<>();
+    final Map<LobbyCode, MissionManager> managers = new ConcurrentHashMap<>();
+
     private final MissionNotifier notifier;
     private final DiscoverService discoverService;
 
@@ -53,7 +54,7 @@ public class MissionService implements Cleanable {
         return manager.getTeamFullProgression(clientId);
     }
 
-    public void startDiscover(LobbyCode lobbyCode, UUID hostId) {
+    public void endMission(LobbyCode lobbyCode, UUID hostId) {
         MissionManager manager = getManager(lobbyCode);
 
         manager.validateEndOfMission(hostId);

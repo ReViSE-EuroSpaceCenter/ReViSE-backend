@@ -31,23 +31,23 @@ class AppMetricsTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1, 5, 0, 10})
-    void testLobbyClearedIncrementsCounter(int count) {
-        appMetrics.lobbyCleared(count);
+    void testGameClearedIncrementsCounter(int count) {
+        appMetrics.gameCleared(count);
 
-        var counter = meterRegistry.find(MetricType.LOBBY_CLEARED.metricKey).counter();
+        var counter = meterRegistry.find(MetricType.GAME_CLEARED.metricKey).counter();
         assertNotNull(counter, "Counter should be registered");
         assertEquals(count, counter.count());
     }
 
     @Test
-    void testLobbyClearedMultipleCalls() {
+    void testGameClearedMultipleCalls() {
         int count1 = 2;
         int count2 = 3;
 
-        appMetrics.lobbyCleared(count1);
-        appMetrics.lobbyCleared(count2);
+        appMetrics.gameCleared(count1);
+        appMetrics.gameCleared(count2);
 
-        var counter = meterRegistry.find(MetricType.LOBBY_CLEARED.metricKey).counter();
+        var counter = meterRegistry.find(MetricType.GAME_CLEARED.metricKey).counter();
         assertNotNull(counter, "Counter should be registered");
         assertEquals(5.0, counter.count());
     }

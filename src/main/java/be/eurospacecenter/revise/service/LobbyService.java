@@ -33,7 +33,7 @@ public class LobbyService implements Cleanable {
         return getManager(lobbyCode);
     }
 
-    @RecordMetric(MetricType.LOBBY_CREATED)
+    @RecordMetric(MetricType.GAME_CREATED)
     public LobbyCreation createLobby(int numberOfTeams) {
         LobbyCode lobbyCode = lobbyCodeGenerator.generate();
         Host host = new Host(UUID.randomUUID());
@@ -44,7 +44,7 @@ public class LobbyService implements Cleanable {
         return new LobbyCreation(lobbyCode, host.id());
     }
 
-    @RecordMetric(MetricType.LOBBY_JOINED)
+    @RecordMetric(MetricType.GAME_JOINED)
     public LobbyJoined joinLobby(LobbyCode lobbyCode) {
         Lobby lobby = getManager(lobbyCode);
         UUID clientId = UUID.randomUUID();
@@ -63,7 +63,7 @@ public class LobbyService implements Cleanable {
         notifier.notifyTeamJoined(lobbyCode, teamLabel);
     }
 
-    @RecordMetric(MetricType.LOBBY_STARTED)
+    @RecordMetric(MetricType.GAME_STARTED)
     public void startGame(LobbyCode lobbyCode, UUID hostId) {
         Lobby lobby = getManager(lobbyCode);
 
