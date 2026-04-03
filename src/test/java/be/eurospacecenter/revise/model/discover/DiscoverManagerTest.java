@@ -1,4 +1,4 @@
-package be.eurospacecenter.revise.model.launcher;
+package be.eurospacecenter.revise.model.discover;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
@@ -17,9 +17,9 @@ import java.util.UUID;
 import static be.eurospacecenter.revise.ErrorHelpere.assertError;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class LauncherManagerTest {
+class DiscoverManagerTest {
 
-    private LauncherManager manager;
+    private DiscoverManager manager;
     private final UUID team1 = UUID.randomUUID();
     private final UUID team2 = UUID.randomUUID();
     private final UUID hostId = UUID.randomUUID();
@@ -33,7 +33,7 @@ class LauncherManagerTest {
         GameInfo info = new GameInfo(new Host(hostId), LocalDateTime.now());
         info.addTeam(new Team(TeamLabel.EXPE, team1));
         info.addTeam(new Team(TeamLabel.MECA, team2));
-        manager = new LauncherManager(info);
+        manager = new DiscoverManager(info);
     }
 
     // ---------------------------------------------------------------------

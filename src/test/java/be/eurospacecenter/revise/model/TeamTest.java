@@ -1,9 +1,9 @@
 package be.eurospacecenter.revise.model;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
-import be.eurospacecenter.revise.exceptions.InvalidLauncherOperationException;
+import be.eurospacecenter.revise.exceptions.InvalidDiscoverOperationException;
 import be.eurospacecenter.revise.exceptions.InvalidMissionOperationException;
-import be.eurospacecenter.revise.model.launcher.ResourceType;
+import be.eurospacecenter.revise.model.discover.ResourceType;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.model.mission.TeamProgression;
@@ -103,8 +103,8 @@ class TeamTest {
     // ---------------------------------------------------------------------
 
     private void assertResourceError(Map<ResourceType, Integer> resources) {
-        InvalidLauncherOperationException ex = assertThrows(
-                InvalidLauncherOperationException.class,
+        InvalidDiscoverOperationException ex = assertThrows(
+                InvalidDiscoverOperationException.class,
                 () -> team.updateResources(resources)
         );
         assertEquals(ErrorKeys.INSUFFICIENT_RESOURCES, ex.getMessage());

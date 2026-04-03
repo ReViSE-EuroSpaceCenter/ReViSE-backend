@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-class LauncherManagerControllerTest {
+class DiscoverManagerControllerTest {
 
-    private static final String BASE_URI = "/api/launchers";
+    private static final String BASE_URI = "/api/discover";
     private static final Map<String, Integer> VALID_RESOURCES = Map.of("ENERGY", 1, "HUMAN", 2, "CLOCK", 3);
 
     @Autowired
@@ -122,7 +122,7 @@ class LauncherManagerControllerTest {
             }
             missionService.changeTeamMissionsState(lobbyCode, hostId, teamLabel, missions);
         });
-        missionService.startLauncher(lobbyCode, hostId);
+        missionService.startDiscover(lobbyCode, hostId);
     }
 
     private RestTestClient.ResponseSpec updateResources(String lobby, UUID clientId, Map<String, Integer> resources) {

@@ -17,11 +17,11 @@ public class MissionService implements Cleanable {
 
     protected final Map<LobbyCode, MissionManager> managers = new ConcurrentHashMap<>();
     private final MissionNotifier notifier;
-    private final LauncherService launcherService;
+    private final DiscoverService discoverService;
 
-    public MissionService(MissionNotifier notifier, LauncherService launcherService) {
+    public MissionService(MissionNotifier notifier, DiscoverService discoverService) {
         this.notifier = notifier;
-        this.launcherService = launcherService;
+        this.discoverService = discoverService;
     }
 
     public void registerManager(LobbyCode lobbyCode, GameInfo gameInfo) {
@@ -53,11 +53,11 @@ public class MissionService implements Cleanable {
         return manager.getTeamFullProgression(clientId);
     }
 
-    public void startLauncher(LobbyCode lobbyCode, UUID hostId) {
+    public void startDiscover(LobbyCode lobbyCode, UUID hostId) {
         MissionManager manager = getManager(lobbyCode);
 
         manager.validateEndOfMission(hostId);
-        launcherService.registerLauncher(lobbyCode, manager.getGameInfo());
+        discoverService.registerDiscover(lobbyCode, manager.getGameInfo());
 
         notifier.notifyMissionEnded(lobbyCode);
     }

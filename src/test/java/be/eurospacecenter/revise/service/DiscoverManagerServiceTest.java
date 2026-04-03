@@ -2,7 +2,7 @@ package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.model.GameInfo;
-import be.eurospacecenter.revise.model.launcher.ResourceType;
+import be.eurospacecenter.revise.model.discover.ResourceType;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.Team;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-class LauncherManagerServiceTest {
+class DiscoverManagerServiceTest {
 
     @Autowired
-    private LauncherService launcherService;
+    private DiscoverService discoverService;
     private GameInfo gameInfoWithOneLoneTeam;
     private UUID idOfTheHost;
     private UUID idOfTheLoneTeam;
@@ -36,7 +36,7 @@ class LauncherManagerServiceTest {
 
     @BeforeEach
     void setUp() {
-        launcherService.launchers.clear();
+        discoverService.managers.clear();
         idOfTheLoneTeam = UUID.randomUUID();
         idOfTheHost = UUID.randomUUID();
 
@@ -50,33 +50,33 @@ class LauncherManagerServiceTest {
     // ---------------------------------------------------------------------
 
     @Test
-    void registerLauncherWithNullLobbyCode() {
+    void registerDiscoverWithNullLobbyCode() {
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () -> launcherService.registerLauncher(null, gameInfoWithOneLoneTeam)
+                () -> discoverService.registerDiscover(null, gameInfoWithOneLoneTeam)
         );
 
         assertEquals(ErrorKeys.INVALID_LOBBY_CODE, ex.getMessage());
     }
 
     @Test
-    void registerLauncherWithValidLobbyCode() {
+    void registerDiscoverWithValidLobbyCode() {
         LobbyCode lobbyCode = new LobbyCode("AAAAAA");
 
 
-        launcherService.registerLauncher(lobbyCode, gameInfoWithOneLoneTeam);
+        discoverService.registerDiscover(lobbyCode, gameInfoWithOneLoneTeam);
 
-        assertEquals(1, launcherService.launchers.size());
+        assertEquals(1, discoverService.managers.size());
     }
 
     @Test
     void updateResourcesWithValidLobbyCode() {
         LobbyCode lobbyCode = new LobbyCode("AAAAAA");
 
-        launcherService.registerLauncher(lobbyCode, gameInfoWithOneLoneTeam);
-        launcherService.updateResources(lobbyCode, idOfTheLoneTeam, Map.of(ResourceType.ENERGY, 4));
+        discoverService.registerDiscover(lobbyCode, gameInfoWithOneLoneTeam);
+        discoverService.updateResources(lobbyCode, idOfTheLoneTeam, Map.of(ResourceType.ENERGY, 4));
 
-        int score = launcherService.getTeamsScore(lobbyCode, idOfTheHost);
+        int score = discoverService.getTeamsScore(lobbyCode, idOfTheHost);
 
         assertEquals(21, score);
     }

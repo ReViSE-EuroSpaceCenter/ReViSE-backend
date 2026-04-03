@@ -1,4 +1,4 @@
-package be.eurospacecenter.revise.model.launcher;
+package be.eurospacecenter.revise.model.discover;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
@@ -7,10 +7,10 @@ import be.eurospacecenter.revise.model.GameInfo;
 import java.util.Map;
 import java.util.UUID;
 
-public class LauncherManager {
+public class DiscoverManager {
     private final GameInfo gameInfo;
 
-    public LauncherManager(GameInfo gameInfo) {
+    public DiscoverManager(GameInfo gameInfo) {
         this.gameInfo = gameInfo;
     }
 

@@ -28,7 +28,7 @@ To run the backend locally, follow these steps:
    ```
 5. **Run the application:**
    ```bash
-   mvn spring-boot:run
+   mvn spring-boot:run  
    ```
 
 ## Running Tests

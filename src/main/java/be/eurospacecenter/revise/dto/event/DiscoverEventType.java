@@ -1,5 +1,5 @@
 package be.eurospacecenter.revise.dto.event;
 
-public enum LauncherEventType {
+public enum DiscoverEventType {
     RESOURCE_UPDATED
 }

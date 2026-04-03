@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class LobbyService implements Cleanable {
 
-    final Map<LobbyCode, Lobby> lobbies = new ConcurrentHashMap<>();
+    final Map<LobbyCode, Lobby> managers = new ConcurrentHashMap<>();
 
     private final LobbyCodeGenerator lobbyCodeGenerator;
     private final MissionService missionService;
@@ -30,7 +30,7 @@ public class LobbyService implements Cleanable {
     }
 
     public Lobby getLobbyInfo(LobbyCode lobbyCode) {
-        return getLobby(lobbyCode);
+        return getManager(lobbyCode);
     }
 
     @RecordMetric(MetricType.LOBBY_CREATED)
@@ -39,14 +39,14 @@ public class LobbyService implements Cleanable {
         Host host = new Host(UUID.randomUUID());
 
         Lobby lobby = new Lobby(host, numberOfTeams, LocalDateTime.now());
-        lobbies.put(lobbyCode, lobby);
+        managers.put(lobbyCode, lobby);
 
         return new LobbyCreation(lobbyCode, host.id());
     }
 
     @RecordMetric(MetricType.LOBBY_JOINED)
     public LobbyJoined joinLobby(LobbyCode lobbyCode) {
-        Lobby lobby = getLobby(lobbyCode);
+        Lobby lobby = getManager(lobbyCode);
         UUID clientId = UUID.randomUUID();
 
         lobby.addTeam(clientId);
@@ -56,7 +56,7 @@ public class LobbyService implements Cleanable {
     }
 
     public void assignTeam(LobbyCode lobbyCode, UUID clientId, TeamLabel teamLabel) {
-        Lobby lobby = getLobby(lobbyCode);
+        Lobby lobby = getManager(lobbyCode);
 
         lobby.assignTeam(clientId, teamLabel);
 
@@ -65,7 +65,7 @@ public class LobbyService implements Cleanable {
 
     @RecordMetric(MetricType.LOBBY_STARTED)
     public void startGame(LobbyCode lobbyCode, UUID hostId) {
-        Lobby lobby = getLobby(lobbyCode);
+        Lobby lobby = getManager(lobbyCode);
 
         lobby.startGame(hostId);
         missionService.registerManager(lobbyCode, lobby.getGameInfo());
@@ -74,15 +74,15 @@ public class LobbyService implements Cleanable {
     }
 
     void addLobby(LobbyCode lobbyCode, Lobby lobby) {
-        lobbies.put(lobbyCode, lobby);
+        managers.put(lobbyCode, lobby);
     }
 
-    private Lobby getLobby(LobbyCode lobbyCode) {
-        return Optional.ofNullable(lobbies.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.LOBBY_NOT_FOUND));
+    private Lobby getManager(LobbyCode lobbyCode) {
+        return Optional.ofNullable(managers.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.LOBBY_NOT_FOUND));
     }
 
     @Override
     public void cleanUp(List<LobbyCode> toRemove) {
-        toRemove.forEach(lobbies::remove);
+        toRemove.forEach(managers::remove);
     }
 }

@@ -31,7 +31,7 @@ public class CleaningService {
     protected int clearLobbies() {
         List<LobbyCode> toRemove = new ArrayList<>();
 
-        lobbyService.lobbies.forEach((code, lobby) -> {
+        lobbyService.managers.forEach((code, lobby) -> {
             GameInfo gameInfo = lobby.getGameInfo();
 
             if (LocalDateTime.now().isAfter(gameInfo.getExpiresAt())) {

@@ -1,7 +1,7 @@
-package be.eurospacecenter.revise.model.launcher;
+package be.eurospacecenter.revise.model.discover;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
-import be.eurospacecenter.revise.exceptions.InvalidLauncherOperationException;
+import be.eurospacecenter.revise.exceptions.InvalidDiscoverOperationException;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -32,7 +32,7 @@ public class Resources {
         newResources.forEach((type, newAmount) -> {
             int current = resourcesMap.getOrDefault(type, 0);
             if (current < newAmount) {
-                throw new InvalidLauncherOperationException(ErrorKeys.INSUFFICIENT_RESOURCES);
+                throw new InvalidDiscoverOperationException(ErrorKeys.INSUFFICIENT_RESOURCES);
             }
         });
     }

@@ -1,4 +1,4 @@
-package be.eurospacecenter.revise.model.launcher;
+package be.eurospacecenter.revise.model.discover;
 
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 
