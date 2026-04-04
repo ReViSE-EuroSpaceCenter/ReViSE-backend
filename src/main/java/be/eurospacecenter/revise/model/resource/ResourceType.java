@@ -1,4 +1,4 @@
-package be.eurospacecenter.revise.model.discover;
+package be.eurospacecenter.revise.model.resource;
 
 public enum ResourceType {
     ENERGY(40),

@@ -35,17 +35,19 @@ class MetricsAspectTest {
 
     @Test
     void testComprehensiveMetricScenario() {
-        testService.createLobby();
-        testService.joinLobby();
-        testService.joinLobby();
-        testService.startGame();
+        testService.gameCreated();
+        testService.gameJoined();
+        testService.gameJoined();
+        testService.gameStarted();
+        testService.gameEnded();
 
-        int count = testService.clearLobbies() + testService.clearLobbiesWithCount(2);
+        int count = testService.gameCleared() + testService.gameClearedWithCount(2);
 
         assertMetric(MetricType.GAME_CREATED, 1.0);
         assertMetric(MetricType.GAME_JOINED, 2.0);
         assertMetric(MetricType.GAME_STARTED, 1.0);
         assertMetric(MetricType.GAME_CLEARED, count);
+        assertMetric(MetricType.GAME_ENDED, 1.0);
     }
 
     // ---------------------------------------------------------------------
@@ -59,41 +61,48 @@ class MetricsAspectTest {
     }
 
     interface TestService {
-        void createLobby();
+        void gameCreated();
 
-        void joinLobby();
+        void gameJoined();
 
-        void startGame();
+        void gameStarted();
 
-        int clearLobbies();
+        int gameCleared();
 
-        int clearLobbiesWithCount(int count);
+        int gameClearedWithCount(int count);
+
+        void gameEnded();
     }
 
     static class TestServiceImpl implements TestService {
         @RecordMetric(MetricType.GAME_CREATED)
-        public void createLobby() {
+        public void gameCreated() {
             // Placeholder for lobby creation logic
         }
 
         @RecordMetric(MetricType.GAME_JOINED)
-        public void joinLobby() {
+        public void gameJoined() {
             // Placeholder for lobby joining logic
         }
 
         @RecordMetric(MetricType.GAME_STARTED)
-        public void startGame() {
+        public void gameStarted() {
             // Placeholder for lobby starting logic
         }
 
         @RecordMetric(MetricType.GAME_CLEARED)
-        public int clearLobbies() {
+        public int gameCleared() {
             return 1;
         }
 
         @RecordMetric(MetricType.GAME_CLEARED)
-        public int clearLobbiesWithCount(int count) {
+        public int gameClearedWithCount(int count) {
             return count;
+        }
+
+        @RecordMetric(MetricType.GAME_ENDED)
+        public void gameEnded() {
+            // Placeholder for lobby ending logic
         }
     }
 }

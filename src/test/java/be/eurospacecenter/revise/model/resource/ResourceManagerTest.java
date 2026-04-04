@@ -1,4 +1,4 @@
-package be.eurospacecenter.revise.model.discover;
+package be.eurospacecenter.revise.model.resource;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
@@ -14,15 +14,16 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
-import static be.eurospacecenter.revise.ErrorHelpere.assertError;
+import static be.eurospacecenter.revise.ErrorHelper.assertError;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class DiscoverManagerTest {
+class ResourceManagerTest {
 
-    private DiscoverManager manager;
+    private ResourceManager manager;
     private final UUID team1 = UUID.randomUUID();
     private final UUID team2 = UUID.randomUUID();
     private final UUID hostId = UUID.randomUUID();
+    private GameInfo info;
 
     // ---------------------------------------------------------------------
     // Setup
@@ -30,10 +31,10 @@ class DiscoverManagerTest {
 
     @BeforeEach
     void setUp() {
-        GameInfo info = new GameInfo(new Host(hostId), LocalDateTime.now());
+        info = new GameInfo(new Host(hostId), LocalDateTime.now());
         info.addTeam(new Team(TeamLabel.EXPE, team1));
         info.addTeam(new Team(TeamLabel.MECA, team2));
-        manager = new DiscoverManager(info);
+        manager = new ResourceManager(info);
     }
 
     // ---------------------------------------------------------------------
@@ -42,7 +43,7 @@ class DiscoverManagerTest {
 
     @Test
     void initialScoreShouldBeCorrect() {
-        assertEquals(33, manager.getTeamsScore(hostId));
+       assertEquals(33, info.getTeamsScore());
     }
 
     @Test
@@ -72,7 +73,7 @@ class DiscoverManagerTest {
                 () -> manager.updateResources(UUID.randomUUID(), Map.of(ResourceType.ENERGY, 1)));
 
         assertError(NoAutoriseOperationException.class, ErrorKeys.ACTION_RESERVED_TO_HOST,
-                () -> manager.getTeamsScore(UUID.randomUUID()));
+                () -> manager.ensureHost(UUID.randomUUID()));
     }
 
     // ---------------------------------------------------------------------
@@ -81,6 +82,7 @@ class DiscoverManagerTest {
 
     private void checkUpdate(UUID id, Map<ResourceType, Integer> deltas, int expectedGlobalScore) {
         manager.updateResources(id, deltas);
-        assertEquals(expectedGlobalScore, manager.getTeamsScore(hostId));
+
+        assertEquals(expectedGlobalScore, info.getTeamsScore());
     }
 }

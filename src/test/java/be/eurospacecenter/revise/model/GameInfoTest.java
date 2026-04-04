@@ -65,7 +65,8 @@ class GameInfoTest {
     static Stream<Arguments> validTransitions() {
         return Stream.of(
                 Arguments.of(GameState.LOBBY, GameState.MISSION),
-                Arguments.of(GameState.MISSION, GameState.DISCOVER),
+                Arguments.of(GameState.MISSION, GameState.RESOURCE),
+                Arguments.of(GameState.RESOURCE, GameState.DISCOVER),
                 Arguments.of(GameState.DISCOVER, GameState.END)
         );
     }
@@ -88,16 +89,24 @@ class GameInfoTest {
 
     static Stream<Arguments> invalidTransitions() {
         return Stream.of(
+                Arguments.of(GameState.LOBBY, GameState.RESOURCE),
                 Arguments.of(GameState.LOBBY, GameState.DISCOVER),
                 Arguments.of(GameState.LOBBY, GameState.END),
                 Arguments.of(GameState.MISSION, GameState.LOBBY),
+                Arguments.of(GameState.MISSION, GameState.DISCOVER),
                 Arguments.of(GameState.MISSION, GameState.END),
                 Arguments.of(GameState.DISCOVER, GameState.LOBBY),
                 Arguments.of(GameState.DISCOVER, GameState.MISSION),
+                Arguments.of(GameState.DISCOVER, GameState.RESOURCE),
                 Arguments.of(GameState.END, GameState.LOBBY),
                 Arguments.of(GameState.END, GameState.MISSION),
                 Arguments.of(GameState.END, GameState.DISCOVER),
-                Arguments.of(GameState.MISSION, GameState.MISSION)
+                Arguments.of(GameState.END, GameState.RESOURCE),
+                Arguments.of(GameState.LOBBY, GameState.LOBBY),
+                Arguments.of(GameState.MISSION, GameState.MISSION),
+                Arguments.of(GameState.RESOURCE, GameState.RESOURCE),
+                Arguments.of(GameState.DISCOVER, GameState.DISCOVER),
+                Arguments.of(GameState.END, GameState.END)
         );
     }
 

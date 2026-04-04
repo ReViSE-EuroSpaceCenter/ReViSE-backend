@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-class DiscoverManagerControllerTest {
+class ResourceControllerTest {
 
-    private static final String BASE_URI = "/api/discover";
+    private static final String BASE_URI = "/api/resources";
     private static final Map<String, Integer> VALID_RESOURCES = Map.of("ENERGY", 1, "HUMAN", 2, "CLOCK", 3);
 
     @Autowired
@@ -57,6 +57,21 @@ class DiscoverManagerControllerTest {
     // ---------------------------------------------------------------------
 
     @Test
+    void startResourceEncoding_shouldSucceed() {
+        restTestClient.put().uri(BASE_URI + "/" + lobbyCode.lobbyCode() + "/start").body(Map.of("hostId", hostId.toString())).exchange().expectStatus().isNoContent();
+    }
+
+    @Test
+    void startResourceEncoding_shouldFail_withInvalidLobbyCode() {
+        restTestClient.put().uri(BASE_URI + "/INVALID/start").body(Map.of("hostId", hostId.toString())).exchange().expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+    }
+
+    @Test
+    void startResourceEncoding_shouldFail_withInvalidHost() {
+        restTestClient.put().uri(BASE_URI + "/" + lobbyCode.lobbyCode() + "/start").body(Map.of("hostId", UUID.randomUUID().toString())).exchange().expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
+    }
+
+    @Test
     void updateResources_shouldSucceed() {
         updateResources(lobbyCode.lobbyCode(), validClientId, VALID_RESOURCES).expectStatus().isNoContent();
     }
@@ -77,73 +92,44 @@ class DiscoverManagerControllerTest {
     }
 
     @Test
-    void getScore_shouldSucceed() {
-        getScore(lobbyCode.lobbyCode(), hostId).expectStatus().isOk().expectBody().jsonPath("$.score").isNumber();
+    void endResourceEncoding_shouldSucceed() {
+        restTestClient.put().uri(BASE_URI + "/" + lobbyCode.lobbyCode() + "/end").body(Map.of("hostId", hostId.toString())).exchange().expectStatus().isNoContent();
     }
 
     @Test
-    void getScore_shouldFail_withInvalidLobbyCode() {
-        getScore("INVALID", hostId).expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
+    void endResourceEncoding_shouldFail_withInvalidLobbyCode() {
+        restTestClient.put().uri(BASE_URI + "/INVALID/end").body(Map.of("hostId", hostId.toString())).exchange().expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
     }
 
     @Test
-    void getScore_shouldFail_withInvalidHost() {
-        getScore(lobbyCode.lobbyCode(), UUID.randomUUID()).expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
+    void endResourceEncoding_shouldFail_withInvalidHost() {
+        restTestClient.put().uri(BASE_URI + "/" + lobbyCode.lobbyCode() + "/end").body(Map.of("hostId", UUID.randomUUID().toString())).exchange().expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
     }
 
     @Test
-    void endDiscover_ShouldSucceed_WithValidLobbyCodeHostId() {
+    void illegalStateShouldBeReturnedWhenTryingJoinLobby() {
         restTestClient.post()
-                .uri("/api/discover/" + lobbyCode.lobbyCode() + "/end")
-                .body(Map.of("hostId", hostId))
-                .exchange()
-                .expectStatus()
-                .isNoContent();
-    }
-
-    @Test
-    void endDiscover_ShouldNotSucceedWithUnknownHost() {
-        createLobbyAndHost();
-        joinClientAndStartGame();
-
-        restTestClient.post()
-                .uri("/api/missions/" + lobbyCode.lobbyCode() + "/end")
-                .body(Map.of("hostId", UUID.randomUUID()))
-                .exchange()
-                .expectStatus()
-                .isForbidden();
-    }
-
-    @Test
-    void endDiscover_ShouldNotSucceedWithInvalidLobbyCode() {
-        restTestClient.post()
-                .uri("/api/discover/INVALID/end")
-                .body(Map.of("hostId", hostId))
-                .exchange()
-                .expectStatus()
-                .isBadRequest();
-    }
-
-    @Test
-    void illegalStateShouldBeReturnedWhenTryingToUpdateResourcesAfterDiscoverEnded() {
-        restTestClient.post()
-                .uri("/api/discover/" + lobbyCode.lobbyCode() + "/end")
-                .body(Map.of("hostId", hostId))
-                .exchange()
-                .expectStatus()
-                .isNoContent();
-
-        updateResources(lobbyCode.lobbyCode(), validClientId, VALID_RESOURCES)
-                .expectStatus()
+                .uri("/api/lobbies/" + lobbyCode.lobbyCode() + "/join")
+                .exchange().expectStatus()
                 .is4xxClientError()
                 .expectBody().jsonPath("$.error").isEqualTo(ErrorKeys.INVALID_GAME_STATE);
     }
 
     @Test
-    void illegalStateShouldBeReturnedWhenTryingToChangeMissionStateAfterMissionEnded() {
+    void illegalStateShouldBeReturnedWhenTryingStartGame() {
+        restTestClient.post()
+                .uri("/api/lobbies/" + lobbyCode.lobbyCode() + "/start")
+                .body(Map.of("hostId", hostId.toString()))
+                .exchange().expectStatus()
+                .is4xxClientError()
+                .expectBody().jsonPath("$.error").isEqualTo(ErrorKeys.INVALID_GAME_STATE);
+    }
+
+    @Test
+    void illegalStateShouldBeReturnedWhenTryingChangeMissionsState() {
         restTestClient.put()
                 .uri("/api/missions/" + lobbyCode.lobbyCode())
-                .body(Map.of("id", validClientId, "updateMissions", Set.of("CLASSIC_1")))
+                .body(Map.of("id", hostId.toString(), "teamLabel", TeamLabel.EXPE.name(), "updateMissions", Set.of("CLASSIC_1")))
                 .exchange().expectStatus()
                 .is4xxClientError()
                 .expectBody().jsonPath("$.error").isEqualTo(ErrorKeys.INVALID_GAME_STATE);
@@ -184,10 +170,6 @@ class DiscoverManagerControllerTest {
     }
 
     private RestTestClient.ResponseSpec updateResources(String lobby, UUID clientId, Map<String, Integer> resources) {
-        return restTestClient.put().uri(BASE_URI + "/" + lobby).body(Map.of("clientId", clientId.toString(), "resources", resources)).exchange();
-    }
-
-    private RestTestClient.ResponseSpec getScore(String lobby, UUID hostId) {
-        return restTestClient.get().uri(uriBuilder -> uriBuilder.path(BASE_URI + "/{lobbyCode}/score").queryParam("hostId", hostId.toString()).build(lobby)).exchange();
+        return restTestClient.post().uri(BASE_URI + "/" + lobby).body(Map.of("clientId", clientId.toString(), "resources", resources)).exchange();
     }
 }

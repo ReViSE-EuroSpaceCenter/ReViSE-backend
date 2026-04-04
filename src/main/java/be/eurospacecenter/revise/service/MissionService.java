@@ -14,28 +14,18 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class MissionService implements Cleanable {
+public class MissionService implements Cleanable, Workflow {
 
     private static final GameState STATE = GameState.MISSION;
 
     final Map<LobbyCode, MissionManager> managers = new ConcurrentHashMap<>();
 
     private final MissionNotifier notifier;
-    private final DiscoverService discoverService;
+    private final ResourceService resourceService;
 
-    public MissionService(MissionNotifier notifier, DiscoverService discoverService) {
+    public MissionService(MissionNotifier notifier, ResourceService resourceService) {
         this.notifier = notifier;
-        this.discoverService = discoverService;
-    }
-
-    public void registerManager(LobbyCode lobbyCode, GameInfo gameInfo) {
-        if (lobbyCode == null) {
-            throw new IllegalArgumentException(ErrorKeys.INVALID_LOBBY_CODE);
-        }
-
-        gameInfo.changeState(STATE);
-
-        managers.put(lobbyCode, new MissionManager(gameInfo));
+        this.resourceService = resourceService;
     }
 
     public void changeTeamMissionsState(LobbyCode lobbyCode, UUID id, TeamLabel teamLabel, Set<MissionType> missionType) {
@@ -63,12 +53,28 @@ public class MissionService implements Cleanable {
         MissionManager manager = getManager(lobbyCode);
 
         manager.validateEndOfMission(hostId);
-        discoverService.registerDiscover(lobbyCode, manager.getGameInfo());
+        resourceService.registerManager(lobbyCode, manager.getGameInfo());
 
         notifier.notifyMissionEnded(lobbyCode);
     }
 
-    public MissionManager getManager(LobbyCode lobbyCode) {
+    @Override
+    public void registerManager(LobbyCode lobbyCode, GameInfo gameInfo) {
+        if (lobbyCode == null) {
+            throw new IllegalArgumentException(ErrorKeys.INVALID_LOBBY_CODE);
+        }
+
+        gameInfo.changeState(STATE);
+
+        managers.put(lobbyCode, new MissionManager(gameInfo));
+    }
+
+    @Override
+    public void cleanUp(List<LobbyCode> toRemove) {
+        toRemove.forEach(managers::remove);
+    }
+
+    MissionManager getManager(LobbyCode lobbyCode) {
         MissionManager manager = Optional.ofNullable(managers.get(lobbyCode))
                 .orElseThrow(() -> new NotFoundException(ErrorKeys.MISSION_MANAGER_NOT_FOUND));
 
@@ -79,10 +85,5 @@ public class MissionService implements Cleanable {
         }
 
         return manager;
-    }
-
-    @Override
-    public void cleanUp(List<LobbyCode> toRemove) {
-        toRemove.forEach(managers::remove);
     }
 }

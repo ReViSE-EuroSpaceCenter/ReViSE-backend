@@ -29,9 +29,12 @@ public final class ErrorKeys {
     public static final String ONLY_MECA_COMPLETE_CLASSIC_8 = "onlyMecaCanCompleteClassic8";
     public static final String DISCOVER_START_INCOMPLETE_MISSIONS = "discoverStartIncompleteMissions";
 
-    // Discover
-    public static final String DISCOVER_MANAGER_NOT_FOUND = "discoverNotFound";
+    // Resource
+    public static final String RESOURCE_MANAGER_NOT_FOUND = "resourceManagerNotFound";
     public static final String INVALID_RESOURCE_TYPE = "invalidResourceType";
     public static final String INSUFFICIENT_RESOURCES = "insufficientResources";
+
+    // Discover
+    public static final String DISCOVER_MANAGER_NOT_FOUND = "discoverNotFound";
 
 }

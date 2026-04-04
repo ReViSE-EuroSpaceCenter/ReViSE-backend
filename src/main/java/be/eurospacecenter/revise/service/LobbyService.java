@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class LobbyService implements Cleanable {
-    // Will be used in US 1O7
     private static final GameState STATE = GameState.LOBBY;
 
     final Map<LobbyCode, LobbyManager> managers = new ConcurrentHashMap<>();
@@ -77,6 +76,11 @@ public class LobbyService implements Cleanable {
         notifier.notifyGameStarted(lobbyCode);
     }
 
+    @Override
+    public void cleanUp(List<LobbyCode> toRemove) {
+        toRemove.forEach(managers::remove);
+    }
+
     void addLobby(LobbyCode lobbyCode, LobbyManager lobbyManager) {
         managers.put(lobbyCode, lobbyManager);
     }
@@ -92,10 +96,5 @@ public class LobbyService implements Cleanable {
         }
 
         return manager;
-    }
-
-    @Override
-    public void cleanUp(List<LobbyCode> toRemove) {
-        toRemove.forEach(managers::remove);
     }
 }
