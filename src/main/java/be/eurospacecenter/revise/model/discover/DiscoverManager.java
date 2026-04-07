@@ -1,16 +1,17 @@
-package be.eurospacecenter.revise.model.launcher;
+package be.eurospacecenter.revise.model.discover;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NoAutoriseOperationException;
 import be.eurospacecenter.revise.model.GameInfo;
+import be.eurospacecenter.revise.model.GameState;
 
 import java.util.Map;
 import java.util.UUID;
 
-public class LauncherManager {
+public class DiscoverManager {
     private final GameInfo gameInfo;
 
-    public LauncherManager(GameInfo gameInfo) {
+    public DiscoverManager(GameInfo gameInfo) {
         this.gameInfo = gameInfo;
     }
 
@@ -26,5 +27,13 @@ public class LauncherManager {
             throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
         }
         return gameInfo.getTeamsScore();
+    }
+
+    public void endDiscover(UUID hostId) {
+        if (gameInfo.isNotHost(hostId)) {
+            throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
+        }
+
+        gameInfo.changeState(GameState.END);
     }
 }

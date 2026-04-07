@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.controller;
 
-import be.eurospacecenter.revise.dto.request.MissionEndDTO;
+import be.eurospacecenter.revise.dto.request.EndDTO;
 import be.eurospacecenter.revise.dto.request.TeamMissionUpdateDTO;
 import be.eurospacecenter.revise.dto.team.TeamFullProgressionDTO;
 import be.eurospacecenter.revise.dto.team.TeamsProgressionDTO;
@@ -58,10 +58,10 @@ public class MissionController {
             @PathVariable String lobbyCode,
 
             @RequestBody @Valid
-            MissionEndDTO request
+            EndDTO request
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
-        missionService.startLauncher(code, request.hostId());
+        missionService.endMission(code, request.hostId());
     }
 
     @PutMapping("/{lobbyCode}")

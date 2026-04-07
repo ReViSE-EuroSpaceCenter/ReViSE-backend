@@ -1,9 +1,10 @@
 package be.eurospacecenter.revise.controller;
 
+import be.eurospacecenter.revise.dto.request.EndDTO;
 import be.eurospacecenter.revise.dto.request.ResourceUpdateDTO;
-import be.eurospacecenter.revise.dto.launcher.ScoreDTO;
+import be.eurospacecenter.revise.dto.discover.ScoreDTO;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
-import be.eurospacecenter.revise.service.LauncherService;
+import be.eurospacecenter.revise.service.DiscoverService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -13,13 +14,13 @@ import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/launchers")
-public class LauncherController {
+@RequestMapping("/api/discover")
+public class DiscoverController {
 
-    private final LauncherService launcherService;
+    private final DiscoverService discoverService;
 
-    public LauncherController(LauncherService launcherService) {
-        this.launcherService = launcherService;
+    public DiscoverController(DiscoverService discoverService) {
+        this.discoverService = discoverService;
     }
 
     @GetMapping(value = "/{lobbyCode}/score", params = "hostId")
@@ -32,7 +33,7 @@ public class LauncherController {
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
 
-        int score = launcherService.getTeamsScore(code, hostId);
+        int score = discoverService.getTeamsScore(code, hostId);
 
         return new ScoreDTO(score);
     }
@@ -47,6 +48,18 @@ public class LauncherController {
             ResourceUpdateDTO request
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
-        launcherService.updateResources(code, request.clientId(), request.resources());
+        discoverService.updateResources(code, request.clientId(), request.resources());
+    }
+
+    @PostMapping("/{lobbyCode}/end")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void endMission(
+            @PathVariable String lobbyCode,
+
+            @RequestBody @Valid
+            EndDTO request
+    ) {
+        LobbyCode code = new LobbyCode(lobbyCode);
+        discoverService.endDiscover(code, request.hostId());
     }
 }

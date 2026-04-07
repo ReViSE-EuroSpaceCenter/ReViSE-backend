@@ -15,19 +15,24 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class MissionService implements Cleanable {
 
-    protected final Map<LobbyCode, MissionManager> managers = new ConcurrentHashMap<>();
-    private final MissionNotifier notifier;
-    private final LauncherService launcherService;
+    private static final GameState STATE = GameState.MISSION;
 
-    public MissionService(MissionNotifier notifier, LauncherService launcherService) {
+    final Map<LobbyCode, MissionManager> managers = new ConcurrentHashMap<>();
+
+    private final MissionNotifier notifier;
+    private final DiscoverService discoverService;
+
+    public MissionService(MissionNotifier notifier, DiscoverService discoverService) {
         this.notifier = notifier;
-        this.launcherService = launcherService;
+        this.discoverService = discoverService;
     }
 
     public void registerManager(LobbyCode lobbyCode, GameInfo gameInfo) {
         if (lobbyCode == null) {
             throw new IllegalArgumentException(ErrorKeys.INVALID_LOBBY_CODE);
         }
+
+        gameInfo.changeState(STATE);
 
         managers.put(lobbyCode, new MissionManager(gameInfo));
     }
@@ -53,11 +58,11 @@ public class MissionService implements Cleanable {
         return manager.getTeamFullProgression(clientId);
     }
 
-    public void startLauncher(LobbyCode lobbyCode, UUID hostId) {
+    public void endMission(LobbyCode lobbyCode, UUID hostId) {
         MissionManager manager = getManager(lobbyCode);
 
         manager.validateEndOfMission(hostId);
-        launcherService.registerLauncher(lobbyCode, manager.getGameInfo());
+        discoverService.registerDiscover(lobbyCode, manager.getGameInfo());
 
         notifier.notifyMissionEnded(lobbyCode);
     }

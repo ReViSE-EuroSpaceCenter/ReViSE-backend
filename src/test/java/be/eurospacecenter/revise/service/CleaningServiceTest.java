@@ -25,7 +25,7 @@ class CleaningServiceTest {
     private MissionService missionService;
 
     @InjectMocks
-    private LauncherService launcherService;
+    private DiscoverService discoverService;
 
     private CleaningService cleaningService;
 
@@ -37,7 +37,7 @@ class CleaningServiceTest {
     void setup() {
         cleaningService = new CleaningService(
                 lobbyService,
-                List.of(lobbyService, missionService, launcherService)
+                List.of(lobbyService, missionService, discoverService)
         );
     }
 
@@ -66,24 +66,24 @@ class CleaningServiceTest {
                 new LobbyCode("AAAAAM"), new Lobby(new Host(UUID.randomUUID()), 4, LocalDateTime.now().minusMonths(1))
         );
 
-        lobbyService.lobbies.putAll(shouldBeThere);
-        lobbyService.lobbies.putAll(shouldNotBeThere);
+        lobbyService.managers.putAll(shouldBeThere);
+        lobbyService.managers.putAll(shouldNotBeThere);
 
         shouldBeThere.forEach((k, v) -> missionService.registerManager(k, v.getGameInfo()));
         shouldNotBeThere.forEach((k, v) -> missionService.registerManager(k, v.getGameInfo()));
 
-        shouldBeThere.forEach((k, v) -> launcherService.registerLauncher(k, v.getGameInfo()));
-        shouldNotBeThere.forEach((k, v) -> launcherService.registerLauncher(k, v.getGameInfo()));
+        shouldBeThere.forEach((k, v) -> discoverService.registerDiscover(k, v.getGameInfo()));
+        shouldNotBeThere.forEach((k, v) -> discoverService.registerDiscover(k, v.getGameInfo()));
 
         cleaningService.clearLobbies();
 
-        shouldBeThere.forEach((k, v) -> assertTrue(lobbyService.lobbies.containsKey(k), "Should keep " + k));
-        shouldNotBeThere.forEach((k, v) -> assertFalse(lobbyService.lobbies.containsKey(k), "Should remove " + k));
+        shouldBeThere.forEach((k, v) -> assertTrue(lobbyService.managers.containsKey(k), "Should keep " + k));
+        shouldNotBeThere.forEach((k, v) -> assertFalse(lobbyService.managers.containsKey(k), "Should remove " + k));
 
         shouldBeThere.forEach((k, v) -> assertTrue(missionService.managers.containsKey(k), "Manager should still exist for " + k));
         shouldNotBeThere.forEach((k, v) -> assertFalse(missionService.managers.containsKey(k), "Manager should be cleared for " + k));
 
-        shouldBeThere.forEach((k, v) -> assertTrue(launcherService.launchers.containsKey(k), "Launcher should still exist for " + k));
-        shouldNotBeThere.forEach((k, v) -> assertFalse(launcherService.launchers.containsKey(k), "Launcher should be cleared for " + k));
+        shouldBeThere.forEach((k, v) -> assertTrue(discoverService.managers.containsKey(k), "Manager should still exist for " + k));
+        shouldNotBeThere.forEach((k, v) -> assertFalse(discoverService.managers.containsKey(k), "Manager should be cleared for " + k));
     }
 }

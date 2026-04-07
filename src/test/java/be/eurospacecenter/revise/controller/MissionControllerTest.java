@@ -163,7 +163,7 @@ class MissionControllerTest {
                 .body(Map.of("hostId", hostId))
                 .exchange();
 
-        expectBadRequest(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS, response);
+        expectBadRequest(ErrorKeys.DISCOVER_START_INCOMPLETE_MISSIONS, response);
     }
 
     // ---------------------------------------------------------------------

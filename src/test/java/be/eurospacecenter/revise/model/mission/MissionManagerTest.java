@@ -78,7 +78,7 @@ class MissionManagerTest {
         assertError(NotFoundException.class, ErrorKeys.TEAM_NOT_FOUND,
                 () -> manager.getTeamProgression(UUID.randomUUID()));
 
-        assertError(InvalidMissionOperationException.class, ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS,
+        assertError(InvalidMissionOperationException.class, ErrorKeys.DISCOVER_START_INCOMPLETE_MISSIONS,
                 () -> manager.validateEndOfMission(hostId));
     }
 

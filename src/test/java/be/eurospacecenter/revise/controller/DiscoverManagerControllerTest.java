@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-class LauncherManagerControllerTest {
+class DiscoverManagerControllerTest {
 
-    private static final String BASE_URI = "/api/launchers";
+    private static final String BASE_URI = "/api/discover";
     private static final Map<String, Integer> VALID_RESOURCES = Map.of("ENERGY", 1, "HUMAN", 2, "CLOCK", 3);
 
     @Autowired
@@ -91,6 +91,36 @@ class LauncherManagerControllerTest {
         getScore(lobbyCode.lobbyCode(), UUID.randomUUID()).expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
     }
 
+    @Test
+    void endDiscover_ShouldSucceed_WithValidLobbyCodeHostId() {
+        restTestClient.post()
+                .uri("/api/discover/" + lobbyCode.lobbyCode() + "/end")
+                .body(Map.of("hostId", hostId))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
+    }
+
+    @Test
+    void endDiscover_ShouldNotSucceedWithUnknownHost() {
+        restTestClient.post()
+                .uri("/api/missions/" + lobbyCode.lobbyCode() + "/end")
+                .body(Map.of("hostId", UUID.randomUUID()))
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+
+    @Test
+    void endDiscover_ShouldNotSucceedWithInvalidLobbyCode() {
+        restTestClient.post()
+                .uri("/api/discover/INVALID/end")
+                .body(Map.of("hostId", hostId))
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
+
     // ---------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------
@@ -122,7 +152,7 @@ class LauncherManagerControllerTest {
             }
             missionService.changeTeamMissionsState(lobbyCode, hostId, teamLabel, missions);
         });
-        missionService.startLauncher(lobbyCode, hostId);
+        missionService.endMission(lobbyCode, hostId);
     }
 
     private RestTestClient.ResponseSpec updateResources(String lobby, UUID clientId, Map<String, Integer> resources) {

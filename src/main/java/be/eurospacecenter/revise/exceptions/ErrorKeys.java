@@ -20,6 +20,7 @@ public final class ErrorKeys {
     public static final String ONLY_MECA_COMPLETE_CLASSIC_8 = "onlyMecaCanCompleteClassic8";
     public static final String TEAM_LABEL_ALREADY_TAKEN = "teamLabelAlreadyTaken";
     public static final String TEAM_NOT_FOUND = "teamNotFound";
-    public static final String LAUNCHER_NOT_FOUND = "launcherNotFound";
-    public static final String LAUNCHER_START_INCOMPLETE_MISSIONS = "launcherStartIncompleteMissions";
+    public static final String DISCOVER_MANAGER_NOT_FOUND = "discoverNotFound";
+    public static final String DISCOVER_START_INCOMPLETE_MISSIONS = "discoverStartIncompleteMissions";
+    public static final String INVALID_GAME_STATE_TRANSITION = "invalidGameStateTransition";
 }

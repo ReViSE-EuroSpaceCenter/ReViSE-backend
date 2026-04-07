@@ -1,10 +1,11 @@
 package be.eurospacecenter.revise.metric;
 
 public enum MetricType {
-    LOBBY_CREATED("lobby_created_counter"),
-    LOBBY_JOINED("lobby_joined_counter"),
-    LOBBY_STARTED("lobby_started_counter"),
-    LOBBY_CLEARED("lobby_cleared_counter");
+    GAME_CREATED("game_created_counter"),
+    GAME_JOINED("game_joined_counter"),
+    GAME_STARTED("game_started_counter"),
+    GAME_ENDED("game_ended_counter"),
+    GAME_CLEARED("game_cleared_counter");
 
     public final String metricKey;
 

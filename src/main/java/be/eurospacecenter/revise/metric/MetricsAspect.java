@@ -17,11 +17,12 @@ public class MetricsAspect {
     @AfterReturning(pointcut = "@annotation(recordMetric)", returning = "result")
     public void recordMetric(RecordMetric recordMetric, Object result) {
         switch (recordMetric.value()) {
-            case LOBBY_CLEARED ->
-                    metrics.lobbyCleared(result instanceof Integer count ? count : 0);
-            case LOBBY_CREATED -> metrics.lobbyCreated();
-            case LOBBY_JOINED -> metrics.lobbyJoined();
-            case LOBBY_STARTED -> metrics.lobbyStarted();
+            case GAME_CREATED -> metrics.gameCreated();
+            case GAME_JOINED -> metrics.gameJoined();
+            case GAME_STARTED -> metrics.gameStarted();
+            case GAME_ENDED -> metrics.gameEnded();
+            case GAME_CLEARED ->
+                    metrics.gameCleared(result instanceof Integer count ? count : 0);
         }
     }
 }

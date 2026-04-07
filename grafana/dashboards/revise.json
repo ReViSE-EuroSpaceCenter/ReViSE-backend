@@ -75,7 +75,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "round(increase(lobby_created_counter_total[$__range]))",
+          "expr": "round(increase(game_created_counter_total[$__range]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -139,7 +139,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "round(increase(lobby_joined_counter_total[$__range]))",
+          "expr": "round(increase(game_joined_counter_total[$__range]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -203,7 +203,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "round(increase(lobby_started_counter_total[$__range]))",
+          "expr": "round(increase(game_started_counter_total[$__range]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -364,7 +364,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "round(increase(lobby_created_counter_total[$__rate_interval]))",
+          "expr": "round(increase(game_created_counter_total[$__rate_interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -458,7 +458,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "round(increase(lobby_started_counter_total[$__rate_interval]))",
+          "expr": "round(increase(game_started_counter_total[$__rate_interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -552,7 +552,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "round(increase(lobby_cleared_counter_total[$__rate_interval]))",
+          "expr": "round(increase(game_cleared_counter_total[$__rate_interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -645,6 +645,10 @@
       "pluginVersion": "12.4.1",
       "targets": [
         {
+          "editorMode": "code",
+          "expr": "round(increase(game_ended_counter_total[$__rate_interval]))",
+          "legendFormat": "__auto",
+          "range": true,
           "refId": "A"
         }
       ],

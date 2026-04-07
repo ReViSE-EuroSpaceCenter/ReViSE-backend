@@ -86,7 +86,7 @@ public class MissionManager {
         }
 
         if (!allTeamsMissionsCompleted) {
-            throw new InvalidMissionOperationException(ErrorKeys.LAUNCHER_START_INCOMPLETE_MISSIONS);
+            throw new InvalidMissionOperationException(ErrorKeys.DISCOVER_START_INCOMPLETE_MISSIONS);
         }
     }
 
