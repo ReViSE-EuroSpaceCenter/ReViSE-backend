@@ -1,7 +1,8 @@
-package be.eurospacecenter.revise.model.discover;
+package be.eurospacecenter.revise.model;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.InvalidDiscoverOperationException;
+import be.eurospacecenter.revise.model.resource.ResourceType;
 
 import java.util.EnumMap;
 import java.util.Map;

@@ -68,15 +68,9 @@ public class GameInfo {
     }
 
     public void changeState(GameState newState) {
-        if (state == GameState.LOBBY && newState == GameState.MISSION) {
-            state = newState;
-        } else if (state == GameState.MISSION && newState == GameState.DISCOVER) {
-            state = newState;
-        } else if (state == GameState.DISCOVER && newState == GameState.END) {
-            state = newState;
-        } else {
+        if (!state.canTransitionTo(newState)) {
             throw new IllegalStateException(ErrorKeys.INVALID_GAME_STATE_TRANSITION);
         }
+        state = newState;
     }
-
 }

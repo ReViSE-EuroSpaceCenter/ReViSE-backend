@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
-import static be.eurospacecenter.revise.ErrorHelpere.assertError;
+import static be.eurospacecenter.revise.ErrorHelper.assertError;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

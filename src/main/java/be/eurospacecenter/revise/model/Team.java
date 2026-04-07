@@ -1,8 +1,7 @@
 package be.eurospacecenter.revise.model;
 
-import be.eurospacecenter.revise.model.discover.ResourceType;
-import be.eurospacecenter.revise.model.discover.Resources;
-import be.eurospacecenter.revise.model.discover.TeamResources;
+import be.eurospacecenter.revise.model.resource.ResourceType;
+import be.eurospacecenter.revise.model.resource.TeamResources;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import be.eurospacecenter.revise.model.mission.Missions;

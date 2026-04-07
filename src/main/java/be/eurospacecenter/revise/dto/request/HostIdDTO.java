@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record EndDTO(@NotNull UUID hostId) {
+public record HostIdDTO(@NotNull UUID hostId) {
 }

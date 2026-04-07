@@ -22,12 +22,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class LobbyManagerServiceTest {
+class LobbyServiceTest {
 
     private LobbyService lobbyService;
     @Autowired private LobbyCodeGenerator lobbyCodeGenerator;
-    private final MissionService missionService = mock(MissionService.class);
-    private final LobbyNotifier notifier = mock(LobbyNotifier.class);
 
     // ---------------------------------------------------------------------
     // Setup
@@ -35,7 +33,7 @@ class LobbyManagerServiceTest {
 
     @BeforeEach
     void setup() {
-        lobbyService = new LobbyService(missionService, notifier, lobbyCodeGenerator);
+        lobbyService = new LobbyService(mock(MissionService.class), mock(LobbyNotifier.class), lobbyCodeGenerator);
     }
 
     // ---------------------------------------------------------------------

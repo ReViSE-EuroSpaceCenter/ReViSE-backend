@@ -8,9 +8,6 @@ import be.eurospacecenter.revise.metric.RecordMetric;
 import be.eurospacecenter.revise.model.GameInfo;
 import be.eurospacecenter.revise.model.GameState;
 import be.eurospacecenter.revise.model.discover.DiscoverManager;
-
-import be.eurospacecenter.revise.model.discover.ResourceType;
-import be.eurospacecenter.revise.model.discover.TeamResources;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.notification.DiscoverNotifier;
 import org.springframework.stereotype.Service;
@@ -22,7 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class DiscoverService implements Cleanable {
+public class DiscoverService implements Cleanable, Workflow {
 
     private static final GameState STATE = GameState.DISCOVER;
 
@@ -32,24 +29,6 @@ public class DiscoverService implements Cleanable {
 
     public DiscoverService(DiscoverNotifier notifier) {
         this.notifier = notifier;
-    }
-
-    public void registerDiscover(LobbyCode lobbyCode, GameInfo gameInfo) {
-        if (lobbyCode == null) {
-            throw new IllegalArgumentException(ErrorKeys.INVALID_LOBBY_CODE);
-        }
-
-        gameInfo.changeState(STATE);
-
-        managers.put(lobbyCode, new DiscoverManager(gameInfo));
-    }
-
-    public void updateResources(LobbyCode lobbyCode, UUID clientId, Map<ResourceType, Integer> resources) {
-        DiscoverManager discoverManager = getManager(lobbyCode);
-
-        TeamResources teamResources = discoverManager.updateResources(clientId, resources);
-
-        notifier.notifyResourcesUpdated(lobbyCode, teamResources);
     }
 
     public int getTeamsScore(LobbyCode lobbyCode, UUID hostId) {
@@ -67,6 +46,22 @@ public class DiscoverService implements Cleanable {
         notifier.notifyDiscoverEnded(lobbyCode);
     }
 
+    @Override
+    public void registerManager(LobbyCode lobbyCode, GameInfo gameInfo) {
+        if (lobbyCode == null) {
+            throw new IllegalArgumentException(ErrorKeys.INVALID_LOBBY_CODE);
+        }
+
+        gameInfo.changeState(STATE);
+
+        managers.put(lobbyCode, new DiscoverManager(gameInfo));
+    }
+
+    @Override
+    public void cleanUp(List<LobbyCode> toRemove) {
+        toRemove.forEach(managers::remove);
+    }
+
     private DiscoverManager getManager(LobbyCode lobbyCode) {
         DiscoverManager manager = Optional.ofNullable(managers.get(lobbyCode))
                 .orElseThrow(() -> new NotFoundException(ErrorKeys.DISCOVER_MANAGER_NOT_FOUND));
@@ -78,10 +73,5 @@ public class DiscoverService implements Cleanable {
         }
 
         return manager;
-    }
-
-    @Override
-    public void cleanUp(List<LobbyCode> toRemove) {
-        toRemove.forEach(managers::remove);
     }
 }

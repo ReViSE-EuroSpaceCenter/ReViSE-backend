@@ -1,6 +1,6 @@
 package be.eurospacecenter.revise.exceptions;
 
-import be.eurospacecenter.revise.model.discover.ResourceType;
+import be.eurospacecenter.revise.model.resource.ResourceType;
 import be.eurospacecenter.revise.model.mission.MissionType;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;

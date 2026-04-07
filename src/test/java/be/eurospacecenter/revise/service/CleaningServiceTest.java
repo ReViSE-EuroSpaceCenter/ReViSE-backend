@@ -25,6 +25,9 @@ class CleaningServiceTest {
     private MissionService missionService;
 
     @InjectMocks
+    private ResourceService resourceService;
+
+    @InjectMocks
     private DiscoverService discoverService;
 
     private CleaningService cleaningService;
@@ -37,7 +40,7 @@ class CleaningServiceTest {
     void setup() {
         cleaningService = new CleaningService(
                 lobbyService,
-                List.of(lobbyService, missionService, discoverService)
+                List.of(lobbyService, missionService, resourceService, discoverService)
         );
     }
 
@@ -72,8 +75,11 @@ class CleaningServiceTest {
         shouldBeThere.forEach((k, v) -> missionService.registerManager(k, v.getGameInfo()));
         shouldNotBeThere.forEach((k, v) -> missionService.registerManager(k, v.getGameInfo()));
 
-        shouldBeThere.forEach((k, v) -> discoverService.registerDiscover(k, v.getGameInfo()));
-        shouldNotBeThere.forEach((k, v) -> discoverService.registerDiscover(k, v.getGameInfo()));
+        shouldBeThere.forEach((k, v) -> resourceService.registerManager(k, v.getGameInfo()));
+        shouldNotBeThere.forEach((k, v) -> resourceService.registerManager(k, v.getGameInfo()));
+
+        shouldBeThere.forEach((k, v) -> discoverService.registerManager(k, v.getGameInfo()));
+        shouldNotBeThere.forEach((k, v) -> discoverService.registerManager(k, v.getGameInfo()));
 
         cleaningService.clearLobbies();
 
@@ -82,6 +88,9 @@ class CleaningServiceTest {
 
         shouldBeThere.forEach((k, v) -> assertTrue(missionService.managers.containsKey(k), "Manager should still exist for " + k));
         shouldNotBeThere.forEach((k, v) -> assertFalse(missionService.managers.containsKey(k), "Manager should be cleared for " + k));
+
+        shouldBeThere.forEach((k, v) -> assertTrue(resourceService.managers.containsKey(k), "Manager should still exist for " + k));
+        shouldNotBeThere.forEach((k, v) -> assertFalse(resourceService.managers.containsKey(k), "Manager should be cleared for " + k));
 
         shouldBeThere.forEach((k, v) -> assertTrue(discoverService.managers.containsKey(k), "Manager should still exist for " + k));
         shouldNotBeThere.forEach((k, v) -> assertFalse(discoverService.managers.containsKey(k), "Manager should be cleared for " + k));

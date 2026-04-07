@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-class LobbyManagerControllerTest {
+class LobbyControllerTest {
 
     @Autowired
     private RestTestClient restTestClient;
