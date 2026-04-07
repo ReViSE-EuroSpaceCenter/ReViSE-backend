@@ -1,6 +1,7 @@
 package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.exceptions.ErrorKeys;
+import be.eurospacecenter.revise.exceptions.InvalidGameStateException;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.*;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
@@ -68,7 +69,16 @@ public class MissionService implements Cleanable {
     }
 
     public MissionManager getManager(LobbyCode lobbyCode) {
-        return Optional.ofNullable(managers.get(lobbyCode)).orElseThrow(() -> new NotFoundException(ErrorKeys.MISSION_MANAGER_NOT_FOUND));
+        MissionManager manager = Optional.ofNullable(managers.get(lobbyCode))
+                .orElseThrow(() -> new NotFoundException(ErrorKeys.MISSION_MANAGER_NOT_FOUND));
+
+        GameState currentState = manager.getGameInfo().getState();
+
+        if (currentState != STATE) {
+            throw new InvalidGameStateException(currentState);
+        }
+
+        return manager;
     }
 
     @Override

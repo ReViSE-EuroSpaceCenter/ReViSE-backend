@@ -63,6 +63,10 @@ public class GameInfo {
         return total / teams.size();
     }
 
+    public GameState getState() {
+        return state;
+    }
+
     public void changeState(GameState newState) {
         if (state == GameState.LOBBY && newState == GameState.MISSION) {
             state = newState;
@@ -74,4 +78,5 @@ public class GameInfo {
             throw new IllegalStateException(ErrorKeys.INVALID_GAME_STATE_TRANSITION);
         }
     }
+
 }

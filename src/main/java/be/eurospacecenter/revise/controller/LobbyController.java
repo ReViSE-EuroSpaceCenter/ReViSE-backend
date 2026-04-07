@@ -6,7 +6,7 @@ import be.eurospacecenter.revise.dto.lobby.LobbyStartedDTO;
 import be.eurospacecenter.revise.dto.lobby.LobbyCreationDTO;
 import be.eurospacecenter.revise.dto.lobby.LobbyInfoDTO;
 import be.eurospacecenter.revise.dto.lobby.LobbyJoinedDTO;
-import be.eurospacecenter.revise.model.lobby.Lobby;
+import be.eurospacecenter.revise.model.lobby.LobbyManager;
 import be.eurospacecenter.revise.model.lobby.LobbyCreation;
 import be.eurospacecenter.revise.model.lobby.LobbyJoined;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
@@ -33,9 +33,9 @@ public class LobbyController {
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
 
-        Lobby lobby = lobbyService.getLobbyInfo(code);
+        LobbyManager lobbyManager = lobbyService.getLobbyInfo(code);
 
-        return LobbyInfoDTO.fromLobby(lobby);
+        return LobbyInfoDTO.fromLobby(lobbyManager);
     }
 
     @PostMapping

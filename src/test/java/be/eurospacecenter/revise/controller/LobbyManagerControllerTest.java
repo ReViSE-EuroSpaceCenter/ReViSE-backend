@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-class LobbyControllerTest {
+class LobbyManagerControllerTest {
 
     @Autowired
     private RestTestClient restTestClient;
@@ -77,6 +77,17 @@ class LobbyControllerTest {
         postAndCheck(uri, Map.of("hostId", UUID.randomUUID()), 403, ErrorKeys.ACTION_RESERVED_TO_HOST);
         postAndCheck(uri, Map.of("hostId", lobby.hostId()), 400, ErrorKeys.INVALID_TEAM_LABELS);
         postAndCheck(uri, Map.of("hostId", "pas-un-uuid"), 400, ErrorKeys.INVALID_UUID);
+    }
+
+    @Test
+    void invalidStateWhenStartingLobby() {
+        LobbyCreationDTO lobby = createLobby(4);
+        String uri = "/api/lobbies/" + lobby.lobbyCode() + "/start";
+
+        postAndCheck(uri, Map.of("hostId", lobby.hostId()), 400, ErrorKeys.INVALID_TEAM_LABELS);
+
+        assignTeam(lobby.lobbyCode(), joinLobby(lobby.lobbyCode()).clientId());
+        postAndCheck(uri, Map.of("hostId", lobby.hostId()), 400, ErrorKeys.INVALID_TEAM_LABELS);
     }
 
     // ---------------------------------------------------------------------

@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.service;
 
 import be.eurospacecenter.revise.model.lobby.Host;
-import be.eurospacecenter.revise.model.lobby.Lobby;
+import be.eurospacecenter.revise.model.lobby.LobbyManager;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.mission.MissionManager;
@@ -54,8 +54,8 @@ public class DefaultLobbies implements CommandLineRunner {
     }
 
     private void setupLobby(LobbyCode lobbyCode, UUID hostId, int teamCount) {
-        Lobby lobby = new Lobby(new Host(hostId), teamCount, LocalDateTime.now().plusYears(10));
-        lobbyService.addLobby(lobbyCode, lobby);
+        LobbyManager lobbyManager = new LobbyManager(new Host(hostId), teamCount, LocalDateTime.now().plusYears(10));
+        lobbyService.addLobby(lobbyCode, lobbyManager);
 
         Set<TeamLabel> allowedLabels = TeamLabel.getAllowedLabels(teamCount == FOUR_TEAMS);
 
@@ -66,8 +66,8 @@ public class DefaultLobbies implements CommandLineRunner {
             UUID clientId = clientIterator.next();
             TeamLabel label = labelIterator.next();
 
-            lobby.addTeam(clientId);
-            lobby.assignTeam(clientId, label);
+            lobbyManager.addTeam(clientId);
+            lobbyManager.assignTeam(clientId, label);
         }
 
         lobbyService.startGame(lobbyCode, hostId);

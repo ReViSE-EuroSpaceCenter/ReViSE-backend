@@ -15,6 +15,10 @@ public class DiscoverManager {
         this.gameInfo = gameInfo;
     }
 
+    public GameInfo getGameInfo() {
+        return gameInfo;
+    }
+
     public TeamResources updateResources(UUID clientId, Map<ResourceType, Integer> resources) {
         if (gameInfo.isNotClient(clientId)) {
             throw new NoAutoriseOperationException(ErrorKeys.CLIENT_NOT_IN_LOBBY);
@@ -36,4 +40,5 @@ public class DiscoverManager {
 
         gameInfo.changeState(GameState.END);
     }
+
 }

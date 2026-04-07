@@ -166,6 +166,15 @@ class MissionControllerTest {
         expectBadRequest(ErrorKeys.DISCOVER_START_INCOMPLETE_MISSIONS, response);
     }
 
+    @Test
+    void illegalStateShouldBeReturnedWhenTryingJoinLobby() {
+        restTestClient.post()
+                .uri("/api/lobbies/" + lobbyCode.lobbyCode() + "/join")
+                .exchange().expectStatus()
+                .is4xxClientError()
+                .expectBody().jsonPath("$.error").isEqualTo(ErrorKeys.INVALID_GAME_STATE);
+    }
+
     // ---------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------

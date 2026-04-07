@@ -6,11 +6,13 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import tools.jackson.databind.exc.InvalidFormatException;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -76,6 +78,16 @@ public class GlobalExceptionHandler {
         problem.setDetail(cause.getMessage());
 
         return problem;
+    }
+
+    @ExceptionHandler(InvalidGameStateException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidState(InvalidGameStateException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", ErrorKeys.INVALID_GAME_STATE);
+        body.put("message", "The action cannot be performed in the current game state.");
+        body.put("currentState", ex.getCurrentState());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     private ProblemDetail buildProblemDetail(
