@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.notification;
 
-import be.eurospacecenter.revise.dto.event.DiscoverEvent;
-import be.eurospacecenter.revise.dto.event.DiscoverEventType;
+import be.eurospacecenter.revise.event.DiscoverEvent;
+import be.eurospacecenter.revise.event.DiscoverEventType;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +20,11 @@ public class WebSocketDiscoverNotifier implements DiscoverNotifier {
     }
 
     @Override
-    public void notifyDiscoverEnded(LobbyCode lobbyCode) {
-        logger.info("Sending DISCOVER_ENDED event for discovery: {}", lobbyCode.lobbyCode());
-        DiscoverEvent event = new DiscoverEvent(DiscoverEventType.DISCOVER_ENDED, null);
+    public void notifyGameEnded(LobbyCode lobbyCode) {
+        logger.info("Sending DISCOVER_GAME_ENDED event for discovery: {}", lobbyCode.lobbyCode());
+        DiscoverEvent event = new DiscoverEvent(DiscoverEventType.DISCOVER_GAME_ENDED, null);
 
         messagingTemplate.convertAndSend(DISCOVER_TOPIC_PREFIX + lobbyCode.lobbyCode(), event);
-        logger.info("DISCOVER_ENDED event sent successfully");
+        logger.info("DISCOVER_GAME_ENDED event sent successfully");
     }
 }

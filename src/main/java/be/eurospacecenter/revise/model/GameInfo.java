@@ -4,8 +4,11 @@ import be.eurospacecenter.revise.exceptions.ErrorKeys;
 import be.eurospacecenter.revise.exceptions.NotFoundException;
 import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
+import be.eurospacecenter.revise.model.resource.TeamResources;
+import be.eurospacecenter.revise.model.resource.TeamsResources;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -58,11 +61,6 @@ public class GameInfo {
         return host.id();
     }
 
-    public int getTeamsScore() {
-        int total = teams.values().stream().mapToInt(Team::score).sum();
-        return total / teams.size();
-    }
-
     public GameState getState() {
         return state;
     }
@@ -72,5 +70,20 @@ public class GameInfo {
             throw new IllegalStateException(ErrorKeys.INVALID_GAME_STATE_TRANSITION);
         }
         state = newState;
+    }
+
+    public TeamsResources getTeamsResources() {
+        Map<TeamLabel, TeamResources> resourcesMap = teams
+                .values()
+                .stream()
+                .filter(Team::hasLabel)
+                .collect(HashMap::new, (map, team) -> map.put(team.getLabel(), team.getResources()), HashMap::putAll);
+
+        return new TeamsResources(resourcesMap, getTeamsScore());
+    }
+
+    private int getTeamsScore() {
+        int total = teams.values().stream().mapToInt(Team::score).sum();
+        return total / teams.size();
     }
 }

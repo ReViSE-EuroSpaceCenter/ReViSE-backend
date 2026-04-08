@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.notification;
 
-import be.eurospacecenter.revise.dto.event.MissionEvent;
-import be.eurospacecenter.revise.dto.event.MissionEventType;
+import be.eurospacecenter.revise.event.MissionEvent;
+import be.eurospacecenter.revise.event.MissionEventType;
 
 import be.eurospacecenter.revise.dto.team.TeamProgressionDTO;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;

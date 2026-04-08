@@ -1,19 +1,24 @@
 package be.eurospacecenter.revise.model;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public enum GameState {
-    END(null),
+    END(),
     DISCOVER(END),
     RESOURCE(DISCOVER),
-    MISSION(RESOURCE),
+    LAUNCHER(RESOURCE, END),
+    MISSION(LAUNCHER),
     LOBBY(MISSION);
 
-    private final GameState next;
+    private final Set<GameState> nextStates;
 
-    GameState(GameState next) {
-        this.next = next;
+    GameState(GameState... next) {
+        this.nextStates = new HashSet<>(Arrays.asList(next));
     }
 
     boolean canTransitionTo(GameState newState) {
-        return next == newState;
+        return nextStates.contains(newState);
     }
 }

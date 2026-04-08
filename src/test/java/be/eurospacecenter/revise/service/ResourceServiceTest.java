@@ -47,6 +47,7 @@ class ResourceServiceTest {
         gameInfo = new GameInfo(new Host(hostId), LocalDateTime.now());
         gameInfo.addTeam(new Team(TeamLabel.EXPE, teamId));
         gameInfo.changeState(GameState.MISSION);
+        gameInfo.changeState(GameState.LAUNCHER);
     }
 
     // ---------------------------------------------------------------------
@@ -67,39 +68,6 @@ class ResourceServiceTest {
     void shouldRegisterResourceManagerWithValidLobbyCode() {
         assertDoesNotThrow(() ->
                 resourceService.registerManager(VALID_LOBBY_CODE, gameInfo)
-        );
-    }
-
-    // ---------------------------------------------------------------------
-    // startResourceEncoding
-    // ---------------------------------------------------------------------
-
-    @Test
-    void shouldStartResourceEncodingWithValidHost() {
-        resourceService.registerManager(VALID_LOBBY_CODE, gameInfo);
-
-        assertDoesNotThrow(() ->
-                resourceService.startResourceEncoding(VALID_LOBBY_CODE, hostId)
-        );
-    }
-
-    @Test
-    void shouldFailToStartResourceEncodingWithUnknownLobbyCode() {
-        assertThrows(
-                NotFoundException.class,
-                () -> resourceService.startResourceEncoding(VALID_LOBBY_CODE, hostId)
-        );
-    }
-
-    @Test
-    void shouldFailToStartResourceEncodingWithUnknownHost() {
-        resourceService.registerManager(VALID_LOBBY_CODE, gameInfo);
-
-        UUID unknownHostId = UUID.randomUUID();
-
-        assertThrows(
-                NoAutoriseOperationException.class,
-                () -> resourceService.startResourceEncoding(VALID_LOBBY_CODE, unknownHostId)
         );
     }
 
@@ -140,7 +108,7 @@ class ResourceServiceTest {
                 () -> resourceService.endEncodingResources(VALID_LOBBY_CODE, hostId)
         );
 
-        verify(discoverService, never()).endDiscover(any(), any());
+        verify(discoverService, never()).endGame(any(), any());
     }
 
     @Test

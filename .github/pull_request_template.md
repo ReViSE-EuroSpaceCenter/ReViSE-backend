@@ -26,7 +26,7 @@ Please use this format link issue numbers: Fixes #123
 - [ ] 🙋 no, because I need help
 - [ ] 🤷 no, because I forgot
 
-# Checklist:
+## Checklist:
 
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my code
@@ -39,5 +39,8 @@ Please use this format link issue numbers: Fixes #123
 - [ ] I have checked my code and corrected any misspellings
 - [ ] This PR is ready to be merged and not breaking any other features
 
+## I am proud of my code and I think it is ready to be merged!
+- [ ] Yes!
+- [ ] No
 
 ## [optional] Are there any post-deployment tasks we need to perform?

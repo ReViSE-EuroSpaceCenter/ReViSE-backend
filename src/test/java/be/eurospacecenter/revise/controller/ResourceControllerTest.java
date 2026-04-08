@@ -50,26 +50,13 @@ class ResourceControllerTest {
         createLobbyAndHost();
         joinClientAndStartGame();
         completeMissionsAndEndGame();
+        endLauncher(lobbyCode.lobbyCode(), hostId);
     }
 
     // ---------------------------------------------------------------------
     // Tests
     // ---------------------------------------------------------------------
 
-    @Test
-    void startResourceEncoding_shouldSucceed() {
-        restTestClient.put().uri(BASE_URI + "/" + lobbyCode.lobbyCode() + "/start").body(Map.of("hostId", hostId.toString())).exchange().expectStatus().isNoContent();
-    }
-
-    @Test
-    void startResourceEncoding_shouldFail_withInvalidLobbyCode() {
-        restTestClient.put().uri(BASE_URI + "/INVALID/start").body(Map.of("hostId", hostId.toString())).exchange().expectStatus().isBadRequest().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.INVALID_LOBBY_CODE);
-    }
-
-    @Test
-    void startResourceEncoding_shouldFail_withInvalidHost() {
-        restTestClient.put().uri(BASE_URI + "/" + lobbyCode.lobbyCode() + "/start").body(Map.of("hostId", UUID.randomUUID().toString())).exchange().expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
-    }
 
     @Test
     void updateResources_shouldSucceed() {
@@ -167,6 +154,10 @@ class ResourceControllerTest {
             missionService.changeTeamMissionsState(lobbyCode, hostId, teamLabel, missions);
         });
         missionService.endMission(lobbyCode, hostId);
+    }
+
+    private void endLauncher(String lobby, UUID hostId) {
+        restTestClient.post().uri("/api/launcher/" + lobby + "/end").body(Map.of("hostId", hostId)).exchange().expectStatus().isNoContent();
     }
 
     private RestTestClient.ResponseSpec updateResources(String lobby, UUID clientId, Map<String, Integer> resources) {

@@ -21,11 +21,11 @@ public class MissionService implements Cleanable, Workflow {
     final Map<LobbyCode, MissionManager> managers = new ConcurrentHashMap<>();
 
     private final MissionNotifier notifier;
-    private final ResourceService resourceService;
+    private final LauncherService launcherService;
 
-    public MissionService(MissionNotifier notifier, ResourceService resourceService) {
+    public MissionService(MissionNotifier notifier, LauncherService launcherService) {
         this.notifier = notifier;
-        this.resourceService = resourceService;
+        this.launcherService = launcherService;
     }
 
     public void changeTeamMissionsState(LobbyCode lobbyCode, UUID id, TeamLabel teamLabel, Set<MissionType> missionType) {
@@ -53,7 +53,7 @@ public class MissionService implements Cleanable, Workflow {
         MissionManager manager = getManager(lobbyCode);
 
         manager.validateEndOfMission(hostId);
-        resourceService.registerManager(lobbyCode, manager.getGameInfo());
+        launcherService.registerManager(lobbyCode, manager.getGameInfo());
 
         notifier.notifyMissionEnded(lobbyCode);
     }

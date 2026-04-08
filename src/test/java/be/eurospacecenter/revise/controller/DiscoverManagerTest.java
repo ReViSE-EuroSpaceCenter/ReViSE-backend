@@ -50,6 +50,7 @@ class DiscoverManagerTest {
         createLobbyAndHost();
         joinClientAndStartGame();
         completeMissionsAndEndGame();
+        endLauncher(lobbyCode.lobbyCode(), hostId);
         endResources(lobbyCode.lobbyCode(), hostId);
     }
 
@@ -59,7 +60,7 @@ class DiscoverManagerTest {
 
     @Test
     void getScore_shouldSucceed() {
-        getScore(lobbyCode.lobbyCode(), hostId).expectStatus().isOk().expectBody().jsonPath("$.score").isNumber();
+        getScore(lobbyCode.lobbyCode(), hostId).expectStatus().isOk().expectBody().jsonPath("$.totalScore").isNumber();
     }
 
     @Test
@@ -73,9 +74,9 @@ class DiscoverManagerTest {
     }
 
     @Test
-    void endDiscover_ShouldSucceed_WithValidLobbyCodeHostId() {
+    void endGame_ShouldSucceed_WithValidLobbyCodeHostId() {
         restTestClient.post()
-                .uri("/api/discover/" + lobbyCode.lobbyCode() + "/end")
+                .uri("/api/discover/" + lobbyCode.lobbyCode() + "/endGame")
                 .body(Map.of("hostId", hostId))
                 .exchange()
                 .expectStatus()
@@ -83,7 +84,7 @@ class DiscoverManagerTest {
     }
 
     @Test
-    void endDiscover_ShouldNotSucceedWithUnknownHost() {
+    void endGame_ShouldNotSucceedWithUnknownHost() {
         createLobbyAndHost();
         joinClientAndStartGame();
 
@@ -96,9 +97,9 @@ class DiscoverManagerTest {
     }
 
     @Test
-    void endDiscover_ShouldNotSucceedWithInvalidLobbyCode() {
+    void endGame_ShouldNotSucceedWithInvalidLobbyCode() {
         restTestClient.post()
-                .uri("/api/discover/INVALID/end")
+                .uri("/api/discover/INVALID/endGame")
                 .body(Map.of("hostId", hostId))
                 .exchange()
                 .expectStatus()
@@ -108,7 +109,7 @@ class DiscoverManagerTest {
     @Test
     void illegalStateShouldBeReturnedWhenTryingToUpdateResourcesAfterDiscoverEnded() {
         restTestClient.post()
-                .uri("/api/discover/" + lobbyCode.lobbyCode() + "/end")
+                .uri("/api/discover/" + lobbyCode.lobbyCode() + "/endGame")
                 .body(Map.of("hostId", hostId))
                 .exchange()
                 .expectStatus()
@@ -166,6 +167,10 @@ class DiscoverManagerTest {
 
     private void endResources(String lobby, UUID hostId) {
         restTestClient.put().uri("/api/resources/" + lobby + "/end").body(Map.of("hostId", hostId)).exchange().expectStatus().isNoContent();
+    }
+
+    private void endLauncher(String lobby, UUID hostId) {
+        restTestClient.post().uri("/api/launcher/" + lobby + "/end").body(Map.of("hostId", hostId)).exchange().expectStatus().isNoContent();
     }
 
     private RestTestClient.ResponseSpec updateResources(String lobby, UUID clientId) {

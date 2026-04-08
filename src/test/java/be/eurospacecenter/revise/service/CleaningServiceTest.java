@@ -25,6 +25,9 @@ class CleaningServiceTest {
     private MissionService missionService;
 
     @InjectMocks
+    private LauncherService launcherService;
+
+    @InjectMocks
     private ResourceService resourceService;
 
     @InjectMocks
@@ -40,7 +43,7 @@ class CleaningServiceTest {
     void setup() {
         cleaningService = new CleaningService(
                 lobbyService,
-                List.of(lobbyService, missionService, resourceService, discoverService)
+                List.of(lobbyService, missionService, launcherService, resourceService, discoverService)
         );
     }
 
@@ -75,6 +78,9 @@ class CleaningServiceTest {
         shouldBeThere.forEach((k, v) -> missionService.registerManager(k, v.getGameInfo()));
         shouldNotBeThere.forEach((k, v) -> missionService.registerManager(k, v.getGameInfo()));
 
+        shouldBeThere.forEach((k, v) -> launcherService.registerManager(k, v.getGameInfo()));
+        shouldNotBeThere.forEach((k, v) -> launcherService.registerManager(k, v.getGameInfo()));
+
         shouldBeThere.forEach((k, v) -> resourceService.registerManager(k, v.getGameInfo()));
         shouldNotBeThere.forEach((k, v) -> resourceService.registerManager(k, v.getGameInfo()));
 
@@ -88,6 +94,9 @@ class CleaningServiceTest {
 
         shouldBeThere.forEach((k, v) -> assertTrue(missionService.managers.containsKey(k), "Manager should still exist for " + k));
         shouldNotBeThere.forEach((k, v) -> assertFalse(missionService.managers.containsKey(k), "Manager should be cleared for " + k));
+
+        shouldBeThere.forEach((k, v) -> assertTrue(launcherService.managers.containsKey(k), "Manager should still exist for " + k));
+        shouldNotBeThere.forEach((k, v) -> assertFalse(launcherService.managers.containsKey(k), "Manager should be cleared for " + k));
 
         shouldBeThere.forEach((k, v) -> assertTrue(resourceService.managers.containsKey(k), "Manager should still exist for " + k));
         shouldNotBeThere.forEach((k, v) -> assertFalse(resourceService.managers.containsKey(k), "Manager should be cleared for " + k));

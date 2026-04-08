@@ -1,8 +1,9 @@
 package be.eurospacecenter.revise.controller;
 
+import be.eurospacecenter.revise.dto.discover.TeamsResourcesDTO;
 import be.eurospacecenter.revise.dto.request.HostIdDTO;
-import be.eurospacecenter.revise.dto.discover.ScoreDTO;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
+import be.eurospacecenter.revise.model.resource.TeamsResources;
 import be.eurospacecenter.revise.service.DiscoverService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class DiscoverController {
     }
 
     @GetMapping(value = "/{lobbyCode}/score", params = "hostId")
-    public ScoreDTO getTeamsScore(
+    public TeamsResourcesDTO getTeamsScore(
             @PathVariable
             String lobbyCode,
 
@@ -32,12 +33,12 @@ public class DiscoverController {
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
 
-        int score = discoverService.getTeamsScore(code, hostId);
+        TeamsResources teamsResources = discoverService.getTeamsResources(code, hostId);
 
-        return new ScoreDTO(score);
+        return TeamsResourcesDTO.fromTeamsResources(teamsResources);
     }
 
-    @PostMapping("/{lobbyCode}/end")
+    @PostMapping("/{lobbyCode}/endGame")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void endMission(
             @PathVariable String lobbyCode,
@@ -46,6 +47,6 @@ public class DiscoverController {
             HostIdDTO request
     ) {
         LobbyCode code = new LobbyCode(lobbyCode);
-        discoverService.endDiscover(code, request.hostId());
+        discoverService.endGame(code, request.hostId());
     }
 }
