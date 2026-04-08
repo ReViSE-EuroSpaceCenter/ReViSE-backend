@@ -93,7 +93,7 @@ class ResourceControllerTest {
 
     @Test
     void endResourceEncoding_shouldSucceed() {
-        restTestClient.put().uri(BASE_URI + "/" + lobbyCode.lobbyCode() + "/end").body(Map.of("hostId", hostId.toString())).exchange().expectStatus().isNoContent();
+        restTestClient.post().uri(BASE_URI + "/" + lobbyCode.lobbyCode() + "/end").body(Map.of("hostId", hostId.toString())).exchange().expectStatus().isNoContent();
     }
 
     @Test
@@ -103,7 +103,7 @@ class ResourceControllerTest {
 
     @Test
     void endResourceEncoding_shouldFail_withInvalidHost() {
-        restTestClient.put().uri(BASE_URI + "/" + lobbyCode.lobbyCode() + "/end").body(Map.of("hostId", UUID.randomUUID().toString())).exchange().expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
+        restTestClient.post().uri(BASE_URI + "/" + lobbyCode.lobbyCode() + "/end").body(Map.of("hostId", UUID.randomUUID().toString())).exchange().expectStatus().isForbidden().expectBody().jsonPath("$.detail").isEqualTo(ErrorKeys.ACTION_RESERVED_TO_HOST);
     }
 
     @Test

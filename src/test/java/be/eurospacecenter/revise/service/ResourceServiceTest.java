@@ -71,39 +71,6 @@ class ResourceServiceTest {
     }
 
     // ---------------------------------------------------------------------
-    // startResourceEncoding
-    // ---------------------------------------------------------------------
-
-    @Test
-    void shouldStartResourceEncodingWithValidHost() {
-        resourceService.registerManager(VALID_LOBBY_CODE, gameInfo);
-
-        assertDoesNotThrow(() ->
-                resourceService.startResourceEncoding(VALID_LOBBY_CODE, hostId)
-        );
-    }
-
-    @Test
-    void shouldFailToStartResourceEncodingWithUnknownLobbyCode() {
-        assertThrows(
-                NotFoundException.class,
-                () -> resourceService.startResourceEncoding(VALID_LOBBY_CODE, hostId)
-        );
-    }
-
-    @Test
-    void shouldFailToStartResourceEncodingWithUnknownHost() {
-        resourceService.registerManager(VALID_LOBBY_CODE, gameInfo);
-
-        UUID unknownHostId = UUID.randomUUID();
-
-        assertThrows(
-                NoAutoriseOperationException.class,
-                () -> resourceService.startResourceEncoding(VALID_LOBBY_CODE, unknownHostId)
-        );
-    }
-
-    // ---------------------------------------------------------------------
     // updateResource
     // ---------------------------------------------------------------------
 

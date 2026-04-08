@@ -26,12 +26,12 @@ public class LauncherService implements Cleanable, Workflow {
 
     final Map<LobbyCode, LauncherManager> managers = new ConcurrentHashMap<>();
 
-    private final ResourceService resourceService;
     private final LauncherNotifier notifier;
+    private final ResourceService resourceService;
 
-    public LauncherService(ResourceService resourceService, LauncherNotifier notifier) {
-        this.resourceService = resourceService;
+    public LauncherService(LauncherNotifier notifier, ResourceService resourceService) {
         this.notifier = notifier;
+        this.resourceService = resourceService;
     }
 
 

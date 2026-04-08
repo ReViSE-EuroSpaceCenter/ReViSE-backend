@@ -38,7 +38,7 @@ public class DiscoverController {
         return TeamsResourcesDTO.fromTeamsResources(teamsResources);
     }
 
-    @PostMapping("/{lobbyCode}/end")
+    @PostMapping("/{lobbyCode}/endGame")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void endMission(
             @PathVariable String lobbyCode,
