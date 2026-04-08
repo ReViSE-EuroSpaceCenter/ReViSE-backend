@@ -50,6 +50,7 @@ class DiscoverServiceTest {
         gameInfo = new GameInfo(new Host(hostId), LocalDateTime.now());
         gameInfo.addTeam(new Team(TeamLabel.EXPE, teamId));
         gameInfo.changeState(GameState.MISSION);
+        gameInfo.changeState(GameState.LAUNCHER);
     }
 
     private void moveGameToResourcePhase() {

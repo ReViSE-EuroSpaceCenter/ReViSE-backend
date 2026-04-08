@@ -40,10 +40,30 @@ class LauncherServiceTest {
         gameInfo.changeState(GameState.MISSION);
     }
 
-    // ---------------------------------------------------------------------
-    // endLauncher
-    // ---------------------------------------------------------------------
+    @Test
+    void shouldGetTeamsProgressionWithValidLobbyCode() {
+        launcherService.registerManager(VALID_LOBBY_CODE, gameInfo);
 
+        assertDoesNotThrow(() ->
+                launcherService.getTeamsProgression(VALID_LOBBY_CODE)
+        );
+    }
+
+    @Test
+    void shouldFailToGetTeamsProgressionWithUnknownLobbyCode() {
+        assertThrows(
+                NotFoundException.class,
+                () -> launcherService.getTeamsProgression(VALID_LOBBY_CODE)
+        );
+    }
+
+    @Test
+    void shouldFailToRegisterManagerWithNullLobbyCode() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> launcherService.registerManager(null, gameInfo)
+        );
+    }
 
     @Test
     void shouldStartResourceEncodingWithValidHost() {

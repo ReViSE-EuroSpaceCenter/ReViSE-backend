@@ -65,7 +65,9 @@ class GameInfoTest {
     static Stream<Arguments> validTransitions() {
         return Stream.of(
                 Arguments.of(GameState.LOBBY, GameState.MISSION),
-                Arguments.of(GameState.MISSION, GameState.RESOURCE),
+                Arguments.of(GameState.MISSION, GameState.LAUNCHER),
+                Arguments.of(GameState.LAUNCHER, GameState.RESOURCE),
+                Arguments.of(GameState.LAUNCHER, GameState.END),
                 Arguments.of(GameState.RESOURCE, GameState.DISCOVER),
                 Arguments.of(GameState.DISCOVER, GameState.END)
         );
@@ -106,7 +108,11 @@ class GameInfoTest {
                 Arguments.of(GameState.MISSION, GameState.MISSION),
                 Arguments.of(GameState.RESOURCE, GameState.RESOURCE),
                 Arguments.of(GameState.DISCOVER, GameState.DISCOVER),
-                Arguments.of(GameState.END, GameState.END)
+                Arguments.of(GameState.END, GameState.END),
+                Arguments.of(GameState.LAUNCHER, GameState.LOBBY),
+                Arguments.of(GameState.LAUNCHER, GameState.MISSION),
+                Arguments.of(GameState.LAUNCHER, GameState.LAUNCHER),
+                Arguments.of(GameState.LAUNCHER, GameState.DISCOVER)
         );
     }
 
