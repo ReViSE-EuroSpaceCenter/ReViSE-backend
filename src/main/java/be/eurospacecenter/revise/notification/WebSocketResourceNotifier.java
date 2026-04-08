@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.notification;
 
-import be.eurospacecenter.revise.dto.event.ResourceEvent;
-import be.eurospacecenter.revise.dto.event.ResourceEventType;
+import be.eurospacecenter.revise.event.ResourceEvent;
+import be.eurospacecenter.revise.event.ResourceEventType;
 import be.eurospacecenter.revise.model.resource.TeamResources;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import org.slf4j.Logger;
@@ -18,15 +18,6 @@ public class WebSocketResourceNotifier implements ResourceNotifier {
 
     public WebSocketResourceNotifier(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
-    }
-
-    @Override
-    public void notifyEncodingStarted(LobbyCode lobbyCode) {
-        logger.info("Sending RESOURCE_STARTED event for discovery: {}", lobbyCode.lobbyCode());
-        ResourceEvent event = new ResourceEvent(ResourceEventType.RESOURCE_STARTED, null);
-
-        messagingTemplate.convertAndSend(RESOURCE_TOPIC_PREFIX + lobbyCode.lobbyCode(), event);
-        logger.info("RESOURCE_STARTED event sent successfully");
     }
 
     @Override

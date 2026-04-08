@@ -33,14 +33,6 @@ public class ResourceService implements Cleanable, Workflow {
         this.discoverService = discoverService;
     }
 
-    public void startResourceEncoding(LobbyCode lobbyCode, UUID hostId) {
-        ResourceManager resourceManager = getManager(lobbyCode);
-
-        resourceManager.ensureHost(hostId);
-
-        notifier.notifyEncodingStarted(lobbyCode);
-    }
-
     public void updateResource(LobbyCode lobbyCode, UUID clientId, Map<ResourceType, Integer> resources) {
         ResourceManager resourceManager = getManager(lobbyCode);
 

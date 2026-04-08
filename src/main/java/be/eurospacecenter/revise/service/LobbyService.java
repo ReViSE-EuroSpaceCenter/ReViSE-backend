@@ -81,6 +81,10 @@ public class LobbyService implements Cleanable {
         toRemove.forEach(managers::remove);
     }
 
+    Map<LobbyCode, LobbyManager> getManagers() {
+        return Map.copyOf(managers);
+    }
+
     void addLobby(LobbyCode lobbyCode, LobbyManager lobbyManager) {
         managers.put(lobbyCode, lobbyManager);
     }

@@ -1,4 +1,4 @@
-package be.eurospacecenter.revise.dto.event;
+package be.eurospacecenter.revise.event;
 
 public enum MissionEventType {
     TEAM_PROGRESSION,

@@ -19,19 +19,6 @@ public class ResourceController {
         this.resourceService = resourceService;
     }
 
-    @PutMapping("/{lobbyCode}/start")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void startResourceEncoding(
-            @PathVariable
-            String lobbyCode,
-
-            @RequestBody
-            HostIdDTO request
-    ) {
-        LobbyCode code = new LobbyCode(lobbyCode);
-        resourceService.startResourceEncoding(code, request.hostId());
-    }
-
     @PostMapping("/{lobbyCode}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateResource(

@@ -71,4 +71,8 @@ public class Team {
     public int score() {
         return resources.score();
     }
+
+    public TeamResources getResources() {
+        return new TeamResources(label, Map.copyOf(resources.getResources()));
+    }
 }

@@ -29,6 +29,10 @@ public class Resources {
         return Map.copyOf(resourcesMap);
     }
 
+    public Map<ResourceType, Integer> getResources() {
+        return Map.copyOf(resourcesMap);
+    }
+
     private void checkSufficientResources(Map<ResourceType, Integer> newResources) {
         newResources.forEach((type, newAmount) -> {
             int current = resourcesMap.getOrDefault(type, 0);

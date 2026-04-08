@@ -140,7 +140,7 @@ class ResourceServiceTest {
                 () -> resourceService.endEncodingResources(VALID_LOBBY_CODE, hostId)
         );
 
-        verify(discoverService, never()).endDiscover(any(), any());
+        verify(discoverService, never()).endGame(any(), any());
     }
 
     @Test

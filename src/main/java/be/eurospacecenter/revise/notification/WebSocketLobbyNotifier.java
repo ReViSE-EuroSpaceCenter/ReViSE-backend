@@ -1,7 +1,7 @@
 package be.eurospacecenter.revise.notification;
 
-import be.eurospacecenter.revise.dto.event.LobbyEvent;
-import be.eurospacecenter.revise.dto.event.LobbyEventType;
+import be.eurospacecenter.revise.event.LobbyEvent;
+import be.eurospacecenter.revise.event.LobbyEventType;
 import be.eurospacecenter.revise.dto.team.TeamJoinedDTO;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;

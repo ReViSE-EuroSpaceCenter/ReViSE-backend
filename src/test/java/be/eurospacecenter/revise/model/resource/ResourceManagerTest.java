@@ -43,7 +43,7 @@ class ResourceManagerTest {
 
     @Test
     void initialScoreShouldBeCorrect() {
-       assertEquals(33, info.getTeamsScore());
+       assertEquals(33, info.getTeamsResources().totalScore());
     }
 
     @Test
@@ -83,6 +83,6 @@ class ResourceManagerTest {
     private void checkUpdate(UUID id, Map<ResourceType, Integer> deltas, int expectedGlobalScore) {
         manager.updateResources(id, deltas);
 
-        assertEquals(expectedGlobalScore, info.getTeamsScore());
+        assertEquals(expectedGlobalScore, info.getTeamsResources().totalScore());
     }
 }

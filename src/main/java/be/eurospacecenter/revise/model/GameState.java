@@ -4,7 +4,8 @@ public enum GameState {
     END(null),
     DISCOVER(END),
     RESOURCE(DISCOVER),
-    MISSION(RESOURCE),
+    LAUNCHER(RESOURCE),
+    MISSION(LAUNCHER),
     LOBBY(MISSION);
 
     private final GameState next;

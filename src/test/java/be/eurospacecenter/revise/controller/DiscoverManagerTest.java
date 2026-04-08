@@ -59,7 +59,7 @@ class DiscoverManagerTest {
 
     @Test
     void getScore_shouldSucceed() {
-        getScore(lobbyCode.lobbyCode(), hostId).expectStatus().isOk().expectBody().jsonPath("$.score").isNumber();
+        getScore(lobbyCode.lobbyCode(), hostId).expectStatus().isOk().expectBody().jsonPath("$.totalScore").isNumber();
     }
 
     @Test
@@ -73,7 +73,7 @@ class DiscoverManagerTest {
     }
 
     @Test
-    void endDiscover_ShouldSucceed_WithValidLobbyCodeHostId() {
+    void endGame_ShouldSucceed_WithValidLobbyCodeHostId() {
         restTestClient.post()
                 .uri("/api/discover/" + lobbyCode.lobbyCode() + "/end")
                 .body(Map.of("hostId", hostId))
@@ -83,7 +83,7 @@ class DiscoverManagerTest {
     }
 
     @Test
-    void endDiscover_ShouldNotSucceedWithUnknownHost() {
+    void endGame_ShouldNotSucceedWithUnknownHost() {
         createLobbyAndHost();
         joinClientAndStartGame();
 
@@ -96,7 +96,7 @@ class DiscoverManagerTest {
     }
 
     @Test
-    void endDiscover_ShouldNotSucceedWithInvalidLobbyCode() {
+    void endGame_ShouldNotSucceedWithInvalidLobbyCode() {
         restTestClient.post()
                 .uri("/api/discover/INVALID/end")
                 .body(Map.of("hostId", hostId))

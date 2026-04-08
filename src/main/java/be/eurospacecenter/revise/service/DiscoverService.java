@@ -9,6 +9,7 @@ import be.eurospacecenter.revise.model.GameInfo;
 import be.eurospacecenter.revise.model.GameState;
 import be.eurospacecenter.revise.model.discover.DiscoverManager;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
+import be.eurospacecenter.revise.model.resource.TeamsResources;
 import be.eurospacecenter.revise.notification.DiscoverNotifier;
 import org.springframework.stereotype.Service;
 
@@ -31,19 +32,19 @@ public class DiscoverService implements Cleanable, Workflow {
         this.notifier = notifier;
     }
 
-    public int getTeamsScore(LobbyCode lobbyCode, UUID hostId) {
+    public TeamsResources getTeamsResources(LobbyCode lobbyCode, UUID hostId) {
         DiscoverManager discoverManager = getManager(lobbyCode);
 
-        return discoverManager.getTeamsScore(hostId);
+        return discoverManager.getTeamsResources(hostId);
     }
 
     @RecordMetric(MetricType.GAME_ENDED)
-    public void endDiscover(LobbyCode lobbyCode, UUID hostId) {
+    public void endGame(LobbyCode lobbyCode, UUID hostId) {
         DiscoverManager discoverManager = getManager(lobbyCode);
 
-        discoverManager.endDiscover(hostId);
+        discoverManager.endGame(hostId);
 
-        notifier.notifyDiscoverEnded(lobbyCode);
+        notifier.notifyGameEnded(lobbyCode);
     }
 
     @Override

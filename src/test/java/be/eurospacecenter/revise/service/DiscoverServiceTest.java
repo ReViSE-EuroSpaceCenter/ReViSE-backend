@@ -11,6 +11,7 @@ import be.eurospacecenter.revise.model.lobby.Host;
 import be.eurospacecenter.revise.model.lobby.TeamLabel;
 import be.eurospacecenter.revise.model.lobbycode.LobbyCode;
 import be.eurospacecenter.revise.model.resource.ResourceType;
+import be.eurospacecenter.revise.model.resource.TeamsResources;
 import be.eurospacecenter.revise.notification.DiscoverNotifier;
 import be.eurospacecenter.revise.notification.ResourceNotifier;
 import org.junit.jupiter.api.BeforeEach;
@@ -96,9 +97,9 @@ class DiscoverServiceTest {
 
         resourceService.endEncodingResources(VALID_LOBBY_CODE, hostId);
 
-        int score = discoverService.getTeamsScore(VALID_LOBBY_CODE, hostId);
+        TeamsResources resources = discoverService.getTeamsResources(VALID_LOBBY_CODE, hostId);
 
-        assertEquals(21, score);
+        assertEquals(21, resources.totalScore());
     }
 
     // ---------------------------------------------------------------------
@@ -106,12 +107,12 @@ class DiscoverServiceTest {
     // ---------------------------------------------------------------------
 
     @Test
-    void shouldEndDiscoverWhenHostIsValid() {
+    void shouldEndGameWhenHostIsValid() {
         moveGameToResourcePhase();
         discoverService.registerManager(VALID_LOBBY_CODE, gameInfo);
 
         assertDoesNotThrow(() ->
-                discoverService.endDiscover(VALID_LOBBY_CODE, hostId)
+                discoverService.endGame(VALID_LOBBY_CODE, hostId)
         );
     }
 
@@ -121,7 +122,7 @@ class DiscoverServiceTest {
 
         assertThrows(
                 NotFoundException.class,
-                () -> discoverService.endDiscover(VALID_LOBBY_CODE, hostId)
+                () -> discoverService.endGame(VALID_LOBBY_CODE, hostId)
         );
     }
 
@@ -134,7 +135,7 @@ class DiscoverServiceTest {
 
         assertThrows(
                 NoAutoriseOperationException.class,
-                () -> discoverService.endDiscover(VALID_LOBBY_CODE, unknownHostId)
+                () -> discoverService.endGame(VALID_LOBBY_CODE, unknownHostId)
         );
     }
 
@@ -143,11 +144,11 @@ class DiscoverServiceTest {
         moveGameToResourcePhase();
         discoverService.registerManager(VALID_LOBBY_CODE, gameInfo);
 
-        discoverService.endDiscover(VALID_LOBBY_CODE, hostId);
+        discoverService.endGame(VALID_LOBBY_CODE, hostId);
 
         assertThrows(
                 InvalidGameStateException.class,
-                () -> discoverService.getTeamsScore(VALID_LOBBY_CODE, hostId)
+                () -> discoverService.getTeamsResources(VALID_LOBBY_CODE, hostId)
         );
     }
 }
