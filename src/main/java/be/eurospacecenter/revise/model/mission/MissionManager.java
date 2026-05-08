@@ -39,7 +39,13 @@ public class MissionManager {
 
         updateAllTeamsMissionsCompletion(team);
 
-        return team.getProgression();
+        return new TeamProgression(
+                team.getLabel(),
+                team.getProgression().classicMissionsCompleted(),
+                team.getProgression().firstBonusMissionCompleted(),
+                team.getProgression().secondBonusMissionCompleted(),
+                allTeamsMissionsCompleted
+        );
     }
 
     public TeamProgression changeTeamMissionsState(UUID clientId, Set<MissionType> missions) {
@@ -48,7 +54,13 @@ public class MissionManager {
 
         updateAllTeamsMissionsCompletion(team);
 
-        return team.getProgression();
+        return new TeamProgression(
+                team.getLabel(),
+                team.getProgression().classicMissionsCompleted(),
+                team.getProgression().firstBonusMissionCompleted(),
+                team.getProgression().secondBonusMissionCompleted(),
+                allTeamsMissionsCompleted
+        );
     }
 
     public TeamProgression getTeamProgression(UUID id) {
