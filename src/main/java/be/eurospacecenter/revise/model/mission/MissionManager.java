@@ -43,16 +43,7 @@ public class MissionManager {
 
     public TeamProgression getTeamProgression(UUID id) {
         Team team = gameInfo.getTeam(id);
-
-        TeamProgression teamProgression = team.getProgression();
-
-        return new TeamProgression(
-                teamProgression.teamLabel(),
-                teamProgression.classicMissionsCompleted(),
-                teamProgression.firstBonusMissionCompleted(),
-                teamProgression.secondBonusMissionCompleted(),
-                allTeamsMissionsCompleted
-        );
+        return getTeamProgression(team);
     }
 
     public TeamFullProgression getTeamFullProgression(UUID id) {
@@ -83,7 +74,10 @@ public class MissionManager {
     private TeamProgression applyMissionsUpdate(Team team, Set<MissionType> missions) {
         missions.forEach(team::updateMission);
         updateAllTeamsMissionsCompletion(team);
+        return getTeamProgression(team);
+    }
 
+    private TeamProgression getTeamProgression(Team team) {
         TeamProgression teamProgression = team.getProgression();
         return new TeamProgression(
                 team.getLabel(),
