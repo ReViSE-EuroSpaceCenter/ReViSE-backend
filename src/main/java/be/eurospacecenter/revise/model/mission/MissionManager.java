@@ -34,35 +34,16 @@ public class MissionManager {
             throw new NoAutoriseOperationException(ErrorKeys.ACTION_RESERVED_TO_HOST);
         }
 
-        Team team = gameInfo.getTeamByLabel(teamLabel);
-        missions.forEach(team::updateMission);
-
-        updateAllTeamsMissionsCompletion(team);
-
-        return team.getProgression();
+        return applyMissionsUpdate(gameInfo.getTeamByLabel(teamLabel), missions);
     }
 
     public TeamProgression changeTeamMissionsState(UUID clientId, Set<MissionType> missions) {
-        Team team = gameInfo.getTeam(clientId);
-        missions.forEach(team::updateMission);
-
-        updateAllTeamsMissionsCompletion(team);
-
-        return team.getProgression();
+        return applyMissionsUpdate(gameInfo.getTeam(clientId), missions);
     }
 
     public TeamProgression getTeamProgression(UUID id) {
         Team team = gameInfo.getTeam(id);
-
-        TeamProgression teamProgression = team.getProgression();
-
-        return new TeamProgression(
-                teamProgression.teamLabel(),
-                teamProgression.classicMissionsCompleted(),
-                teamProgression.firstBonusMissionCompleted(),
-                teamProgression.secondBonusMissionCompleted(),
-                allTeamsMissionsCompleted
-        );
+        return getTeamProgression(team);
     }
 
     public TeamFullProgression getTeamFullProgression(UUID id) {
@@ -88,6 +69,23 @@ public class MissionManager {
         if (!allTeamsMissionsCompleted) {
             throw new InvalidMissionOperationException(ErrorKeys.DISCOVER_START_INCOMPLETE_MISSIONS);
         }
+    }
+
+    private TeamProgression applyMissionsUpdate(Team team, Set<MissionType> missions) {
+        missions.forEach(team::updateMission);
+        updateAllTeamsMissionsCompletion(team);
+        return getTeamProgression(team);
+    }
+
+    private TeamProgression getTeamProgression(Team team) {
+        TeamProgression teamProgression = team.getProgression();
+        return new TeamProgression(
+                team.getLabel(),
+                teamProgression.classicMissionsCompleted(),
+                teamProgression.firstBonusMissionCompleted(),
+                teamProgression.secondBonusMissionCompleted(),
+                allTeamsMissionsCompleted
+        );
     }
 
     private boolean areAllTeamsMissionsCompleted() {
